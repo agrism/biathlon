@@ -35,7 +35,7 @@ class ShowController extends Controller
         }
         $title[] = $event->organizer;
         $title[] = $event->nat_long;
-        $title[] = 'season ' . $seasonHelper->season($event->season->name);
+        $title[] = $this->getDates($event);
         $title = implode(', ', $title);
 
         return GenericViewIndexHelper::instance()
@@ -71,5 +71,21 @@ class ShowController extends Controller
             route: route('competitions.show', $competition->race_remote_id),
             name: $name,
         );
+    }
+
+    protected function getDates(Event $event): ?string
+    {
+        $start = $event->start_date;
+        $end = $event->end_date;
+
+        if($start->format('m') == $end->format('m')){
+            return sprintf('%s-%s', $start->format('d'), $end->format('d.m.Y'));
+        }
+
+        if($start->format('Y') == $end->format('Y')){
+            return sprintf('%s-%s', $start->format('d.m'), $end->format('d.m.Y'));
+        }
+
+        return sprintf('%s-%s', $start->format('d.m.y'), $end->format('d.m.Y'));
     }
 }

@@ -39,7 +39,8 @@ class ShowController extends Controller
         }
         $title[] = $competition->event->organizer;
         $title[] = $competition->event->nat_long;
-        $title[] = 'season '. $seasonHelper->season($competition->event->season->name);
+        $title[] = $competition->start_time?->format('H:i d.m.Y');
+        $title = array_filter($title);
         $title = implode(', ', $title);
 
         return GenericViewIndexHelper::instance()
