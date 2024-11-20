@@ -11,9 +11,7 @@
             try {
                 getimagesize($athlete->photo_uri);
                 echo '<img src="'.$athlete->photo_uri .'" alt="'.$athlete->family_name.'" style="height: 200px;margin: 0 auto" />';
-//                echo '<div style="height:500px;background-image: url('.$athlete->photo_uri.');background-siz1e: cover; background-repeat: no-repeat; background-position: right">';
             } catch (Exception){
-
             }
         @endphp
 
