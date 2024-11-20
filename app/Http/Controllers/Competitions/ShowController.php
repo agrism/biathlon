@@ -43,7 +43,7 @@ class ShowController extends Controller
         $title = implode(', ', $title);
 
         return GenericViewIndexHelper::instance()
-            ->setTitle($title)
+            ->setTitle('Results: ' .$title)
             ->setData($data)
             ->setHeaders(['rank','bib','Athlete','Nat','flag','shooting','behind', 'wc points'])
             ->setDataKeys([
