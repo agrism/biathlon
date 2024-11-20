@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Competitions;
 
 use App\Helpers\Generic\GenericViewIndexHelper;
 use App\Helpers\LinkHelper;
+use App\Helpers\SeasonHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Athlete;
 use App\Models\Event;
@@ -16,11 +17,13 @@ class ShowController extends Controller
 {
     protected LinkHelper $linkHelper;
 
-    public function __invoke(Request $request, string $id, LinkHelper $linkHelper): View
+    public function __invoke(Request $request, string $id, LinkHelper $linkHelper, SeasonHelper $seasonHelper): View
     {
         $this->linkHelper = $linkHelper;
 
-        $competition = EventCompetition::query()->where('race_remote_id', $id)->first();
+        $competition = EventCompetition::query()
+            ->with('event.season')
+            ->where('race_remote_id', $id)->first();
 
         $this->registerBread('Competition:'.$competition->short_description);
 
@@ -28,8 +31,19 @@ class ShowController extends Controller
             ->where('event_competition_id', $competition->id)
             ->paginate(perPage: 2000);
 
+        $title = [];
+        $title[] = $competition->description;
+        $title[] = $competition->event->description;
+        if($competition->event->event_series_no){
+            $title[] = 'stage '.$competition->event->event_series_no;
+        }
+        $title[] = $competition->event->organizer;
+        $title[] = $competition->event->nat_long;
+        $title[] = 'season '. $seasonHelper->season($competition->event->season->name);
+        $title = implode(', ', $title);
+
         return GenericViewIndexHelper::instance()
-            ->setTitle('Race "'.$competition->description.'" results')
+            ->setTitle($title)
             ->setData($data)
             ->setHeaders(['rank','bib','Athlete','Nat','flag','shooting','behind', 'wc points'])
             ->setDataKeys([
