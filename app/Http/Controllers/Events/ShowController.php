@@ -31,7 +31,7 @@ class ShowController extends Controller
         $title = [];
         $title[] = $event->description;
         if($event->event_series_no){
-            $title[] = 'stage '.$event->event_series_no;
+            $title[] = 'stage '.trim($event->event_series_no);
         }
         $title[] = $event->organizer;
         $title[] = $event->nat_long;
