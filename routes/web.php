@@ -1,9 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers as Contr;
 
-Route::get('/', \App\Http\Controllers\Events\IndexController::class)->name('home');
-Route::get('/events/{id}', \App\Http\Controllers\Events\ShowController::class)->name('events.show');
-Route::get('/competitions/{id}', \App\Http\Controllers\Competitions\ShowController::class)->name('competitions.show');
-Route::get('/athletes/{id}', \App\Http\Controllers\Athletes\ShowController::class)->name('athletes.show');
+Route::get('/', Contr\Events\IndexController::class)->name('home');
+Route::get('/events/{id}', Contr\Events\ShowController::class)->name('events.show');
+Route::get('/competitions/{id}', Contr\Competitions\ShowController::class)->name('competitions.show');
+Route::get('/athletes/{id}', Contr\Athletes\ShowController::class)->name('athletes.show');
 

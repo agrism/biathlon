@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Competitions;
 
 use App\Helpers\Generic\GenericViewIndexHelper;
+use App\Helpers\LinkHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use Illuminate\Http\Request;
@@ -10,13 +11,12 @@ use Illuminate\View\View;
 
 class IndexController extends Controller
 {
-    public function __invoke(Request $request): View
+    protected LinkHelper $linkHelper;
+    public function __invoke(Request $request, LinkHelper $linkHelper): View
     {
+        $this->linkHelper = $linkHelper;
+
         $this->registerBread('Competitions');
-
-        $page = intval($request->query('page'));
-
-        $page = max($page, 1);
 
         $data = Event::query()->with('season')->where('level', 1)->orderBy('start_date', 'desc')->paginate(perPage: 2000);
 
@@ -50,6 +50,6 @@ class IndexController extends Controller
 
     protected function getLink(Event $event, string $name): string
     {
-        return '<a href="'.route('events.show', $event->event_remote_id).'">'.$name.'</a>';
+        return $this->linkHelper->getLink(route: route('events.show', $event->event_remote_id), name:  $name);
     }
 }

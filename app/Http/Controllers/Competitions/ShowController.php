@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Competitions;
 
 use App\Helpers\Generic\GenericViewIndexHelper;
+use App\Helpers\LinkHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Athlete;
 use App\Models\Event;
@@ -13,12 +14,11 @@ use Illuminate\View\View;
 
 class ShowController extends Controller
 {
-    public function __invoke(Request $request, string $id): View
+    protected LinkHelper $linkHelper;
+
+    public function __invoke(Request $request, string $id, LinkHelper $linkHelper): View
     {
-
-        $page = intval($request->query('page'));
-
-        $page = max($page, 1);
+        $this->linkHelper = $linkHelper;
 
         $competition = EventCompetition::query()->where('race_remote_id', $id)->first();
 
@@ -63,6 +63,6 @@ class ShowController extends Controller
 
     protected function getLink(EventCompetitionResult $result, string $name): string
     {
-        return '<a href="'.route('athletes.show', $result->athlete->ibu_id).'">'.$name.'</a>';
+        return $this->linkHelper->getLink(route: route('athletes.show', $result->athlete->ibu_id), name: $name);
     }
 }

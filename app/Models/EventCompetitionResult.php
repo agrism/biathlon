@@ -37,6 +37,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property ?string $leg_rank
  * @property ?string $team_rank_after_leg
  * @property ?string $start_confirmed
+ * @property ?Athlete $athlete
  */
 class EventCompetitionResult extends Model
 {
