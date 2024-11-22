@@ -14,7 +14,7 @@
 <body>
 <div class="container" style="margin: 0 auto">
     @include('menu', ['ignoreHome' => true])
-    <div class="flex flex-col justify-center min-h-screen antialiased bg-gray-100">
+    <div class="flex flex-col justify-center min-h-screen antialiased bg-gray1-100">
 
         {{ $slot }}
     </div>
