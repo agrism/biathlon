@@ -27,7 +27,6 @@ class ShowController extends Controller
             ->where('event_id', $event->id)
             ->paginate(perPage: 2000);
 
-
         $title = [];
         $title[] = $event->description;
         if($event->event_series_no){
@@ -36,6 +35,9 @@ class ShowController extends Controller
         $title[] = $event->organizer;
         $title[] = $event->nat_long;
         $title[] = $this->getDates($event);
+        $title = array_map(function ($item){
+            return str_replace(' ', '&nbsp;', $item);
+        }, $title);
         $title = implode(', ', $title);
 
         return GenericViewIndexHelper::instance()

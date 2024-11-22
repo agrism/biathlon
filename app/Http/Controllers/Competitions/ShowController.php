@@ -41,6 +41,11 @@ class ShowController extends Controller
         $title[] = $competition->event->nat_long;
         $title[] = $competition->start_time?->format('H:i d.m.Y');
         $title = array_filter($title);
+
+        $title = array_map(function ($item){
+            return str_replace(' ', '&nbsp;', $item);
+        }, $title);
+
         $title = implode(', ', $title);
 
         return GenericViewIndexHelper::instance()

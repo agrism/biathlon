@@ -8,3 +8,7 @@ Route::get('/events/{id}', Contr\Events\ShowController::class)->name('events.sho
 Route::get('/competitions/{id}', Contr\Competitions\ShowController::class)->name('competitions.show');
 Route::get('/athletes/{id}', Contr\Athletes\ShowController::class)->name('athletes.show');
 
+Route::group(['prefix' => 'private','middleware' => 'auth:web'], function(){
+    Route::get('/',Contr\Private\IndexController::class)->name('private.index');
+    Route::get('/profile', Contr\Private\ProfileController::class)->name('profile');
+});
