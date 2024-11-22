@@ -27,10 +27,15 @@ class IndexController extends Controller
             ->setHeaders([ 'status','season','description', 'Organizer','country','start', 'level'])
             ->setDataKeys([
                 function (Event $event): string {
-                    return $this->getLink(
-                        $event,
-                        $event->start_date->lt(now()) ? '<span style="color: darkgrey">completed</span>' : '<span style="color: darkgreen">upcoming</span>'
-                    );
+                    if($event->start_date->startOfDay() === now()->startOfDay()){
+                        $name = '<span style="color: red">today</span>';
+                    } else if($event->start_date->lt(now())){
+                        $name = '<span style="color: darkgrey">completed</span>';
+                    } else {
+                        $name = '<span style="color: darkgreen">upcoming</span>';
+                    }
+
+                    return $this->getLink($event, $name);
                 },
                 function (Event $event): string {
                     $name = $event->season->name;
