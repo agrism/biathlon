@@ -41,9 +41,11 @@ class BreadCrumbHelper
     {
         $this->read();
 
+        $count = count($this->objects);
+
         return implode(' <span style="font-size: 14px;font-weight: bold">&#10095;</span> ', array_map(
-            fn($object) => '<a href="' . $object->route . '">' . $object->title . '</a>',
-            $this->objects
+            fn($object, $index) => ($count-1)  === $index ? '<span style="font-weight: bold">'.$object->title.'</span>' : '<a href="' . $object->route . '">' . $object->title . '</a>',
+            $this->objects, array_keys(array_values($this->objects))
         ));
     }
 
