@@ -24,8 +24,14 @@ class IndexController extends Controller
         return GenericViewIndexHelper::instance()
             ->setTitle('Events')
             ->setData($data)
-            ->setHeaders(['season','description', 'Organizer','country','start', 'level'])
+            ->setHeaders([ 'status','season','description', 'Organizer','country','start', 'level'])
             ->setDataKeys([
+                function (Event $event): string {
+                    return $this->getLink(
+                        $event,
+                        $event->start_date->lt(now()) ? '<span style="color: darkgrey">completed</span>' : '<span style="color: darkgreen">upcoming</span>'
+                    );
+                },
                 function (Event $event): string {
                     $name = $event->season->name;
                     $first = substr($name, 0, 2);
