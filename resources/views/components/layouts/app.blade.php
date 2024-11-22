@@ -15,6 +15,7 @@
 
 <div class="container" style="margin: 0 auto">
     @include('menu', ['ignoreHome' => true])
+    {{ $slot }}
 </div>
 
 <script>

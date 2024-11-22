@@ -10,5 +10,5 @@ Route::get('/athletes/{id}', Contr\Athletes\ShowController::class)->name('athlet
 
 Route::group(['prefix' => 'private','middleware' => 'auth:web'], function(){
     Route::get('/',Contr\Private\IndexController::class)->name('private.index');
-    Route::get('/profile', Contr\Private\ProfileController::class)->name('profile');
+    Route::get('/profile', Contr\Private\ProfileController::class)->name('private.profile');
 });
