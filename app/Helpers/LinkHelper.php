@@ -6,8 +6,8 @@ class LinkHelper
 {
     use InstanceTrait;
 
-    public function getLink(string $route, ?string $name = null): string
+    public function getLink(string $route, ?string $name = null, ?string $style = null, string $hrefProp = 'href', ?string $attributes = null): string
     {
-        return sprintf('<a href="%s">%s</a>', $route, $name);
+        return sprintf('<a  '.($hrefProp ?: 'href').'="%s" '.$attributes.' style="'.$style.'">%s</a>', $route, $name);
     }
 }

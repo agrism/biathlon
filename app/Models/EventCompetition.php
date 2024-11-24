@@ -43,4 +43,31 @@ class EventCompetition extends Model
     {
         return $this->hasMany(EventCompetitionResult::class, 'event_competition_id','id');
     }
+
+    public function forecasts(): HasMany
+    {
+        return $this->hasMany(Forecast::class);
+    }
+
+    public function getTitle(): string
+    {
+        $title = [];
+        $title[] = $this->description;
+        $title[] = $this->event->description;
+        if($this->event->event_series_no){
+            if($no = trim($this->event->event_series_no)){
+                $title[] = 'stage '.$no;
+            }
+        }
+        $title[] = $this->event->organizer;
+        $title[] = $this->event->nat_long;
+        $title[] = $this->start_time?->format('H:i d.m.Y');
+        $title = array_filter($title);
+
+        $title = array_map(function ($item){
+            return str_replace(' ', '&nbsp;', $item);
+        }, $title);
+
+        return implode(', ', $title);
+    }
 }

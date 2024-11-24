@@ -17,6 +17,9 @@ class GenericViewIndexHelper
     protected array $tableHeaders = [];
     protected array $dataKeys = [];
     protected array $dataUrlKeys = [];
+    protected bool $doNotUseLayout = false;
+    protected bool $useHtmx = false;
+    protected ?string $htmxTargetElement = null;
 
     /**
      * @var FilterValueObject[]
@@ -51,7 +54,7 @@ class GenericViewIndexHelper
      */
     public function setHeaders(array $headers = []): self
     {
-        $this->tableHeaders = $headers;
+        $this->tableHeaders = array_filter($headers);
 
         return $this;
     }
@@ -65,6 +68,25 @@ class GenericViewIndexHelper
 
         return $this;
     }
+
+    public function doNotUseLayout(): self
+    {
+        $this->doNotUseLayout = true;
+        return $this;
+    }
+
+    public function useHtmx(): self
+    {
+        $this->useHtmx = true;
+        return $this;
+    }
+
+    public function htmxTargetElement(string $targetElement): self
+    {
+        $this->htmxTargetElement = $targetElement;
+        return $this;
+    }
+
 
     /**
      * @param string[] $keys
@@ -168,7 +190,17 @@ class GenericViewIndexHelper
 
     public function render(): View
     {
-        return view('generic.view.index', ['helper' => $this]);
+        $blade = $this->doNotUseLayout ? 'generic.view.partials.index-content' : 'generic.view.index';
+
+        view('generic.view.index');
+
+        return view($blade, [
+            'helper' => $this,
+            'doNotUseLayout' => $this->doNotUseLayout,
+            'useHtmx' => $this->useHtmx,
+            'htmxTargetElement' => $this->htmxTargetElement,
+            'subTitle' => $this->doNotUseLayout ? $this->title : null,
+        ]);
     }
 
     public function dataButton(string $route, string $title, string $routeHttpMethod = 'get'): string

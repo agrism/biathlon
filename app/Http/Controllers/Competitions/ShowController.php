@@ -31,25 +31,8 @@ class ShowController extends Controller
             ->where('event_competition_id', $competition->id)
             ->paginate(perPage: 2000);
 
-        $title = [];
-        $title[] = $competition->description;
-        $title[] = $competition->event->description;
-        if($competition->event->event_series_no){
-            $title[] = 'stage '.trim($competition->event->event_series_no);
-        }
-        $title[] = $competition->event->organizer;
-        $title[] = $competition->event->nat_long;
-        $title[] = $competition->start_time?->format('H:i d.m.Y');
-        $title = array_filter($title);
-
-        $title = array_map(function ($item){
-            return str_replace(' ', '&nbsp;', $item);
-        }, $title);
-
-        $title = implode(', ', $title);
-
         return GenericViewIndexHelper::instance()
-            ->setTitle('Results: ' .$title)
+            ->setTitle('Results: ' .$competition->getTitle())
             ->setData($data)
             ->setHeaders(['rank','bib','Athlete','Nat','flag','shooting','behind', 'wc points'])
             ->setDataKeys([
