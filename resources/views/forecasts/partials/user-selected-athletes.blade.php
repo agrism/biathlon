@@ -4,17 +4,29 @@
 
         @foreach($authUserSubmittedData->athletes ?? [] as $index => $athlete)
 
-            <td style="justify-content: center">
+            <td style="justify-content: center;position: relative">
+
+                <div style="justify-content: center; border: 0px solid lightgrey;border-radius: 10px;padding: 5px;min-height: 100%;">
 
                 @if($athlete->family_name)
                     <strong style="font-size:32px;">
                     {{\App\Enums\RankEnum::tryFrom($index+1)->getMedal()}}
                     </strong>
-                    <div class="px-2 py-2"><img src="{{$athlete->photo_uri}}" width="200" height="200">
+                    <div class="px-2 py-2" style="height: 100%;">
+                        {!! \App\Helpers\RemoteImageRenderHelper::instance()->getImageTag(url: $athlete->photo_uri, attributes: 'width="200" height="200"') !!}
                     </div>
-                    <div class="px-2 py-2 text-center">⭐ {{$athlete->given_name}} {{$athlete->family_name}}</div>
+                    <div class="px-2 py-2 text-center">
 
-                    <div class="px-2 py-2 text-center text-sm" ">
+                        @if(in_array($athlete->id, $favoriteAthleteIds ?? []))
+                            {{\App\Enums\FavoriteIconEnum::ENABLED->value}}
+                        @else
+                            {{\App\Enums\FavoriteIconEnum::DISABLED->value}}
+                        @endif
+
+                        {{$athlete->given_name}} {{$athlete->family_name}}
+                    </div>
+
+                    <div class="px-2 py-2 text-center text-sm">
                         <img src="{{$athlete->flag_uri}}" style="height:20px;display:inline-block;">&nbsp;
                         <span style="line-height: 20px;">{{trim($athlete->nat)}}</span>
                     </div>
@@ -54,15 +66,23 @@
                             {{\App\Enums\RankEnum::tryFrom($index+1)->getMedal()}}
                         </strong>
                         <div class="text-center">{{\App\Helpers\NumberHelper::instance()->ordinal($index+1)}}</div>
-                        <div class="text-center px-2 py-2"
+                        @if(auth()->check())
+                        <div class="text-center px-2 py-2 cursor-pointer"
                              hx-get="{{route('forecasts.select-athlete', ['id' => $forecast->id, 'place' => $index])}}"
                              hx-target="#selected-athletes"
                         >
                             Choose Athlete
                         </div>
+                        @else
+                            <div class="text-center px-2 py-2 cursor-pointer">
+                                <a href="{{route('login')}}">Login first</a>
+                            </div>
+                        @endif
                     </div>
 
                 @endif
+
+                </div>
 
             </td>
         @endforeach

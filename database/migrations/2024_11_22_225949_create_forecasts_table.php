@@ -37,6 +37,14 @@ return new class extends Migration
             $table->float('points');
             $table->timestamps();
         });
+
+        Schema::create('favorites', function (Blueprint $table) {
+            $table->id();
+            $table->integer('user_id')->index();
+            $table->string('type')->index();
+            $table->integer('type_id');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -44,6 +52,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('favorites');
         Schema::dropIfExists('forecast_awards');
         Schema::dropIfExists('forecast_submitted_data');
         Schema::dropIfExists('forecasts');

@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property integer $id
@@ -28,4 +30,9 @@ class Athlete extends Model
     protected $casts = [
         'birth_date' => 'datetime',
     ];
+
+    public function results(): HasMany
+    {
+        return $this->hasMany(EventCompetitionResult::class);
+    }
 }

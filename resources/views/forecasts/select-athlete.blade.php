@@ -1,10 +1,10 @@
 <div style="border: 1px solid grey;border-radius: 5px;padding: 5px;">
-<span style="font-weight: bold">Choose athlete from season <a
-        href="https://www.biatlons.kilograms.lv/events/BT2425SWRLCP09">24/25</a></span>
+<span style="font-weight: bold">Choose athlete from season 24/25</span>
 
-    <h1 class="mb-4 mt-4 text-2xl font-extrabold leading-none tracking-tight text-gray-900 md:text-2xl lg:text-3xl  text-center ">
+
+
+    <h1 class="mb-4 mt-4 text-2xl font-extrabold leading-none tracking-tight text-gray-900 md:text-2xl lg:text-3xl  text-center cursor-pointer">
         Choose athlete:</h1>
-
     <div class="flex flex-row-reverse">
     </div>
 

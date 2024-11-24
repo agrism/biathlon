@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Forecasts;
 
 use App\Helpers\LinkHelper;
 use App\Helpers\SeasonHelper;
+use App\Helpers\UnAuthResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Athlete;
 use App\Models\Forecast;
@@ -11,15 +12,12 @@ use App\Models\ForecastSubmittedData;
 use App\ValueObjects\Helpers\Forecasts\ForecastFirstSixPlacesDataValueObject;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Http\Response;
 
 class SubmitSelectedAthleteController extends Controller
 {
-    public function __invoke(Request $request, string $id, string $place, string $athlete, LinkHelper $linkHelper): View
+    public function __invoke(Request $request, string $id, string $place, string $athlete, LinkHelper $linkHelper): View|Response
     {
-        if(!$authUserId = auth()->id()){
-            throw new \Exception('Should auth before!');
-        }
-
         if(!in_array($place, range(0,5))){
             throw new \Exception('Place provided: '.$place);
         }
@@ -35,11 +33,11 @@ class SubmitSelectedAthleteController extends Controller
         /** @var ForecastSubmittedData $forecastSubmittedData */
         if(!$forecastSubmittedData = ForecastSubmittedData::query()
             ->where('forecast_id', $forecast->id)
-            ->where('user_id', $authUserId)
+            ->where('user_id', auth()->id())
             ->first()){
             $forecastSubmittedData = new ForecastSubmittedData;
             $forecastSubmittedData->forecast_id = $forecast->id;
-            $forecastSubmittedData->user_id = $authUserId;
+            $forecastSubmittedData->user_id = auth()->id();
             $forecastSubmittedData->submitted_data = new ForecastFirstSixPlacesDataValueObject();
             $forecastSubmittedData->save();
         }
@@ -53,6 +51,6 @@ class SubmitSelectedAthleteController extends Controller
 
         $forecastSubmittedData->save();
 
-        return (new ShowController())($request, $id, $linkHelper, SeasonHelper::instance());
+        return (new ShowController())($request, $id, $linkHelper, SeasonHelper::instance(), true);
     }
 }
