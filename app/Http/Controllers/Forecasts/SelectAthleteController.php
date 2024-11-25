@@ -76,12 +76,25 @@ class SelectAthleteController extends Controller
                     );
                 },
                 function(Athlete $athlete) use($place, $forecast): string{
-                    return $this->linkHelper->getLink(
-                        route: route('forecasts.select-athlete.submit', ['id' => $forecast->id, 'place' => $place, 'athlete' => $athlete->id]),
-                        name: '<span class="cursor-pointer">Add</span>',
-                        hrefProp: 'hx-get',
-                        attributes: 'hx-target=".cont" hx-indicator="#status"',
-                    );
+//                    return $this->linkHelper->getLink(
+//                        route: route('forecasts.select-athlete.submit', ['id' => $forecast->id, 'place' => $place, 'athlete' => $athlete->id]),
+//                        name: '<span class="cursor-pointer">Add</span>',
+//                        hrefProp: 'hx-get',
+//                        attributes: 'hx-target=".cont" hx-indicator="#status"',
+//                    );
+
+                    $route = route('forecasts.select-athlete.submit', ['id' => $forecast->id, 'place' => $place, 'athlete' => $athlete->id]);
+                    return <<<HTML
+                            <button
+                                class="bg-transparent hover:bg-blue-400 text-blue-500 hover:text-white py-0 px-2 border border-blue-500 hover:border-transparent rounded"
+                                hx-get="$route"
+                                hx-target="#selected-athletes"
+                                hx-target=".cont"
+                                hx-indicator="#status"
+                            >
+                                +
+                            </button>
+HTML;
                 },
                 function(Athlete $athlete): string{
                     return self::TODO;

@@ -52,27 +52,28 @@
                         </table>
                     </div>
                     <div class="px-2 py-2 text-center cursor-pointer"><form><input type="checkbox"> Private</form></div>
-                    <div class="px-2 py-2">
-                        <div class="text-center px-2 py-2 cursor-pointer"
-                             hx-get="{{route('forecasts.select-athlete', ['id' => $forecast->id, 'place' => $index])}}"
-                             hx-target="#selected-athletes"
+                    <div class="px-2 py-2 text-center">
+                        <x-buttons.button
+                            hx-get="{{route('forecasts.select-athlete', ['id' => $forecast->id, 'place' => $index])}}"
+                            hx-target="#selected-athletes"
                         >
                             Edit
-                        </div>
+                        </x-buttons.button>
                     </div>
                 @else
-                    <div class="px-2 py-2">
+                    <div class="px-2 py-2 text-center">
                         <strong style="font-size:32px;">
                             {{\App\Enums\RankEnum::tryFrom($index+1)->getMedal()}}
                         </strong>
                         <div class="text-center">{{\App\Helpers\NumberHelper::instance()->ordinal($index+1)}}</div>
                         @if(auth()->check())
-                        <div class="text-center px-2 py-2 cursor-pointer"
-                             hx-get="{{route('forecasts.select-athlete', ['id' => $forecast->id, 'place' => $index])}}"
-                             hx-target="#selected-athletes"
-                        >
-                            Choose Athlete
-                        </div>
+                            <x-buttons.button
+                                class="my-3"
+                                hx-get="{{route('forecasts.select-athlete', ['id' => $forecast->id, 'place' => $index])}}"
+                                hx-target="#selected-athletes"
+                            >
+                                Choose Athlete
+                            </x-buttons.button>
                         @else
                             <div class="text-center px-2 py-2 cursor-pointer">
                                 <a href="{{route('login')}}">Login first</a>
