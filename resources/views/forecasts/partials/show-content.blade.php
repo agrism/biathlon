@@ -1,10 +1,7 @@
 <div class="px-2 py-2">
-    <h1 class="mb-4 mt-4 text-2xl font-extrabold leading-none tracking-tight text-gray-900 md:text-2xl lg:text-3xl  text-center ">
-        {!!$forecast?->competition->getTitle()!!}</h1>
-
     <div id="selected-athletes">
         @include('forecasts.partials.user-selected-athletes')
-    </div>
+
 
 
     <h2 class="mb-4 mt-4 text-2xl font-extrabold leading-none tracking-tight text-gray-900 md:text-2xl lg:text-3xl  text-center ">
@@ -184,4 +181,5 @@
         @endforeach
         </tbody>
     </table>
+    </div>
 </div>

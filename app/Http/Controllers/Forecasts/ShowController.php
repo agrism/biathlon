@@ -42,6 +42,8 @@ class ShowController extends Controller
             return redirect()->to(route('forecasts.index'));
         }
 
+//        dd($forecast);
+
         $authUserSubmittedData = null;
 
         if ($authUserId) {
