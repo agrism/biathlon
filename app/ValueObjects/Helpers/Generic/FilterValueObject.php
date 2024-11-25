@@ -11,6 +11,7 @@ class FilterValueObject
         public string $key,
         public ?string $title = null,
         public ?string $value = null,
+        public array $options = [],
     ) {
     }
 }

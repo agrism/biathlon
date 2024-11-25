@@ -4,6 +4,7 @@
 
 
 <div class="flex flex-row-reverse">
+    @php /** @var \App\Helpers\Generic\GenericViewIndexHelper $helper */@endphp
     @if($helper->isExportButtonVisible())
         <a href="{{request()->url() . '?export=excel'}}">
             <button
@@ -17,7 +18,7 @@
 </div>
 
 @if($helper->filters())
-    <form method="GET">
+    <form @if($helper->getFilterHtmxFormAttributes()) {!!$helper->getFilterHtmxFormAttributes()!!}  @else method="GET" @endif  >
         @csrf
         <div style="border:2px solid grey; padding: 10px 10px 10px 0;margin: 10px;display: inline-block; border-radius: 5px;">
             <div style="position: absolute;margin-left: 10px;margin-top: -20px; border: 2px solid grey;display: inline-block;background-color: white;padding: 0px 10px;border-radius: 5px;font-size: 12px;">Filter</div>
@@ -26,7 +27,7 @@
                     <tr>
                         <td><label class="text-sm px-2" for="{{$filter->key}}">{{$filter->title ?: $filter->key}}:</label></td>
                         <td>
-                            {!! $filter->inputType->getElement(name: $filter->key, value: $filter->value, style: 'padding-top: 0;padding-bottom: 0;', classes: 'text-sm') !!}
+                            {!! $filter->inputType->getElement(name: $filter->key, value: $filter->value, style: 'padding-top: 0;padding-bottom: 0; border: 1px solid black;', classes: 'text-sm', options: $filter->options) !!}
                         </td>
                     </tr>
                 @endforeach

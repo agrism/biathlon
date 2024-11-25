@@ -20,6 +20,7 @@ class GenericViewIndexHelper
     protected bool $doNotUseLayout = false;
     protected bool $useHtmx = false;
     protected ?string $htmxTargetElement = null;
+    protected ?string $filterHtmxFormAttributes = null;
 
     /**
      * @var FilterValueObject[]
@@ -108,6 +109,17 @@ class GenericViewIndexHelper
     {
         $this->filters = $filters;
         return $this;
+    }
+
+    public function setFilterHtmxFormAttributes(string $attr): self
+    {
+        $this->filterHtmxFormAttributes = $attr;
+        return $this;
+    }
+
+    public function getFilterHtmxFormAttributes(): ?string
+    {
+        return $this->filterHtmxFormAttributes;
     }
 
     public function saveFilterDataAll(Request $request, array $keys): self

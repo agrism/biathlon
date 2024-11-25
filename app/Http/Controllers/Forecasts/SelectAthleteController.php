@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Forecasts;
 
 use App\Enums\FavoriteIconEnum;
 use App\Enums\FavoriteTypeEnum;
+use App\Enums\InputTypeEnum;
 use App\Helpers\FavoriteHelper;
 use App\Helpers\Generic\GenericViewIndexHelper;
 use App\Helpers\LinkHelper;
@@ -11,6 +12,7 @@ use App\Helpers\NumberHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Athlete;
 use App\Models\Forecast;
+use App\ValueObjects\Helpers\Generic\FilterValueObject;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
@@ -18,10 +20,19 @@ use Illuminate\View\View;
 class SelectAthleteController extends Controller
 {
     const TODO = '<span style="font-size: 0.5rem;color: lightgray">Coming..<span>';
+
+    const FILTER_COUNTRY = 'filter_country';
+    const FILTER_NAME = 'filter_name';
+
     protected LinkHelper $linkHelper;
 
     public function __invoke(Request $request, string $id, string $place): View
     {
+        GenericViewIndexHelper::instance()->saveFilterDataAll(request: $request, keys: [
+            self::FILTER_COUNTRY,
+            self::FILTER_NAME,
+        ]);
+
         $this->linkHelper = LinkHelper::instance();
 
         if(!in_array($place, range(0,5))){
@@ -35,6 +46,16 @@ class SelectAthleteController extends Controller
         $athletes = Athlete::query()
             ->where('gender_id', 'W')
             ->where('functions', 'Athlete');
+
+        if($country = GenericViewIndexHelper::instance()->getFilterValue(self::FILTER_COUNTRY)){
+            $athletes = $athletes->where('nat','LIKE', '%'.$country.'%');
+        }
+
+        if($name = GenericViewIndexHelper::instance()->getFilterValue(self::FILTER_NAME)){
+            $athletes = $athletes->where(function($q) use($name){
+                $q->where('given_name', 'LIKE', '%'.$name.'%')->orWhere('family_name', 'LIKE', '%'.$name.'%');
+            });
+        }
 
         if(auth()->check()){
             $favoriteIds = FavoriteHelper::instance()
@@ -76,13 +97,6 @@ class SelectAthleteController extends Controller
                     );
                 },
                 function(Athlete $athlete) use($place, $forecast): string{
-//                    return $this->linkHelper->getLink(
-//                        route: route('forecasts.select-athlete.submit', ['id' => $forecast->id, 'place' => $place, 'athlete' => $athlete->id]),
-//                        name: '<span class="cursor-pointer">Add</span>',
-//                        hrefProp: 'hx-get',
-//                        attributes: 'hx-target=".cont" hx-indicator="#status"',
-//                    );
-
                     $route = route('forecasts.select-athlete.submit', ['id' => $forecast->id, 'place' => $place, 'athlete' => $athlete->id]);
                     return <<<HTML
                             <button
@@ -133,6 +147,30 @@ HTML;
             ->useHtmx()
             ->doNotUseLayout()
             ->htmxTargetElement('#selected-athletes')
+            ->setFilters([
+                new FilterValueObject(
+                    inputType: InputTypeEnum::TEXT,
+                    key: self::FILTER_NAME,
+                    title: 'Name',
+                    value: GenericViewIndexHelper::instance()->getFilterValue(self::FILTER_NAME),
+                    options: []
+                ),
+                new FilterValueObject(
+                    inputType: InputTypeEnum::TEXT,
+                    key: self::FILTER_COUNTRY,
+                    title: 'Country (ISO2)',
+                    value: GenericViewIndexHelper::instance()->getFilterValue(self::FILTER_COUNTRY),
+                    options: []
+                ),
+//                new FilterValueObject(
+//                    inputType: InputTypeEnum::SELECT,
+//                    key: self::FILTER_COUNTRY,
+//                    title: 'Country',
+//                    value: GenericViewIndexHelper::instance()->getFilterValue(self::FILTER_COUNTRY),
+//                    options: Athlete::query()->select('nat')->groupBy('nat')->orderBy('nat')->pluck('nat', 'nat')->all(),
+//                )
+            ])
+            ->setFilterHtmxFormAttributes(attr: 'hx-get="'.route('forecasts.select-athlete', ['id' => $forecast->id, 'place' => $place]).'" hx-target="#selected-athletes"')
             ->render();
     }
 }
