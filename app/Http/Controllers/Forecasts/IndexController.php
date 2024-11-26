@@ -29,7 +29,7 @@ class IndexController extends Controller
         $data = Forecast::query()
             ->with('competition.event')
             ->whereHas('competition.event', function ($s){
-                $s->where('level', 4);
+                $s->where('level', 1);
             });
 
         if($authUserId = auth()->id()){
