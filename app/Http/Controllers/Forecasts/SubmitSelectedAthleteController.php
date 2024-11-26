@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Forecasts;
 
 use App\Helpers\LinkHelper;
 use App\Helpers\SeasonHelper;
-use App\Helpers\UnAuthResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Athlete;
 use App\Models\Forecast;

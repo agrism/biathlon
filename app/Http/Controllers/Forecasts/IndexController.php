@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Forecasts;
 use App\Helpers\Generic\GenericViewIndexHelper;
 use App\Helpers\LinkHelper;
 use App\Http\Controllers\Controller;
+use App\Models\Athlete;
 use App\Models\EventCompetition;
 use App\Models\Forecast;
 use Illuminate\Http\Request;
@@ -75,12 +76,22 @@ class IndexController extends Controller
                         return $this->linkHelper->getLink(route('login'), '<span style="color: grey;">Login</span>');
                     }
 
-                    if($forecast->submittedData->count()){
-                        return $this->getLink($forecast, '<span style="color: green;">Done</span>');
-                    }
-                    return $this->getLink($forecast, '<span style="color: red;">todo</span>');
-                }
+                    $authUserSubmittedAthletes = $forecast->submittedData->where('user_id', auth()->id())->first()?->submitted_data?->athletes ?? [];
 
+                    $authUserSubmittedAthletes = collect($authUserSubmittedAthletes)->filter(function(Athlete $athlete){
+                        return !empty($athlete->family_name);
+                    })->count();
+
+                    if($authUserSubmittedAthletes < 1){
+                        return $this->getLink($forecast, '<span style="color: red;">Waiting...</span>');
+                    }
+
+                    if($authUserSubmittedAthletes < 6){
+                        return $this->getLink($forecast, '<span style="color: darkgoldenrod;">Done partially</span>');
+                    }
+
+                    return $this->getLink($forecast, '<span style="color: green;">Done</span>');
+                }
             ])
             ->render();
     }

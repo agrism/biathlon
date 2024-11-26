@@ -75,9 +75,9 @@
                                 Choose Athlete
                             </x-buttons.button>
                         @else
-                            <div class="text-center px-2 py-2 cursor-pointer">
+                            <x-buttons.button>
                                 <a href="{{route('login')}}">Login first</a>
-                            </div>
+                            </x-buttons.button>
                         @endif
                     </div>
 

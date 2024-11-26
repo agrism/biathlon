@@ -27,7 +27,7 @@
                     <tr>
                         <td><label class="text-sm px-2" for="{{$filter->key}}">{{$filter->title ?: $filter->key}}:</label></td>
                         <td>
-                            {!! $filter->inputType->getElement(name: $filter->key, value: $filter->value, style: 'padding-top: 0;padding-bottom: 0; border: 1px solid black;', classes: 'text-sm', options: $filter->options) !!}
+                            {!! $filter->inputType->getElement(name: $filter->key, value: $filter->value, style: 'padding-top: 0;padding-bottom: 0; border: 1px solid black;', classes: 'text-sm px-2', options: $filter->options) !!}
                         </td>
                     </tr>
                 @endforeach
@@ -55,7 +55,7 @@
         @foreach($helper->headers() as $name)
             <th scope="col"
                 class="px-2 py-2 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500">
-                {{$name}}
+                {!! $name !!}
             </th>
         @endforeach
 

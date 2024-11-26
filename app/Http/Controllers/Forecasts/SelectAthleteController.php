@@ -78,9 +78,12 @@ class SelectAthleteController extends Controller
                 return $athlete;
             })
                 ->sortByDesc(function(Athlete $athlete){
-                    return $athlete->is_favorit;
-                })
-            ;
+                    return $athlete?->is_favorit;
+                });
+
+            if($discipline->isTeamDiscipline()){
+                $athletes = $athletes->unique('nat');
+            }
 
             $currentPage = request()->input('page', 1);
 
@@ -98,7 +101,14 @@ class SelectAthleteController extends Controller
         return GenericViewIndexHelper::instance()
             ->setTitle('Select Athlete for '.NumberHelper::instance()->ordinal($place+1) .' place!')
             ->setData($athletes)
-            ->setHeaders(['Favourite','Add','WC points','Discipline points',	'Name',	'Country',	'Speed, %',	'Standing, %',	'Prone, %',	'Gold medals',	'Silver medals',	'Bronze medals',	'Top 10'])
+            ->setHeaders([
+                'Favourite <span style="color: lightgray">&uarr;</span><span style="color: black;">&darr;</span>',
+                'Add',
+                'WC points',
+                'Discipline points',
+                'Name ',
+                'Country',
+                'Speed, %',	'Standing, %;',	'Prone, %',	'Gold medals',	'Silver medals',	'Bronze medals',	'Top 10'])
             ->setDataKeys([
                 function(Athlete $athlete): string{
                     return $this->linkHelper->getLink(
