@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Forecasts;
 
+use App\Enums\CompetitionCategoryEnum;
+use App\Enums\DisciplineEnum;
 use App\Enums\FavoriteIconEnum;
 use App\Enums\FavoriteTypeEnum;
+use App\Enums\GenderEnum;
 use App\Enums\InputTypeEnum;
 use App\Helpers\FavoriteHelper;
 use App\Helpers\Generic\GenericViewIndexHelper;
@@ -13,6 +16,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Athlete;
 use App\Models\Forecast;
 use App\ValueObjects\Helpers\Generic\FilterValueObject;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
@@ -36,16 +40,24 @@ class SelectAthleteController extends Controller
         $this->linkHelper = LinkHelper::instance();
 
         if(!in_array($place, range(0,5))){
-            throw new \Exception('Place provided: '.$place);
+            throw new Exception('Place provided: '.$place);
         }
 
-        if(!$forecast = Forecast::query()->where('id', $id)->first()){
-            throw new \Exception('Forecast not found: '.$id);
+        /** @var Forecast $forecast */
+        if(!$forecast = Forecast::query()->with('competition.event')->where('id', $id)->first()){
+            throw new Exception('Forecast not found: '.$id);
         }
 
-        $athletes = Athlete::query()
-            ->where('gender_id', 'W')
-            ->where('functions', 'Athlete');
+        $discipline = DisciplineEnum::tryFrom($forecast->competition->discipline_remote_id);
+
+        $gender = CompetitionCategoryEnum::tryFrom($forecast->competition->cat_remote_id)->getGender();
+
+        $athletes = Athlete::query();
+        $athletes = $athletes->where('gender_id', $gender->value);
+        $athletes = $athletes->where('is_team', $discipline->isTeamDiscipline() ? 1 : 0);
+        if(!$discipline->isTeamDiscipline() ){
+            $athletes = $athletes->where('functions', 'Athlete');
+        }
 
         if($country = GenericViewIndexHelper::instance()->getFilterValue(self::FILTER_COUNTRY)){
             $athletes = $athletes->where('nat','LIKE', '%'.$country.'%');
