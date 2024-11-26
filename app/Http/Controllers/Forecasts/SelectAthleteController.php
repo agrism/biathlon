@@ -170,7 +170,7 @@ HTML;
                 new FilterValueObject(
                     inputType: InputTypeEnum::TEXT,
                     key: self::FILTER_COUNTRY,
-                    title: 'Country (ISO2)',
+                    title: 'Country (ISO3)',
                     value: GenericViewIndexHelper::instance()->getFilterValue(self::FILTER_COUNTRY),
                     options: []
                 ),
