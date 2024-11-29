@@ -61,7 +61,7 @@ class EventCompetition extends Model
         }
         $title[] = $this->event->organizer;
         $title[] = $this->event->nat_long;
-        $title[] = $this->start_time?->format('H:i d.m.Y');
+        $title[] = $this->start_time?->setTimeZone('Europe/RIga')->format('d F Y, H:i');
         $title = array_filter($title);
 
         $title = array_map(function ($item){
