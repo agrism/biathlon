@@ -67,7 +67,7 @@ class IndexController extends Controller
 
                 function (Forecast $forecast): string {
                     if($forecast->submit_deadline_at->gt(now())){
-                        return $this->getLink($forecast, '<span style="color: green">upcoming</span>');
+                        return $this->getLink($forecast, '<span style="color: green">Starts in '. str_replace(' from now','',$forecast->submit_deadline_at->diffForHumans()) .'</span>');
                     }
                     return $this->getLink($forecast, '<span style="color: grey;">closed</span>');
                 },
@@ -83,7 +83,7 @@ class IndexController extends Controller
                     })->count();
 
                     if($authUserSubmittedAthletes < 1){
-                        return $this->getLink($forecast, '<span style="color: red;">Waiting...</span>');
+                        return $this->getLink($forecast, '<span style="color: red;">Waiting for your bids</span>');
                     }
 
                     if($authUserSubmittedAthletes < 6){

@@ -18,15 +18,19 @@ class SubmitSelectedAthleteController extends Controller
     public function __invoke(Request $request, string $id, string $place, string $athlete, LinkHelper $linkHelper): View|Response
     {
         if(!in_array($place, range(0,5))){
-            throw new \Exception('Place provided: '.$place);
+            abort(401, 'Place provided: '.$place);
         }
 
         if(!$forecast = Forecast::query()->where('id', $id)->first()){
-            throw new \Exception('Forecast not found: '.$id);
+            abort(404, 'Forecast not found: '.$id);
         }
 
         if(!$athleteModel = Athlete::query()->where('id', $athlete)->first()){
-            throw new \Exception('Athlete not found: '.$athlete);
+            abort(404, 'Athlete not found: '.$athlete);
+        }
+
+        if($forecast->submit_deadline_at->lt(now())){
+            abort(401, 'forecast is closed');
         }
 
         /** @var ForecastSubmittedData $forecastSubmittedData */

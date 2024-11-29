@@ -1,10 +1,9 @@
 <div class="px-2 py-2">
     <div id="selected-athletes">
 
-        @if(!$forecast->competition?->results->count())
-
         @include('forecasts.partials.user-selected-athletes')
 
+        @if(!$forecast->competition?->results->count())
 
         <h2 class="mb-4 mt-4 text-2xl font-extrabold leading-none tracking-tight text-gray-900 md:text-2xl lg:text-3xl  text-center ">
             Bid summary

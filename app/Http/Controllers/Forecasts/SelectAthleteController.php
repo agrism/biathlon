@@ -45,7 +45,11 @@ class SelectAthleteController extends Controller
 
         /** @var Forecast $forecast */
         if(!$forecast = Forecast::query()->with('competition.event')->where('id', $id)->first()){
-            throw new Exception('Forecast not found: '.$id);
+            abort(404);
+        }
+
+        if($forecast->submit_deadline_at->lt(now())){
+            abort(401);
         }
 
         $discipline = DisciplineEnum::tryFrom($forecast->competition->discipline_remote_id);

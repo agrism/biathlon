@@ -1,12 +1,12 @@
-<table style="width: 100%">
+<table style="width: 100%;table-layout: fixed;">
     <tbody>
     <tr>
 
         @foreach($authUserSubmittedData->athletes ?? [] as $index => $athlete)
 
-            <td style="justify-content: center;position: relative">
+            <td style="justify-content: center;position: relative;">
 
-                <div style="justify-content: center; border: 0px solid lightgrey;border-radius: 10px;padding: 5px;min-height: 100%;">
+                <div style=";justify-content: center; border: 0px solid lightgrey;border-radius: 10px;padding: 5px;min-height: 100%;">
 
                 @if($athlete->family_name)
                     <strong style="font-size:32px;">
@@ -52,6 +52,7 @@
                         </table>
                     </div>
                     <div class="px-2 py-2 text-center cursor-pointer"><form><input type="checkbox"> Private</form></div>
+                    @if($forecast->submit_deadline_at->gt(now()))
                     <div class="px-2 py-2 text-center">
                         <x-buttons.button
                             hx-get="{{route('forecasts.select-athlete', ['id' => $forecast->id, 'place' => $index])}}"
@@ -60,6 +61,7 @@
                             Edit
                         </x-buttons.button>
                     </div>
+                    @endif
                 @else
                     <div class="px-2 py-2 text-center">
                         <strong style="font-size:32px;">
@@ -67,6 +69,7 @@
                         </strong>
                         <div class="text-center">{{\App\Helpers\NumberHelper::instance()->ordinal($index+1)}}</div>
                         @if(auth()->check())
+                            @if($forecast->submit_deadline_at->gt(now()))
                             <x-buttons.button
                                 class="my-3"
                                 hx-get="{{route('forecasts.select-athlete', ['id' => $forecast->id, 'place' => $index])}}"
@@ -74,6 +77,7 @@
                             >
                                 Choose Athlete
                             </x-buttons.button>
+                            @endif
                         @else
                             <x-buttons.button>
                                 <a href="{{route('login')}}">Login first</a>
