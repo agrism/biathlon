@@ -19,7 +19,7 @@ class IndexController extends Controller
 
         $this->registerBread('Events');
 
-        $data = Event::query()->with('season')->where('level', 1)->orderBy('start_date', 'desc')->paginate(perPage: 2000);
+        $data = Event::query()->with('season')->where('level', 1)->orderBy('start_date', 'desc')->paginate(perPage: 20);
 
         return GenericViewIndexHelper::instance()
             ->setTitle('Events')
@@ -29,8 +29,10 @@ class IndexController extends Controller
                 function (Event $event): string {
                     if($event->start_date->startOfDay() === now()->startOfDay()){
                         $name = '<span style="color: red">today</span>';
-                    } else if($event->start_date->lt(now())){
+                    } else if($event->end_date->lt(now())){
                         $name = '<span style="color: darkgrey">completed</span>';
+                    } else if($event->start_date->lt(now())){
+                        $name = '<span style="color: red">In progress</span>';
                     } else {
                         $name = '<span style="color: darkgreen">upcoming</span>';
                     }
@@ -66,7 +68,7 @@ class IndexController extends Controller
                 },
 
                 function (Event $event): string {
-                    return $this->getLink($event, $event->start_date->format('d.m.Y'));
+                    return $this->getLink($event, $event->start_date?->setTimeZone('Europe/RIga')->format('d F Y, H:i'));
                 },
                 function (Event $event): string {
                     return $this->getLink($event, $event->level);

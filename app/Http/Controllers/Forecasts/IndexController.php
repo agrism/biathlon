@@ -37,7 +37,7 @@ class IndexController extends Controller
             $data = $data->with('submittedData');
         }
 
-        $data = $data->orderBy('submit_deadline_at', 'desc')->paginate(perPage: 100);
+        $data = $data->orderBy('submit_deadline_at', 'asc')->paginate(perPage: 100);
 
         return GenericViewIndexHelper::instance()
             ->setTitle('Forecasts')
@@ -48,7 +48,7 @@ class IndexController extends Controller
 
                     $name = [];
                     $name[] = $forecast->competition->event->organizer;
-                    $name[] = $forecast->competition->start_time?->format('H:i d.m.Y');
+                    $name[] = $forecast->competition->start_time?->setTimeZone('Europe/RIga')->format('d F Y, H:i');
                     $name[] = $forecast->competition->description;
                     $name = array_filter($name);
                     $name = array_map(function($s){
@@ -59,10 +59,10 @@ class IndexController extends Controller
                     return $this->getLink($forecast, $name);
                 },
                 function (Forecast $forecast): string {
-                    return $this->getLink($forecast, $forecast->competition?->start_time->format('H:i d.m.Y'));
+                    return $this->getLink($forecast, $forecast->competition?->start_time->setTimeZone('Europe/RIga')->format('d F Y, H:i'));
                 },
                 function (Forecast $forecast): string {
-                    return $this->getLink($forecast, $forecast->submit_deadline_at->format('H:i d.m.Y'));
+                    return $this->getLink($forecast, $forecast->submit_deadline_at->setTimeZone('Europe/RIga')->format('d F Y, H:i'));
                 },
 
                 function (Forecast $forecast): string {
@@ -83,7 +83,7 @@ class IndexController extends Controller
                     })->count();
 
                     if($authUserSubmittedAthletes < 1){
-                        return $this->getLink($forecast, '<span style="color: red;">Waiting for your bids</span>');
+                        return $this->getLink($forecast, '<span style="color: darkslategrey;">Waiting for your bids</span>');
                     }
 
                     if($authUserSubmittedAthletes < 6){
