@@ -19,7 +19,7 @@ class IndexController extends Controller
     {
         $this->linkHelper = $linkHelper;
 
-        $this->registerBread('Forecasts');
+        $this->registerBread('Predictions');
 
 //        $c = Forecast::query()->with('competition')->first();
 //
@@ -38,12 +38,16 @@ class IndexController extends Controller
         }
 
         $data = $data->orderBy('submit_deadline_at', 'asc')->paginate(perPage: 100);
+        $counter = 1;
 
         return GenericViewIndexHelper::instance()
-            ->setTitle('Forecasts')
+            ->setTitle('Predictions')
             ->setData($data)
-            ->setHeaders(['competition','race start','submit deadline','status', 'my forecast'])
+            ->setHeaders(['no','competition','race start','submit deadline','status', 'my forecast'])
             ->setDataKeys([
+                function (Forecast $forecast) use(&$counter): int {
+                    return $counter++;
+                },
                 function (Forecast $forecast): string {
 
                     $name = [];
@@ -83,11 +87,11 @@ class IndexController extends Controller
                     })->count();
 
                     if($authUserSubmittedAthletes < 1){
-                        return $this->getLink($forecast, '<span style="color: darkslategrey;">Waiting for your bids</span>');
+                        return $this->getLink($forecast, '<span style="color: darkslategrey;">Todo</span>');
                     }
 
                     if($authUserSubmittedAthletes < 6){
-                        return $this->getLink($forecast, '<span style="color: darkgoldenrod;">Done partially</span>');
+                        return $this->getLink($forecast, '<span style="color: darkgoldenrod;">In progress</span>');
                     }
 
                     return $this->getLink($forecast, '<span style="color: green;">Done</span>');

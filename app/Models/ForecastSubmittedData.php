@@ -29,4 +29,9 @@ class ForecastSubmittedData extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function forecast(): BelongsTo
+    {
+        return $this->belongsTo(Forecast::class);
+    }
 }
