@@ -95,45 +95,45 @@ class PointCalculatorServiceHelper extends ForecastAbstractionHelper
     private function getFirstThreeIndirectFinding(): int
     {
         $counter = 0;
-        $counter += intval(in_array($this->resultIds[0], $userFirstThreePlaces = $this->getUserAllPlaces()) && !$this->foundGoldPlace());
-        $counter += intval(in_array($this->resultIds[1], $userFirstThreePlaces) && !$this->foundSilverPlace());
-        $counter += intval(in_array($this->resultIds[2], $userFirstThreePlaces) && !$this->foundBronzePlace());
+        $counter += intval(in_array($this->userGivenIds[0], $resultAllPlaces = $this->getResultAllPlaces()) && !$this->foundGoldPlace());
+        $counter += intval(in_array($this->userGivenIds[1], $resultAllPlaces) && !$this->foundSilverPlace());
+        $counter += intval(in_array($this->userGivenIds[2], $resultAllPlaces) && !$this->foundBronzePlace());
         return $counter;
     }
 
     private function getLastThreeIndirectFinding(): int
     {
         $counter = 0;
-        $counter += intval(in_array($this->resultIds[3], $userFirstThreePlaces = $this->getUserAllPlaces())  && $this->resultIds[3] != $this->userGivenIds[3]);
-        $counter += intval(in_array($this->resultIds[4], $userFirstThreePlaces)  && $this->resultIds[4] != $this->userGivenIds[4]);
-        $counter += intval(in_array($this->resultIds[5], $userFirstThreePlaces)  && $this->resultIds[5] != $this->userGivenIds[5]);
+        $counter += intval(in_array($this->userGivenIds[3], $resultAllPlaces = $this->getResultAllPlaces())  && $this->resultIds[3] != $this->userGivenIds[3]);
+        $counter += intval(in_array($this->userGivenIds[4], $resultAllPlaces) && $this->userGivenIds[4] != $this->resultIds[4]);
+        $counter += intval(in_array($this->userGivenIds[5], $resultAllPlaces) && $this->userGivenIds[5] != $this->resultIds[5]);
         return $counter;
     }
 
     private function getIndirectFinding(): int
     {
         $counter = 0;
-        $counter += intval(in_array($this->resultIds[0], $userFirstThreePlaces = $this->getUserAllPlaces())  && $this->resultIds[0] != $this->userGivenIds[0]);
-        $counter += intval(in_array($this->resultIds[1], $userFirstThreePlaces)  && $this->resultIds[1] != $this->userGivenIds[1]);
-        $counter += intval(in_array($this->resultIds[2], $userFirstThreePlaces)  && $this->resultIds[2] != $this->userGivenIds[2]);
-        $counter += intval(in_array($this->resultIds[3], $userFirstThreePlaces)  && $this->resultIds[3] != $this->userGivenIds[3]);
-        $counter += intval(in_array($this->resultIds[4], $userFirstThreePlaces)  && $this->resultIds[4] != $this->userGivenIds[4]);
-        $counter += intval(in_array($this->resultIds[5], $userFirstThreePlaces)  && $this->resultIds[5] != $this->userGivenIds[5]);
+        $counter += intval(in_array($this->userGivenIds[0], $resultAllPlaces = $this->getResultAllPlaces())  && $this->resultIds[0] != $this->userGivenIds[0]);
+        $counter += intval(in_array($this->userGivenIds[1], $resultAllPlaces) && $this->userGivenIds[1] != $this->resultIds[1]);
+        $counter += intval(in_array($this->userGivenIds[2], $resultAllPlaces) && $this->userGivenIds[2] != $this->resultIds[2]);
+        $counter += intval(in_array($this->userGivenIds[3], $resultAllPlaces) && $this->userGivenIds[3] != $this->resultIds[3]);
+        $counter += intval(in_array($this->userGivenIds[4], $resultAllPlaces) && $this->userGivenIds[4] != $this->resultIds[4]);
+        $counter += intval(in_array($this->userGivenIds[5], $resultAllPlaces) && $this->userGivenIds[5] != $this->resultIds[5]);
         return $counter;
     }
 
-    private function getUserFirstThreePlaces(): array
+    private function getResultFirstThreePlaces(): array
     {
-        return array_slice($this->userGivenIds, 0, 3);
+        return array_slice($this->resultIds, 0, 3);
     }
 
-    private function getUserLastThreePlaces(): array
+    private function getResultLastThreePlaces(): array
     {
-        return array_slice($this->userGivenIds, 3, 3);
+        return array_slice($this->resultIds, 3, 3);
     }
 
-    private function getUserAllPlaces(): array
+    private function getResultAllPlaces(): array
     {
-        return array_slice($this->userGivenIds, 0, 6);
+        return array_slice($this->resultIds, 0, 6);
     }
 }

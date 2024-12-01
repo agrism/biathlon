@@ -20,9 +20,6 @@ class PointCalculatorServiceHelperTest extends TestCase
             userGivenIds: $userGivenIds,
         );
 
-        $this->assertTrue(true);
-
-
         foreach ($trueAsserts as $calculatorMethod => $value) {
             $this->assertSame($value, $calculator->$calculatorMethod());
         }
@@ -359,12 +356,12 @@ class PointCalculatorServiceHelperTest extends TestCase
                     'foundBonus1Perfection' => false,
                     'foundBonus2None' => false,
                     'foundBonus2One' => false,
-                    'foundBonus2Pair' => true,
-                    'foundBonus2All' => false,
+                    'foundBonus2Pair' => false,
+                    'foundBonus2All' => true,
                     'foundBonus3None' => false,
                     'foundBonus3One' => false,
-                    'foundBonus3Pair' => false,
-                    'foundBonus3All' => true,
+                    'foundBonus3Pair' => true,
+                    'foundBonus3All' => false,
                 ]
             ],
             [
@@ -379,12 +376,12 @@ class PointCalculatorServiceHelperTest extends TestCase
                     'found6Place' => false,
                     'foundBonus1Perfection' => false,
                     'foundBonus2None' => false,
-                    'foundBonus2One' => true,
-                    'foundBonus2Pair' => false,
+                    'foundBonus2One' => false,
+                    'foundBonus2Pair' => true,
                     'foundBonus2All' => false,
                     'foundBonus3None' => false,
-                    'foundBonus3One' => false,
-                    'foundBonus3Pair' => true,
+                    'foundBonus3One' => true,
+                    'foundBonus3Pair' => false,
                     'foundBonus3All' => false,
                 ]
             ],
