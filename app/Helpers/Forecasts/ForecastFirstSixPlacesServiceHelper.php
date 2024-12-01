@@ -23,6 +23,8 @@ class ForecastFirstSixPlacesServiceHelper extends ForecastAbstractionHelper
 
     public function calculateUserPoints(Forecast $forecast, User $user): self
     {
+        $this->mainPoints = 0;
+        $this->bonusPoints = 0;
 
         $this->competition = $forecast->competition;
 

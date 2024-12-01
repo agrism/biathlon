@@ -9,7 +9,6 @@ use App\Helpers\Forecasts\ForecastFirstSixPlacesServiceHelper;
 use App\Models\Athlete;
 use App\Models\Forecast;
 use App\Models\ForecastAward;
-use App\Models\ForecastSubmittedData;
 use App\ValueObjects\Helpers\Forecasts\FinalDataValueObject\AthleteValueObject;
 use App\ValueObjects\Helpers\Forecasts\FinalDataValueObject\FinalDataValueObject;
 use App\ValueObjects\Helpers\Forecasts\FinalDataValueObject\PointValueObject;
