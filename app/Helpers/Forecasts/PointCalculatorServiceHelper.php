@@ -2,17 +2,7 @@
 
 namespace App\Helpers\Forecasts;
 
-use App\Enums\CompetitionCategoryEnum;
-use App\Enums\DisciplineEnum;
 use App\Helpers\InstanceTrait;
-use App\Models\Athlete;
-use App\Models\EventCompetition;
-use App\Models\EventCompetitionResult;
-use App\Models\Forecast;
-use App\Models\ForecastSubmittedData;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Collection;
-
 class PointCalculatorServiceHelper extends ForecastAbstractionHelper
 {
     use InstanceTrait;
