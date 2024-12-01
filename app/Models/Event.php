@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -28,6 +29,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property ?integer $level
  * @property ?integer $utc_offset
  * @property ?string $notes
+ *
+ * @property Season $season
+ * @property Collection<EventCompetition> $competitions
  */
 class Event extends Model
 {

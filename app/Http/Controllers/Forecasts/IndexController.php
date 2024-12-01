@@ -43,7 +43,7 @@ class IndexController extends Controller
         return GenericViewIndexHelper::instance()
             ->setTitle('Predictions')
             ->setData($data)
-            ->setHeaders(['no','competition','race start','submit deadline','status', 'my forecast'])
+            ->setHeaders(['no','competition','race start','status', 'my forecast'])
             ->setDataKeys([
                 function (Forecast $forecast) use(&$counter): int {
                     return $counter++;
@@ -65,10 +65,6 @@ class IndexController extends Controller
                 function (Forecast $forecast): string {
                     return $this->getLink($forecast, $forecast->competition?->start_time->setTimeZone('Europe/RIga')->format('d F Y, H:i'));
                 },
-                function (Forecast $forecast): string {
-                    return $this->getLink($forecast, $forecast->submit_deadline_at->setTimeZone('Europe/RIga')->format('d F Y, H:i'));
-                },
-
                 function (Forecast $forecast): string {
                     if($forecast->submit_deadline_at->gt(now())){
                         return $this->getLink($forecast, '<span style="color: green">Starts in '. str_replace(' from now','',$forecast->submit_deadline_at->diffForHumans()) .'</span>');

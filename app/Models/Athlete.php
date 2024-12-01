@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property integer $id
@@ -24,6 +24,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property ?string $badge_order
  * @property ?string $photo_uri
  * @property ?string $flag_uri
+ *
+ * @property Collection<EventCompetitionResult> $results
  */
 class Athlete extends Model
 {
@@ -34,5 +36,16 @@ class Athlete extends Model
     public function results(): HasMany
     {
         return $this->hasMany(EventCompetitionResult::class);
+    }
+
+    public function getFullName(): string
+    {
+        return implode(', ', array_filter([$this->given_name, $this->family_name]));
+    }
+
+    public function attachTempId(bool $isTeamDiscipline): self
+    {
+        $this->temp_id = $isTeamDiscipline ? $this->nat : $this->id;
+        return $this;
     }
 }

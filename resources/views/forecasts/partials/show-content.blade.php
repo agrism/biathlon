@@ -3,7 +3,7 @@
 
         @include('forecasts.partials.user-selected-athletes')
 
-        @if(!$forecast->competition?->results->count())
+        @if(!$forecast->final_data->results)
 
         <h2 class="mb-4 mt-4 text-2xl font-extrabold leading-none tracking-tight text-gray-900 md:text-2xl lg:text-3xl  text-center ">
             Bid summary
@@ -45,16 +45,16 @@
             </thead>
             <tbody>
 
-            @foreach($forecast->submittedData as $submittedData)
+            @foreach($forecast->final_data->users as $user)
                 <tr class="odd:bg-white even:bg-gray-100">
                     <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
-                        {{$submittedData->user->name}}
+                        {{$user->name}}
                     </td>
 
-                    @foreach($submittedData->submitted_data?->athletes ?? [] as $athlete)
+                    @foreach($user->getAthletes() as $athlete)
                         <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
-                            <img src="{{$athlete->flag_uri}}"
-                                 style="height:20px;display:inline-block;">&nbsp;{{$athlete->given_name}} {{$athlete->family_name}}</a>
+                            <img src="{{$athlete->flagUrl}}"
+                                 style="height:20px;display:inline-block;">&nbsp;{{$athlete->name}}</a>
                             <small class="text-gray-500" style="display:block;text-align:center;">(-5% 90% 90%)</small>
                         </td>
                     @endforeach
@@ -121,62 +121,34 @@
                         <strong>IBU</strong>
                     </td>
 
-                    @foreach($forecast->competition?->results ?? [] as $result)
+                    @foreach($forecast->final_data->results as $athlete)
                         <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
-                            <img src="{{$result->athlete->flag_uri}}" style="height:20px;display:inline-block;"><strong>{{$result->athlete->given_name}} {{$result->athlete->family_name}}</strong>
+                            <img src="{{$athlete->flagUrl}}" style="height:20px;display:inline-block;">&nbsp;<strong>{{$athlete->name}}</strong>
                         </td>
                     @endforeach
 
                 </tr>
 
-                @foreach([] as $i)
+                @foreach($forecast->final_data->users as $user)
                     <tr class="odd:bg-white even:bg-gray-100">
                         <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
-                            <a href="https://www.biatlons.kilograms.lv/events/BT2425SWRLCP09">Dainis</a>
-
+                            {{$user->name}}
                         </td>
-                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
-                            {{--                    <img src="athletes_files/nor.png" style="height:20px;display:inline-block;">--}}
-                            Margita Parce
-                            <small class="text-gray-500" style="display:block;text-align:center;">(0)</small>
-                        </td>
-                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
-                            {{--                    <img src="athletes_files/nor.png"  style="height:20px;display:inline-block;">--}}
-                            Madara Līduma
-                            <small class="text-gray-500" style="display:block;text-align:center;">(0)</small>
-                        </td>
-                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
-
-                            {{--                        <img src="athletes_files/nor.png" style="height:20px;display:inline-block;">--}}
-                            Ieva Cederštrēma
-                            <small class="text-gray-500" style="display:block;text-align:center;">(0)</small>
-                        </td>
-                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
-                            {{--                    <img src="athletes_files/nor.png" style="height:20px;display:inline-block;">--}}
-                            Vineta Laiva
-                            <small class="text-gray-500" style="display:block;text-align:center;">(0)</small>
-                        </td>
-                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
-                            {{--                    <img src="athletes_files/nor.png"   style="height:20px;display:inline-block;">--}}
-                            Anžela Brice
-                            <small class="text-gray-500" style="display:block;text-align:center;">(0)</small>
-                        </td>
-                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
-
-                            {{--                        <img src="athletes_files/nor.png"  style="height:20px;display:inline-block;">--}}
-                            Jeanmonnot
-                            <small class="text-gray-500" style="display:block;text-align:center;">(+5)</small>
-
-                        </td>
+                        @foreach($user->getAthletes() as $athlete)
+                            <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
+                                <img src="{{$athlete->flagUrl}}" style="height:20px;display:inline-block;">&nbsp;{{$athlete->name}}
+                                <small class="text-gray-500" style="display:block;text-align:center;"></small>
+                            </td>
+                        @endforeach
 
                         <td class="px-2 py-2 whitespace-nowrap text-sm font-medium" style="text-align:center;">
-                            5
+                            {{ $regularPoints = $user->getPointsByType(type: \App\Enums\Forecast\AwardPointEnum::REGULAR_POINT)}}
                         </td>
                         <td class="px-2 py-2 whitespace-nowrap text-sm font-medium" style="text-align:center;">
-                            0
+                            {{ $bonusPoints = $user->getPointsByType(type: \App\Enums\Forecast\AwardPointEnum::BONUS_POINT)}}
                         </td>
                         <td class="px-2 py-2 whitespace-nowrap text-sm font-medium" style="text-align:center;">
-                            5
+                            {{$regularPoints + $bonusPoints}}
                         </td>
                     </tr>
                 @endforeach

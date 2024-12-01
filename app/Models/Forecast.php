@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
-use App\Casts\ForecastDataCast;
+use App\Casts\ForecastFinalDataCast;
 use App\Enums\Forecast\ForecastStatusEnum;
 use App\Enums\Forecast\ForecastTypeEnum;
-use App\Helpers\Forecasts\ForecastAbstractionHelper;
+use App\ValueObjects\Helpers\Forecasts\FinalDataValueObject\FinalDataValueObject;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -18,9 +19,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property ForecastTypeEnum $type
  * @property ForecastStatusEnum $status
  * @property Carbon $submit_deadline_at
- * @property ForecastAbstractionHelper $final_results
+ * @property FinalDataValueObject $final_data
  * @property Carbon $created_at
  * @property ?Carbon $updated_at
+ *
+ * @property EventCompetition $competition
+ * @property Collection<ForecastSubmittedData> $submittedData
  */
 class Forecast extends Model
 {
@@ -31,7 +35,7 @@ class Forecast extends Model
         'type' => ForecastTypeEnum::class,
         'status' => ForecastStatusEnum::class,
         'submit_deadline_at' => 'datetime',
-        'final_data' => ForecastDataCast::class,
+        'final_data' => ForecastFinalDataCast::class,
     ];
 
     public function competition(): BelongsTo

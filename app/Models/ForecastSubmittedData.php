@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Casts\ForecastDataCast;
 use App\ValueObjects\Helpers\Forecasts\ForecastDataAbstractionValueObject;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -15,6 +16,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property ForecastDataAbstractionValueObject $submitted_data
  * @property Carbon $created_at
  * @property ?Carbon $updated_at
+ *
+ * @property User $user
+ * @property Collection<Forecast> $forecast
  */
 class ForecastSubmittedData extends Model
 {

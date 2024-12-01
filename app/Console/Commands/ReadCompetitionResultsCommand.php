@@ -32,14 +32,13 @@ class ReadCompetitionResultsCommand extends Command
     public function handle(BiathlonResultApi $api)
     {
         EventCompetition::query()
-            ->whereIn('id',[4743, 4744])
             ->where('start_time', '>', Carbon::parse('2024-01-01'))
             ->where('start_time', '<', now()->addDay())
             ->with(['results', 'event'])
             ->whereHas('event', function ($q) {
                 $q->where('level', 1);
             })
-//            ->whereDoesntHave('results')
+            ->whereNull('results_handled_at')
             ->get()->each(function (EventCompetition $competition) use ($api): bool {
                 $response = $api->results(raceId: $competition->race_remote_id);
 
@@ -68,10 +67,14 @@ class ReadCompetitionResultsCommand extends Command
 
                 $dbHasFinalResultsAlready = EventCompetitionResult::query()
                         ->where('event_competition_id', $competition->id)
-                        ->first()->rank !== null;
+                        ->first()?->rank !== null;
 
                 if($dbHasFinalResultsAlready){
                     dump('added results, competitionId: ' . $competition->id);
+                    if(!$competition->results_handled_at){
+                        $competition->results_handled_at = now();
+                        $competition->save();
+                    }
                     return true;
                 }
 
@@ -142,6 +145,10 @@ class ReadCompetitionResultsCommand extends Command
 
                     dump('added results, competitionId: ' . $competition->id);
 
+                }
+
+                if($isResultList){
+                    $competition->results_handled_at = now();
                 }
 
                 usleep(500);
