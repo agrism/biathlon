@@ -6,8 +6,6 @@ use App\Helpers\Forecasts\PointCalculatorServiceHelper;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
-use function PHPUnit\Framework\assertEquals;
-
 class PointCalculatorServiceHelperTest extends TestCase
 {
 
@@ -317,13 +315,76 @@ class PointCalculatorServiceHelperTest extends TestCase
                     'found5Place' => false,
                     'found6Place' => false,
                     'foundBonus1Perfection' => false,
-                    'foundBonus2None' => true,
+                    'foundBonus2None' => false,
                     'foundBonus2One' => false,
                     'foundBonus2Pair' => false,
-                    'foundBonus2All' => false,
-                    'foundBonus3None' => true,
+                    'foundBonus2All' => true,
+                    'foundBonus3None' => false,
                     'foundBonus3One' => false,
                     'foundBonus3Pair' => false,
+                    'foundBonus3All' => true,
+                ]
+            ],
+            [
+                [1, 2, 3, 4, 5, 6],
+                [4, 5, 6, 1, 2, 3],
+                [
+                    'foundGoldPlace' => false,
+                    'foundSilverPlace' => false,
+                    'foundBronzePlace' => false,
+                    'found4Place' => false,
+                    'found5Place' => false,
+                    'found6Place' => false,
+                    'foundBonus1Perfection' => false,
+                    'foundBonus2None' => false,
+                    'foundBonus2One' => false,
+                    'foundBonus2Pair' => false,
+                    'foundBonus2All' => true,
+                    'foundBonus3None' => false,
+                    'foundBonus3One' => false,
+                    'foundBonus3Pair' => false,
+                    'foundBonus3All' => true,
+                ]
+            ],
+            [
+                [1, 2, 3, 4, 5, 6],
+                [4, 5, 6, 1, 2, 7],
+                [
+                    'foundGoldPlace' => false,
+                    'foundSilverPlace' => false,
+                    'foundBronzePlace' => false,
+                    'found4Place' => false,
+                    'found5Place' => false,
+                    'found6Place' => false,
+                    'foundBonus1Perfection' => false,
+                    'foundBonus2None' => false,
+                    'foundBonus2One' => false,
+                    'foundBonus2Pair' => true,
+                    'foundBonus2All' => false,
+                    'foundBonus3None' => false,
+                    'foundBonus3One' => false,
+                    'foundBonus3Pair' => false,
+                    'foundBonus3All' => true,
+                ]
+            ],
+            [
+                [1, 2, 3, 4, 5, 6],
+                [8, 5, 6, 1, 9, 7],
+                [
+                    'foundGoldPlace' => false,
+                    'foundSilverPlace' => false,
+                    'foundBronzePlace' => false,
+                    'found4Place' => false,
+                    'found5Place' => false,
+                    'found6Place' => false,
+                    'foundBonus1Perfection' => false,
+                    'foundBonus2None' => false,
+                    'foundBonus2One' => true,
+                    'foundBonus2Pair' => false,
+                    'foundBonus2All' => false,
+                    'foundBonus3None' => false,
+                    'foundBonus3One' => false,
+                    'foundBonus3Pair' => true,
                     'foundBonus3All' => false,
                 ]
             ],

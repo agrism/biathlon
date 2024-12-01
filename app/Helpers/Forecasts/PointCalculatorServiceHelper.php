@@ -95,7 +95,7 @@ class PointCalculatorServiceHelper extends ForecastAbstractionHelper
     private function getFirstThreeIndirectFinding(): int
     {
         $counter = 0;
-        $counter += intval(in_array($this->resultIds[0], $userFirstThreePlaces = $this->getUserFirstThreePlaces()) && !$this->foundGoldPlace());
+        $counter += intval(in_array($this->resultIds[0], $userFirstThreePlaces = $this->getUserAllPlaces()) && !$this->foundGoldPlace());
         $counter += intval(in_array($this->resultIds[1], $userFirstThreePlaces) && !$this->foundSilverPlace());
         $counter += intval(in_array($this->resultIds[2], $userFirstThreePlaces) && !$this->foundBronzePlace());
         return $counter;
@@ -104,7 +104,19 @@ class PointCalculatorServiceHelper extends ForecastAbstractionHelper
     private function getLastThreeIndirectFinding(): int
     {
         $counter = 0;
-        $counter += intval(in_array($this->resultIds[3], $userFirstThreePlaces = $this->getUserLastThreePlaces())  && $this->resultIds[3] != $this->userGivenIds[3]);
+        $counter += intval(in_array($this->resultIds[3], $userFirstThreePlaces = $this->getUserAllPlaces())  && $this->resultIds[3] != $this->userGivenIds[3]);
+        $counter += intval(in_array($this->resultIds[4], $userFirstThreePlaces)  && $this->resultIds[4] != $this->userGivenIds[4]);
+        $counter += intval(in_array($this->resultIds[5], $userFirstThreePlaces)  && $this->resultIds[5] != $this->userGivenIds[5]);
+        return $counter;
+    }
+
+    private function getIndirectFinding(): int
+    {
+        $counter = 0;
+        $counter += intval(in_array($this->resultIds[0], $userFirstThreePlaces = $this->getUserAllPlaces())  && $this->resultIds[0] != $this->userGivenIds[0]);
+        $counter += intval(in_array($this->resultIds[1], $userFirstThreePlaces)  && $this->resultIds[1] != $this->userGivenIds[1]);
+        $counter += intval(in_array($this->resultIds[2], $userFirstThreePlaces)  && $this->resultIds[2] != $this->userGivenIds[2]);
+        $counter += intval(in_array($this->resultIds[3], $userFirstThreePlaces)  && $this->resultIds[3] != $this->userGivenIds[3]);
         $counter += intval(in_array($this->resultIds[4], $userFirstThreePlaces)  && $this->resultIds[4] != $this->userGivenIds[4]);
         $counter += intval(in_array($this->resultIds[5], $userFirstThreePlaces)  && $this->resultIds[5] != $this->userGivenIds[5]);
         return $counter;
@@ -118,5 +130,10 @@ class PointCalculatorServiceHelper extends ForecastAbstractionHelper
     private function getUserLastThreePlaces(): array
     {
         return array_slice($this->userGivenIds, 3, 3);
+    }
+
+    private function getUserAllPlaces(): array
+    {
+        return array_slice($this->userGivenIds, 0, 6);
     }
 }
