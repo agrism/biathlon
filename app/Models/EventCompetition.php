@@ -62,6 +62,7 @@ class EventCompetition extends Model
     public function getAthletesByRank(bool $isTeamDiscipline, ?int $limit = null): Collection
     {
         $return =  $this->results
+            ->whereNull('rank')
             ->sortBy('rank')
             ->filter(function (EventCompetitionResult $result) use ($isTeamDiscipline): bool {
                 if ($isTeamDiscipline) {
