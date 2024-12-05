@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Forecasts;
 
+use App\Enums\Forecast\ForecastStatusEnum;
 use App\Helpers\Generic\GenericViewIndexHelper;
 use App\Helpers\LinkHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Athlete;
 use App\Models\EventCompetition;
 use App\Models\Forecast;
+use App\ValueObjects\Helpers\Forecasts\FinalDataValueObject\AthleteValueObject;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -66,31 +68,46 @@ class IndexController extends Controller
                     return $this->getLink($forecast, $forecast->competition?->start_time->setTimeZone('Europe/RIga')->format('d F Y, H:i'));
                 },
                 function (Forecast $forecast): string {
+
                     if($forecast->submit_deadline_at->gt(now())){
-                        return $this->getLink($forecast, '<span style="color: green">Starts in '. str_replace(' from now','',$forecast->submit_deadline_at->diffForHumans()) .'</span>');
+
+                    $name = '<span style="color: green">Starts in '. str_replace(' from now','',$forecast->submit_deadline_at->diffForHumans()) .'</span>';
+
+                        if($forecast->competition->results->count()){
+                            return $this->linkHelper->getLink(route: route('competitions.show', $forecast->competition->race_remote_id), name: $name. ' (start list)');
+                        }
+
+                        return $this->getLink($forecast, $name);
                     }
-                    return $this->getLink($forecast, '<span style="color: grey;">closed</span>');
+
+                    if($forecast->status == ForecastStatusEnum::COMPLETED){
+                        return $this->getLink($forecast, '<span style="color: grey;">closed</span>');
+                    }
+
+                    return $this->getLink($forecast, '<span style="color: grey;">Waiting results</span>');
                 },
                 function(Forecast $forecast) use($authUserId){
                     if(!$authUserId){
                         return $this->linkHelper->getLink(route('login'), '<span style="color: grey;">Login</span>');
                     }
 
-                    $authUserSubmittedAthletes = $forecast->submittedData->where('user_id', auth()->id())->first()?->submitted_data?->athletes ?? [];
-
-                    $authUserSubmittedAthletes = collect($authUserSubmittedAthletes)->filter(function(Athlete $athlete){
-                        return !empty($athlete->family_name);
-                    })->count();
-
-                    if($authUserSubmittedAthletes < 1){
-                        return $this->getLink($forecast, '<span style="color: darkslategrey;">Todo</span>');
+                    if($forecast->status == ForecastStatusEnum::COMPLETED){
+                        return $this->getLink($forecast, '<span style="color: grey;">Finished</span>');
                     }
 
-                    if($authUserSubmittedAthletes < 6){
-                        return $this->getLink($forecast, '<span style="color: darkgoldenrod;">In progress</span>');
+                    $user = $forecast->final_data->getUserByUserModel(auth()->user());
+
+                    if($forecast->submit_deadline_at->gt(now())){
+
+                        $submittedAthleteCount = collect($user->athletes)->filter(fn(AthleteValueObject $athlete) => !empty($athlete->id))->count();
+
+                        if($submittedAthleteCount <6){
+                            return $this->getLink($forecast, '<span style="color: red;">Todo, add '.(6-$submittedAthleteCount).' athlete(s) to the list</span>');
+                        }
+                      return $this->getLink($forecast, '<span style="color: green;">Ready for race</span>');
                     }
 
-                    return $this->getLink($forecast, '<span style="color: green;">Done</span>');
+                    return $this->getLink($forecast, '<span style="color: grey;">Waiting results</span>');
                 }
             ])
             ->render();
