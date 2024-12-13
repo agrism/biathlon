@@ -9,5 +9,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote')->hourly();
 
 
-Schedule::command('app:read-competition-results')->everyMinute();
+Schedule::command('app:read-competition-results')->everyFiveMinutes();
 Schedule::command('app:read-forecast-results-command')->everyMinute();
