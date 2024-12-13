@@ -28,8 +28,13 @@ class ShowController extends Controller
         $this->registerBread('Competition:'.$competition->short_description);
 
         $data = EventCompetitionResult::query()->with('athlete')
-            ->where('event_competition_id', $competition->id)
-            ->paginate(perPage: 2000);
+            ->where('event_competition_id', $competition->id);
+
+        if($competition->start_time->lt(now())){
+            $data = $data->orderBy('rank');
+        }
+
+        $data = $data->paginate(perPage: 2000);
 
         return GenericViewIndexHelper::instance()
             ->setTitle('Results: ' .$competition->getTitle())
