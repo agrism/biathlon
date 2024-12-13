@@ -31,16 +31,14 @@ class ShowController extends Controller
             ->where('event_competition_id', $competition->id);
 
         if ($competition->start_time->lt(now())) {
-            $data = $data->orderByRaw(
-                'CASE
-    WHEN rank = "-" THEN 1
+            $data = $data->orderByRaw('CASE
+    WHEN `rank` = "-" THEN 1
     ELSE 0
 END ASC,
 CASE
-    WHEN rank != "-" THEN CAST(rank AS SIGNED)
-    ELSE NULL
-END ASC'
-            );
+    WHEN `rank` <> "-" THEN CAST(`rank` AS SIGNED INTEGER)
+    ELSE 999999
+END ASC');
         }
 
         $data = $data->paginate(perPage: 2000);
