@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Log;
 
 return function (Schedule $schedule) {
