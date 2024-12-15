@@ -82,7 +82,7 @@
                                 <div
                                     class="text-center">{{\App\Helpers\NumberHelper::instance()->ordinal($index+1)}}</div>
                                 @if(auth()->check())
-                                    {{--                            @if($forecast->submit_deadline_at->gt(now()))--}}
+                                  @if($forecast->submit_deadline_at->gt(now()))
                                     <x-buttons.button
                                         class="my-3"
                                         hx-get="{{route('forecasts.select-athlete', ['id' => $forecast->id, 'place' => $index])}}"
@@ -90,7 +90,7 @@
                                     >
                                         Choose Athlete
                                     </x-buttons.button>
-                                    {{--                            @endif--}}
+                                  @endif
                                 @else
                                     <x-buttons.button>
                                         <a href="{{route('login')}}">Login first</a>
