@@ -93,6 +93,12 @@ class IndexController extends Controller
             }
         }
 
+        $key = sprintf('%s.%s', 'total', 'total');
+
+        usort($data['users'], function ($a, $b) use ($key){
+            return data_get($a, $key, 0) > data_get($b, $key, 0);
+        });
+
         $data['events'][] = 'Points';
         $data['events'][] = 'Bonus';
         $data['events'][] = 'Total';
