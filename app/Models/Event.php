@@ -41,6 +41,15 @@ class Event extends Model
         'first_competition_date' => 'datetime',
     ];
 
+    public function title(): string
+    {
+        $return = [];
+        $return[] = $this->short_description;
+        $return[] = $this->nat_long;
+        $return[] = $this->first_competition_date->format('d.m').'-'.$this->end_date->format('d.m.Y');
+        return implode(', ', $return);
+    }
+
     public function season(): BelongsTo
     {
         return $this->belongsTo(Season::class);

@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *
  * @property EventCompetition $competition
  * @property Collection<ForecastSubmittedData> $submittedData
+ * @property Collection<ForecastAward> $awards
  */
 class Forecast extends Model
 {
@@ -46,5 +47,10 @@ class Forecast extends Model
     public function submittedData(): HasMany
     {
         return $this->hasMany(ForecastSubmittedData::class, 'forecast_id');
+    }
+
+    public function awards(): HasMany
+    {
+        return $this->hasMany(ForecastAward::class);
     }
 }
