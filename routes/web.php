@@ -11,7 +11,7 @@ Route::get('/athletes/{id}', Contr\Athletes\ShowController::class)->name('athlet
 Route::get('/forecasts/', Contr\Forecasts\IndexController::class)->name('forecasts.index');
 Route::get('/forecasts/summary', Contr\Forecasts\Summary\IndexController::class)->name('forecasts.summary.index');
 Route::get('/forecasts/summary/{userId}/{eventId}/show', Contr\Forecasts\Summary\ShowUserEventController::class)->name('forecasts.summary.user-event');
-Route::get('/forecasts/{id}', Contr\Forecasts\ShowController::class)->name('forecasts.show');
+Route::get('/forecasts/{id}/{showContentOnly?}', Contr\Forecasts\ShowController::class)->name('forecasts.show');
 Route::get('/forecasts/{id}/select-athlete/{place}/place', Contr\Forecasts\SelectAthleteController::class)->name('forecasts.select-athlete');
 
 
