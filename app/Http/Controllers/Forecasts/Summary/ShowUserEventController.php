@@ -31,9 +31,10 @@ class ShowUserEventController extends Controller
         }
 
         $event->competitions->each(function(EventCompetition &$competition)use($userId):void{
-            $competition->forecast->awards->filter(function(ForecastAward $award)use($userId):bool{
+            $awards = $competition->forecast->awards->filter(function(ForecastAward $award)use($userId):bool{
                 return $award->user_id == $userId;
             });
+            $competition->forecast->awards = $awards;
         });
 
         return view('forecasts.summary.show-user-event', compact('event', 'user'));
