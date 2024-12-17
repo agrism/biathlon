@@ -27,7 +27,7 @@ class IndexController extends Controller
 
         $season = Season::query()
             ->with(['events'=> function( $q){
-                $q->with('competitions.forecasts.awards.user')->where('level', 1);
+                $q->with('competitions.forecast.awards.user')->where('level', 1);
             }])
             ->where('name', '2425')
             ->first();
@@ -40,6 +40,7 @@ class IndexController extends Controller
         foreach ($users as $user){
             $data['users'][$user->name] = [
                 'name' => $user->name,
+                'id' => $user->id,
                 'events' => [],
             ];
         }
@@ -56,14 +57,10 @@ class IndexController extends Controller
 
             /** @var EventCompetition $competition */
             foreach ($event->competitions as $competition){
-                /** @var Forecast $forecast */
-                foreach ($competition->forecasts as $forecast){
-
-                    /** @var ForecastAward $award */
-                    foreach ($forecast->awards as $award) {
-                        $prev =  $userAwardsInEvent[$award->user->name][$award->type->value] ?? 0;
-                        $userAwardsInEvent[$award->user->name][$award->type->value] = $prev + $award->points;
-                    }
+                /** @var ForecastAward $award */
+                foreach ($competition->forecast->awards as $award) {
+                    $prev =  $userAwardsInEvent[$award->user->name][$award->type->value] ?? 0;
+                    $userAwardsInEvent[$award->user->name][$award->type->value] = $prev + $award->points;
                 }
             }
 
@@ -73,13 +70,16 @@ class IndexController extends Controller
                     $data['users'][$user->name]['events'][] = [
                         'regular' => $regular = $userAwardsInEvent[$user->name][AwardPointEnum::REGULAR_POINT->value] ?? 0,
                         'bonus' => $bonus = $userAwardsInEvent[$user->name][AwardPointEnum::BONUS_POINT->value] ?? 0,
+                        'eventId' => $event->id,
                     ];
                 } else {
                     $data['users'][$user->name]['events'][] = [
                         'regular' => $regular = 0,
                         'bonus' => $bonus = 0,
+                        'eventId' => $event->id,
                     ];
                 }
+
 
                 $key = sprintf('%s.%s.%s.%s', 'users', $user->name,'total', AwardPointEnum::REGULAR_POINT->value);
                 data_set($data, $key,data_get($data, $key, 0) + $regular);

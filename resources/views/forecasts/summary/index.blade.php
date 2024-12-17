@@ -9,19 +9,15 @@
         BMW IBU World Cup Biathlon, season 24/25</h2>
 
     <div class="px-2 py-2">
-
-
         <div id="totals">
 
             <table border="1" style="border-collapse: collapse;"
                    class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
                 <thead>
                 <tr>
-
                     @foreach($data['events'] ?? [] as $dataItem)
                         <th scope="col"
                             class="px-2 py-2 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500">
-                            {{$dataItem}}
                         </th>
                     @endforeach
                 </tr>
@@ -33,7 +29,13 @@
                         <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">{{$user['name'] ?? '-'}}</td>
                         @foreach($user['events'] as $userEvent)
                             <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
-                                <u>{{$userEvent['regular'] ?? 0}} <small>+{{$userEvent['bonus'] ?? 0}}</small></u>
+                                <a hx-get="{{route('forecasts.summary.user-event', ['userId' => $user['id'] ?? 'y', 'eventId' => $userEvent['eventId'] ?? 'x'])}}"
+                                    hx-target="#user-event"
+                                   class="cursor-pointer"
+                                >
+                                    <u>{{$userEvent['regular'] ?? 0}} <small>+{{$userEvent['bonus'] ?? 0}}</small></u>
+
+                                </a>
                             </td>
                         @endforeach
 
@@ -45,6 +47,10 @@
                 @endforeach
                 </tbody>
             </table>
+
+        </div>
+
+        <div id="user-event">
 
         </div>
     </div>
