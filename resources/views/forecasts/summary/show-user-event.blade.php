@@ -33,9 +33,9 @@
         <tfoot>
             <tr>
                 <th></th>
-                <th>{{$totalRegularPoints}}</th>
-                <th>{{$totalBonusPoints}}</th>
-                <th>{{$totalPoints}}</th>
+                <th class="text-right">{{$totalRegularPoints}}</th>
+                <th class="text-right">{{$totalBonusPoints}}</th>
+                <th class="text-right">{{$totalPoints}}</th>
             </tr>
         </tfoot>
     </table>
