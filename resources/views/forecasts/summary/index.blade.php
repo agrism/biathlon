@@ -17,7 +17,7 @@
                 <tr>
                     @foreach($data['events'] ?? [] as $dataItem)
                         <th scope="col"
-                            class="px-2 py-2 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500">
+                            class="px-1 py-2 text-start text-xs font-medium  text-gray-500 uppercase dark:text-neutral-500">
                             {{$dataItem}}
                         </th>
                     @endforeach
