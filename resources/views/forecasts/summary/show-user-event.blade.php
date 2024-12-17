@@ -19,7 +19,6 @@
         @foreach($event->competitions as $competition)
             <tr class="odd:bg-white even:bg-gray-100">
                 <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">{!! $competition->getTitle() !!}</td>
-                <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">{!! $competition->forecast->awards->first()?->user?->name !!}</td>
                 <td class="px-2 py-2 whitespace-nowrap text-sm font-medium text-right">{{$regular = $competition->forecast->awards->where('type', \App\Enums\Forecast\AwardPointEnum::REGULAR_POINT)->first()?->points}}</td>
                 <td class="px-2 py-2 whitespace-nowrap text-sm font-medium text-right">{{$bonus = $competition->forecast->awards->where('type', \App\Enums\Forecast\AwardPointEnum::BONUS_POINT)->first()?->points}}</td>
                 <td class="px-2 py-2 whitespace-nowrap text-sm font-medium text-right">{{$total = $regular + $bonus}}</td>
