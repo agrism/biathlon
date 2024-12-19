@@ -1,4 +1,5 @@
-<x-layouts.guest>
+@extends('layouts.admin', ['heading' => isset($helper) ? $helper->title(): ''])
+@section('content')
     <x-alerts.errors />
     <x-alerts.status />
 
@@ -46,4 +47,4 @@
 
         </form>
     </div>
-</x-layouts.guest>
+@endsection
