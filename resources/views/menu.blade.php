@@ -1,5 +1,7 @@
 <nav
-    class="bg-white border border-gray-200 dark:border-gray-700 px-2 sm:px-4 py-2.5  dark:bg-gray-800 shadow" style="margin-bottom: 10px;">
+    class="bg-white border border-gray-200 dark:border-gray-700 px-2 sm:px-4 py-2.5  dark:bg-gray-800 shadow"
+    style="margin-bottom: 10px;"
+>
     <div class="container flex flex-wrap justify-between items-center mx-auto">
         <a href="/" class="flex items-center">
                   <span class="self-center text-xl font-semibold whitespace-nowrap dark:text-white">
