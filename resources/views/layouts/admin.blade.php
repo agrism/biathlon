@@ -119,7 +119,7 @@
 
 
 @include('menu', ['ignoreHome' => true])
-<div class="container  w-screen" style="margin: 0 auto">
+<div class="container" style="margin: 0 auto">
     {!! \App\Helpers\BreadCrumbHelper::instance()->render()!!}
 
     @isset($heading)
