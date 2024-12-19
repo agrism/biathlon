@@ -29,3 +29,10 @@ Route::group([
     Route::get('/favorites/athletes/{id}/toggle', Contr\Favorites\AthleteToggleController::class)->name('favorites.toggle');
 
 });
+
+
+Route::get('test', function (){
+    $a = (new \App\Services\BiathlonResultApi)->athlete('BTFRA11608199201');
+
+    dd($a->json());
+});
