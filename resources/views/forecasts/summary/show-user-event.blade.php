@@ -3,10 +3,10 @@
     <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
         <thead>
             <tr>
-                <th>Competition</th>
-                <th>Points</th>
-                <th>Bonus</th>
-                <th>Total</th>
+                <th class="px-1 py-2 text-start text-xs font-medium  text-gray-500 uppercase dark:text-neutral-500">Competition</th>
+                <th class="px-1 py-2 text-start text-xs font-medium  text-gray-500 uppercase dark:text-neutral-500">Points</th>
+                <th class="px-1 py-2 text-start text-xs font-medium  text-gray-500 uppercase dark:text-neutral-500">Bonus</th>
+                <th class="px-1 py-2 text-start text-xs font-medium  text-gray-500 uppercase dark:text-neutral-500">Total</th>
             </tr>
         </thead>
 
@@ -41,10 +41,10 @@
         </tbody>
         <tfoot>
             <tr>
-                <th></th>
-                <th class="text-right">{{$totalRegularPoints}}</th>
-                <th class="text-right">{{$totalBonusPoints}}</th>
-                <th class="text-right">{{$totalPoints}}</th>
+                <th class="px-1 py-2 text-end text-sm font-medium  text-gray-500 uppercase dark:text-neutral-500"></th>
+                <th class="px-1 py-2 text-end text-sm font-medium  text-gray-500 uppercase dark:text-neutral-500">{{$totalRegularPoints}}</th>
+                <th class="px-1 py-2 text-end text-sm font-medium  text-gray-500 uppercase dark:text-neutral-500">{{$totalBonusPoints}}</th>
+                <th class="px-1 py-2 text-end text-sm font-medium  text-gray-500 uppercase dark:text-neutral-500">{{$totalPoints}}</th>
             </tr>
         </tfoot>
     </table>

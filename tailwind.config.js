@@ -10,6 +10,15 @@ export default {
         './resources/**/*.vue',
     ],
     theme: {
+        screens: {
+            '3xs': '300px',
+            '2xs': '400px',
+            'xs': '500px',
+            'sm': '640px',
+            'md': '768px',
+            'lg': '1024px',
+            'xl': '1280px',
+        },
         extend: {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],

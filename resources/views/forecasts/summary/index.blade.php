@@ -12,12 +12,14 @@
         <div id="totals">
 
             <table border="1" style="border-collapse: collapse;"
-                   class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
+                   class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700"
+            >
                 <thead>
                 <tr>
                     @foreach($data['events'] ?? [] as $dataItem)
                         <th scope="col"
-                            class="px-1 py-2 text-start text-xs font-medium  text-gray-500 uppercase dark:text-neutral-500">
+                            class="px-1 py-2 text-start text-xs font-medium  text-gray-500 uppercase dark:text-neutral-500"
+                        >
                             {{$dataItem}}
                         </th>
                     @endforeach
