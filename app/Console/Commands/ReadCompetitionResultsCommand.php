@@ -144,15 +144,8 @@ class ReadCompetitionResultsCommand extends Command
                     $result->team_rank_after_leg = data_get($resultData, 'TeamRankAfterLeg');
                     $result->start_confirmed = data_get($resultData, 'StartConfirmed');
 
-
-                    if($athlete->id === 4695){
-                        dump(!$athlete->details->IBUId);
-                        dump($athlete->details->IBUId);
-                    }
-
                     if(!$athlete->details?->IBUId){
                         $athlete = ReadAthletesCommand::readAnsSaveAthleteDetailsData($athlete);
-                        dd($athlete->getAttributes());
                     }
 
                     $result->stat_details = new AthleteStatsDetailValueObject(
