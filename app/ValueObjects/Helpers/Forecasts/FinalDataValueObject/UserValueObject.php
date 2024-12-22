@@ -33,6 +33,7 @@ class UserValueObject
                 tempId: null,
                 name: null,
                 flagUrl: null,
+                stats: null
             );
         }
         return $this->athletes;

@@ -136,11 +136,18 @@ class SelectAthleteController extends Controller
                             </button>
 HTML;
                 },
-                function(Athlete $athlete): string{
-                    return self::TODO;
+                function(Athlete $athlete): float{
+                    return floatval($athlete->stat_p_total);
                 },
-                function(Athlete $athlete): string{
-                    return self::TODO;
+                function(Athlete $athlete) use($discipline): float{
+                    $return = match (true){
+                        $discipline->isIndividual() => $athlete->stat_p_individual,
+                        $discipline->isSprint() => $athlete->stat_p_sprint,
+                        $discipline->isPursuit() => $athlete->stat_p_pursuit,
+                        $discipline->isMass() => $athlete->stat_p_mass,
+                        default => 0,
+                    };
+                    return floatval($return);
                 },
                 function(Athlete $athlete): string{
                     return $athlete->given_name .' '. $athlete->family_name;
@@ -149,13 +156,16 @@ HTML;
                     return $athlete->nat;
                 },
                 function(Athlete $athlete): string{
-                    return self::TODO;
+                    if($athlete->stat_skiing === null){
+                        return '-';
+                    }
+                    return intval($athlete->stat_skiing);
                 },
                 function(Athlete $athlete): string{
-                    return self::TODO;
+                    return floatval($athlete->stat_shooting_standing);
                 },
                 function(Athlete $athlete): string{
-                    return self::TODO;
+                    return floatval($athlete->stat_shooting_prone);
                 },
                 function(Athlete $athlete): string{
                     return self::TODO;

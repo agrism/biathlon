@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Casts\AthleteStatsDetailsCast;
 use App\Enums\DisciplineEnum;
 use App\Enums\Forecast\AwardPointEnum;
 use App\Enums\Forecast\ForecastStatusEnum;
@@ -9,6 +10,7 @@ use App\Helpers\Forecasts\ForecastFirstSixPlacesServiceHelper;
 use App\Models\Athlete;
 use App\Models\Forecast;
 use App\Models\ForecastAward;
+use App\ValueObjects\Athletes\AthleteStatsDetailValueObject;
 use App\ValueObjects\Helpers\Forecasts\FinalDataValueObject\AthleteValueObject;
 use App\ValueObjects\Helpers\Forecasts\FinalDataValueObject\FinalDataValueObject;
 use App\ValueObjects\Helpers\Forecasts\FinalDataValueObject\PointValueObject;
@@ -63,6 +65,7 @@ class ReadForecastResultsCommand extends Command
                         tempId: $athlete->temp_id,
                         name: $athlete->getFullName(),
                         flagUrl: $athlete->flag_uri,
+                        stats: AthleteStatsDetailsCast::createDetails(data_get($athlete, 'stats', []) ),
                     );
                 })->toArray();
 

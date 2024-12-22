@@ -3,6 +3,7 @@
 namespace App\ValueObjects\Helpers\Forecasts\FinalDataValueObject;
 
 use App\Models\Athlete;
+use App\ValueObjects\Athletes\AthleteStatsDetailValueObject;
 
 class AthleteValueObject
 {
@@ -11,6 +12,7 @@ class AthleteValueObject
         public ?string $tempId,
         public ?string $name,
         public ?string $flagUrl,
+        public ?AthleteStatsDetailValueObject $stats = null,
     )
     {
     }
@@ -22,6 +24,7 @@ class AthleteValueObject
             'tempId' => $this->tempId,
             'name' => $this->name,
             'flagUrl' => $this->flagUrl,
+            'stats' => $this->stats?->export(),
         ];
     }
 

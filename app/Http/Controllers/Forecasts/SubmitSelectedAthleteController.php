@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Athlete;
 use App\Models\Forecast;
 use App\Models\ForecastSubmittedData;
+use App\ValueObjects\Athletes\AthleteStatsDetailValueObject;
 use App\ValueObjects\Helpers\Forecasts\FinalDataValueObject\AthleteValueObject;
 use App\ValueObjects\Helpers\Forecasts\ForecastFirstSixPlacesDataValueObject;
 use Illuminate\Http\Request;
@@ -35,6 +36,7 @@ class SubmitSelectedAthleteController extends Controller
             abort(401, 'forecast is closed');
         }
 
+        /** @var Athlete $athleteModel */
         if(!$athleteModel = Athlete::query()->where('id', $athlete)->first()){
             abort(404, 'Athlete not found: '.$athlete);
         }
@@ -48,6 +50,19 @@ class SubmitSelectedAthleteController extends Controller
             )->temp_id,
             name: $athleteModel->getFullName(),
             flagUrl: $athleteModel->flag_uri,
+            stats: new AthleteStatsDetailValueObject(
+                statSeason: $athleteModel->stat_season,
+                statsSeasonPointTotal: $athleteModel->stat_p_total,
+                statsSeasonPointsSprint: $athleteModel->stat_p_sprint,
+                statsSeasonPointsIndividual: $athleteModel->stat_p_individual,
+                statsSeasonPointsPursuit: $athleteModel->stat_p_pursuit,
+                statsSeasonPointsMass: $athleteModel->stat_p_mass,
+                statsSkiKmb: $athleteModel->stat_ski_kmb,
+                statSkiing: $athleteModel->stat_skiing,
+                statShooting: $athleteModel->stat_shooting,
+                statShootingProne: $athleteModel->stat_shooting_prone,
+                statShootingStanding: $athleteModel->stat_shooting_standing,
+            )
         ));
 
         $forecast->final_data->updateUser($userValueObject);

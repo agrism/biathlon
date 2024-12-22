@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\AuthMiddleware;
+use App\Models\Event;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers as Contr;
 
@@ -36,3 +37,39 @@ Route::get('test', function (){
 
     dd($a->json());
 });
+
+Route::get('test2', function (){
+    $a = (new \App\Services\BiathlonResultApi)->athlete('BTITA20402199501');
+
+    dd($a->json());
+});
+
+Route::get('test3', function (){
+    $a = (new \App\Services\BiathlonResultApi)->athlete('BTNOR11605199301');
+
+    dump($a->json());
+    dump($a->json()['RNKS']);
+    dd($a->json()['Badges']);
+});
+
+
+Route::get('test4', function (){
+
+    $event = Event::query()
+        ->where('level', 1)
+        ->where('start_date', '<', now())
+        ->where('end_date', '>', now())
+        ->with('competitions.results.athlete')
+        ->first();
+
+    dd($event->competitions->pluck('results.athlete'));
+});
+
+
+
+
+
+
+
+
+

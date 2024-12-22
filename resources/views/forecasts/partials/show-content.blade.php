@@ -58,7 +58,11 @@
                         <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
                             <img src="{{$athlete->flagUrl}}"
                                  style="height:20px;display:inline-block;">&nbsp;{{$athlete->name}}</a>
-                            <small class="text-gray-500" style="display:block;text-align:center;">(-5% 90% 90%)</small>
+                            <small class="text-gray-500" style="display:block;text-align:center;">
+                                ({{$athlete?->stats?->statSkiing === null ? '-' : $athlete->stats->statSkiing.'%' }}
+                                {{$athlete?->stats?->statShootingStanding === null ? '-' : $athlete->stats->statShootingStanding.'%' }}
+                                {{$athlete?->stats?->statShootingProne === null ? '-' : $athlete->stats->statShootingProne.'%' }})
+                            </small>
                         </td>
                     @endforeach
                 </tr>

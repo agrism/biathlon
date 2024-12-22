@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Casts\AthleteStatsDetailsCast;
+use App\ValueObjects\Athletes\AthleteStatsDetailValueObject;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -37,13 +39,14 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property ?string $leg_rank
  * @property ?string $team_rank_after_leg
  * @property ?string $start_confirmed
+ * @property ?string $stat_details
  *
  * @property ?Athlete $athlete
  */
 class EventCompetitionResult extends Model
 {
     protected $casts = [
-
+        'stat_details' => AthleteStatsDetailsCast::class,
     ];
 
     public function athlete(): BelongsTo

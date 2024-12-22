@@ -40,4 +40,37 @@ enum DisciplineEnum: string
             default => false,
         };
     }
+
+    public function isSprint(): bool
+    {
+        return match ($this){
+            self::SPRINT_COMPETITION => true,
+            default => false,
+        };
+    }
+
+    public function isIndividual(): bool
+    {
+        return match ($this){
+            self::INDIVIDUAL_SHORT_COMPETITION,
+            self::INDIVIDUAL_CLASSIC_COMPETITION => true,
+            default => false,
+        };
+    }
+
+    public function isPursuit(): bool
+    {
+        return match ($this){
+            self::PURSUIT_COMPETITION => true,
+            default => false,
+        };
+    }
+
+    public function isMass(): bool
+    {
+        return match ($this){
+            self::MASS_START => true,
+            default => false,
+        };
+    }
 }
