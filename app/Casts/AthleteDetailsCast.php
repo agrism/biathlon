@@ -26,6 +26,8 @@ class AthleteDetailsCast implements CastsAttributes
     {
         $details = json_decode(data_get($attributes, 'details'), true);
 
+        $details = is_array($details) ? $details : [];
+
         return  static::createDetails($details);
 
     }

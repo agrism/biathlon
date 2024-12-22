@@ -65,7 +65,19 @@ class ReadForecastResultsCommand extends Command
                         tempId: $athlete->temp_id,
                         name: $athlete->getFullName(),
                         flagUrl: $athlete->flag_uri,
-                        stats: AthleteStatsDetailsCast::createDetails((array)data_get($athlete, 'stats', []) ),
+                        stats: new AthleteStatsDetailValueObject(
+                            statSeason: $athlete->stat_season,
+                            statsSeasonPointTotal: $athlete->stat_p_total,
+                            statsSeasonPointsSprint: $athlete->stat_p_sprint,
+                            statsSeasonPointsIndividual: $athlete->stat_p_individual,
+                            statsSeasonPointsPursuit: $athlete->stat_p_pursuit,
+                            statsSeasonPointsMass: $athlete->stat_p_mass,
+                            statsSkiKmb: $athlete->stat_ski_kmb,
+                            statSkiing: $athlete->stat_skiing,
+                            statShooting: $athlete->stat_shooting,
+                            statShootingProne: $athlete->stat_shooting_prone,
+                            statShootingStanding: $athlete->stat_shooting_standing,
+                        ),
                     );
                 })->toArray();
 

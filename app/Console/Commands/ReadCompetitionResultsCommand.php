@@ -6,6 +6,7 @@ use App\Models\Athlete;
 use App\Models\EventCompetition;
 use App\Models\EventCompetitionResult;
 use App\Services\BiathlonResultApi;
+use App\ValueObjects\Athletes\AthleteStatsDetailValueObject;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Symfony\Component\HttpFoundation\Response;
@@ -65,21 +66,22 @@ class ReadCompetitionResultsCommand extends Command
 //                   '$data' => $data,
                 ]);
 
-                $dbHasFinalResultsAlready = EventCompetitionResult::query()
-                        ->where('event_competition_id', $competition->id)
-                        ->first()?->rank !== null;
-
-                if($dbHasFinalResultsAlready){
-                    dump('added results, competitionId: ' . $competition->id);
-                    if(!$competition->results_handled_at){
-                        $competition->results_handled_at = now();
-                        $competition->save();
-                    }
-                    return true;
-                }
+//                $dbHasFinalResultsAlready = EventCompetitionResult::query()
+//                        ->where('event_competition_id', $competition->id)
+//                        ->first()?->rank !== null;
+//
+//                if($dbHasFinalResultsAlready){
+//                    dump('added results, competitionId: ' . $competition->id);
+//                    if(!$competition->results_handled_at){
+//                        $competition->results_handled_at = now();
+//                        $competition->save();
+//                    }
+//                    return true;
+//                }
 
                 foreach ($results as $resultData) {
                     $athleteRemoteId = data_get($resultData, 'IBUId');
+
                     if (!$athlete = Athlete::query()->where('ibu_id', $athleteRemoteId)->first()) {
                         $apiAthlete = $api->athlete(ibuId: $athleteRemoteId);
                         $apiAthlete = $apiAthlete->body();
@@ -141,6 +143,31 @@ class ReadCompetitionResultsCommand extends Command
                     $result->leg_rank = data_get($resultData, 'LegRank');
                     $result->team_rank_after_leg = data_get($resultData, 'TeamRankAfterLeg');
                     $result->start_confirmed = data_get($resultData, 'StartConfirmed');
+
+
+                    if($athlete->id === 4695){
+                        dump(!$athlete->details->IBUId);
+                        dump($athlete->details->IBUId);
+                    }
+
+                    if(!$athlete->details?->IBUId){
+                        $athlete = ReadAthletesCommand::readAnsSaveAthleteDetailsData($athlete);
+                        dd($athlete->getAttributes());
+                    }
+
+                    $result->stat_details = new AthleteStatsDetailValueObject(
+                        statSeason: $athlete->stat_season,
+                        statsSeasonPointTotal: $athlete->stat_p_total,
+                        statsSeasonPointsSprint: $athlete->stat_p_sprint,
+                        statsSeasonPointsIndividual: $athlete->stat_p_individual,
+                        statsSeasonPointsPursuit: $athlete->stat_p_pursuit,
+                        statsSeasonPointsMass: $athlete->stat_p_mass,
+                        statsSkiKmb: $athlete->stat_ski_kmb,
+                        statSkiing: $athlete->stat_skiing,
+                        statShooting: $athlete->stat_shooting,
+                        statShootingProne: $athlete->stat_shooting_prone,
+                        statShootingStanding: $athlete->stat_shooting_standing,
+                    );
                     $result->save();
 
                     dump('added results, competitionId: ' . $competition->id);
@@ -149,6 +176,7 @@ class ReadCompetitionResultsCommand extends Command
 
                 if($isResultList){
                     $competition->results_handled_at = now();
+                    $competition->save();
                 }
 
                 usleep(500);

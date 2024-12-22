@@ -41,27 +41,28 @@ class ReadAthletesCommand extends Command
 
                 $competition->results->each(function(EventCompetitionResult $result): void{
                     $result->refresh();
-
-                    $athlete = $result->athlete;
-
-                    if($athlete->details_updated_at){
-                        return;
-                    }
-
-                    dump('before upd Athlete: ' . $athlete->getFullName());
-
-                    $response = app(BiathlonResultApi::class)->athlete(ibuId: $athlete->ibu_id);
-                    $rawDetails = $response->json();
-
-                    $details = AthleteDetailsCast::createDetails(details: $rawDetails);
-
-                    $athlete->details = $details;
-                    $athlete->details_updated_at = now();
-                    $athlete->save();
-
-                    dump('updated Athlete: ' . $athlete->getFullName());
+                    static::readAnsSaveAthleteDetailsData($result->athlete);
                 });
             });
 
+    }
+
+    public static function readAnsSaveAthleteDetailsData(Athlete $athlete): Athlete
+    {
+        dump('before upd Athlete: ' . $athlete->getFullName());
+
+        $response = app(BiathlonResultApi::class)->athlete(ibuId: $athlete->ibu_id);
+        $rawDetails = $response->json();
+
+        $details = AthleteDetailsCast::createDetails(details: $rawDetails);
+
+        $athlete->details = $details;
+        $athlete->details_updated_at = now();
+        $athlete->save();
+        $athlete->refresh();
+
+        dump('updated Athlete: ' . $athlete->getFullName());
+
+        return $athlete;
     }
 }

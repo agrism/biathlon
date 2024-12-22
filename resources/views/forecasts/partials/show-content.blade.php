@@ -128,6 +128,7 @@
                     @foreach($forecast->final_data->results as $athlete)
                         <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
                             <img src="{{$athlete->flagUrl}}" style="height:20px;display:inline-block;">&nbsp;<strong>{{$athlete->name}}</strong>
+                            <x-cards.athlete-stat :athlete="$athlete"></x-cards.athlete-stat>
                         </td>
                     @endforeach
 
@@ -141,7 +142,7 @@
                         @foreach($user->getAthletes() as $athlete)
                             <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
                                 <img src="{{$athlete->flagUrl}}" style="height:20px;display:inline-block;">&nbsp;{{$athlete->name}}
-                                <small class="text-gray-500" style="display:block;text-align:center;"></small>
+                                <x-cards.athlete-stat :athlete="$athlete"></x-cards.athlete-stat>
                             </td>
                         @endforeach
 

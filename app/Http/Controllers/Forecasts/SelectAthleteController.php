@@ -112,7 +112,15 @@ class SelectAthleteController extends Controller
                 'Discipline points',
                 'Name ',
                 'Country',
-                'Speed, %',	'Standing, %;',	'Prone, %',	'Gold medals',	'Silver medals',	'Bronze medals',	'Top 10'])
+                'Speed, %',
+                'Speed behind, k/h',
+                'Standing, %;',
+                'Prone, %',
+                'Gold medals',
+                'Silver medals',
+                'Bronze medals',
+                'Top 10'
+            ])
             ->setDataKeys([
                 function(Athlete $athlete): string{
                     return $this->linkHelper->getLink(
@@ -160,6 +168,12 @@ HTML;
                         return '-';
                     }
                     return intval($athlete->stat_skiing);
+                },
+                function(Athlete $athlete): string{
+                    if($athlete->stat_ski_kmb === null){
+                        return '-';
+                    }
+                    return floatval($athlete->stat_ski_kmb) * -1;
                 },
                 function(Athlete $athlete): string{
                     return floatval($athlete->stat_shooting_standing);

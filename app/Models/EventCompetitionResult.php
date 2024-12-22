@@ -39,7 +39,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property ?string $leg_rank
  * @property ?string $team_rank_after_leg
  * @property ?string $start_confirmed
- * @property ?string $stat_details
+ * @property ?AthleteStatsDetailValueObject $stat_details
  *
  * @property ?Athlete $athlete
  */
