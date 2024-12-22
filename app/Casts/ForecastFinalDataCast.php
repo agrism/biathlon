@@ -28,7 +28,7 @@ class ForecastFinalDataCast implements CastsAttributes
                 tempId: data_get($athlete, 'tempId'),
                 name: data_get($athlete, 'name'),
                 flagUrl: data_get($athlete, 'flagUrl'),
-                stats: AthleteStatsDetailsCast::createDetails(data_get($athlete, 'stats', [])),
+                stats: AthleteStatsDetailsCast::createDetails( (array)data_get($athlete, 'stats', [])),
             );
         };
 
