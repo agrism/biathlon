@@ -14,7 +14,7 @@
             <span class="relative group">
                 <span
                     class="w-4 h-4 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-sm font-semibold cursor-pointer"
-                    title="(Skiing, shooting prone, shooting standing)"
+                    title="(Skiing, shooting prone/standing)"
                 >
                     i
                 </span>
