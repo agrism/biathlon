@@ -41,6 +41,11 @@ class ReadAthletesCommand extends Command
 
                 $competition->results->each(function(EventCompetitionResult $result): void{
                     $result->refresh();
+
+                    if($result->athlete->details_updated_at->gt(now()->startOfDay())){
+                        return;
+                    }
+
                     static::readAnsSaveAthleteDetailsData($result->athlete);
                 });
             });
