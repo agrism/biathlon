@@ -5,10 +5,10 @@
 @if(isset($athlete))
     <small class="text-gray-500 flex justify-center">
         <div class=" flex items-center gap-1">
-            @if(!$athlete->stats?->statSkiing && !$athlete->stats?->statShootingProne && !$athlete->stats?->statShootingStanding )
+            @if(!$athlete->stats?->statsSkiKmb && !$athlete->stats?->statShootingProne && !$athlete->stats?->statShootingStanding )
             @else
             <span>
-                ({{$athlete->stats?->statSkiing === null ? '-' : $athlete->stats->statSkiing.'%' }}
+                ({{$athlete->stats?->statsSkiKmb === null ? '-' : $athlete->stats->statsSkiKmb.'km/h' }}
                 {{$athlete->stats?->statShootingProne === null ? '-' : $athlete->stats->statShootingProne.'%' }}
                 {{$athlete->stats?->statShootingStanding === null ? '-' : $athlete->stats->statShootingStanding.'%' }})
             </span>
