@@ -30,11 +30,7 @@
 
             <div>
                 @if($athlete->name)
-                <small class="text-gray-500" style="display:block;text-align:center;">
-                    ({{$athlete?->stats?->statSkiing === null ? '-' : $athlete->stats->statSkiing.'%' }}
-                    {{$athlete?->stats?->statShootingStanding === null ? '-' : $athlete->stats->statShootingStanding.'%' }}
-                    {{$athlete?->stats?->statShootingProne === null ? '-' : $athlete->stats->statShootingProne.'%' }})
-                 </small>
+                    <x-cards.athlete-stat :athlete="$athlete"></x-cards.athlete-stat>
                 @endif
             </div>
 
