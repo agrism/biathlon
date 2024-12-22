@@ -8,9 +8,8 @@
             @if(!$athlete->stats?->statsSkiKmb && !$athlete->stats?->statShootingProne && !$athlete->stats?->statShootingStanding )
             @else
             <span>
-                ({{$athlete->stats?->statsSkiKmb === null ? '-' : $athlete->stats->statsSkiKmb.'km/h' }}
-                {{$athlete->stats?->statShootingProne === null ? '-' : $athlete->stats->statShootingProne.'%' }}
-                {{$athlete->stats?->statShootingStanding === null ? '-' : $athlete->stats->statShootingStanding.'%' }})
+                ({{$athlete->stats?->statsSkiKmb === null ? '-' : '-'.$athlete->stats->statsSkiKmb.'km/h' }}
+                {{$athlete->stats?->statShootingProne === null ? '-' : $athlete->stats->statShootingProne.'%' }}/{{$athlete->stats?->statShootingStanding === null ? '-' : $athlete->stats->statShootingStanding.'%' }})
             </span>
             <span class="relative group">
                 <span
@@ -22,7 +21,7 @@
                 <span
                    class="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition bg-gray-800 text-white text-sm rounded py-1 px-2 -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap"
                 >
-                    (Skiing, shooting prone, shooting standing)
+                    (Skiing, shooting prone/standing)
                 </span>
             </span>
             @endif
