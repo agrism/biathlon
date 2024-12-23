@@ -70,9 +70,9 @@ class GenericViewIndexHelper
         return $this;
     }
 
-    public function doNotUseLayout(): self
+    public function doNotUseLayout(bool $doNotShowLayout = true): self
     {
-        $this->doNotUseLayout = true;
+        $this->doNotUseLayout = $doNotShowLayout;
         return $this;
     }
 

@@ -24,6 +24,7 @@ class ShowUserEventController extends Controller
             ->with(['competitions.forecast.awards.user'=> function($q)use($userId): void{
                 $q->where('id', $userId);
             }])
+            ->with('competitions.results')
             ->where('id', $eventId)->first();
 
         if(!$user || !$event){

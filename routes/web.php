@@ -7,7 +7,7 @@ use App\Http\Controllers as Contr;
 
 Route::get('/', Contr\Events\IndexController::class)->name('home');
 Route::get('/events/{id}', Contr\Events\ShowController::class)->name('events.show');
-Route::get('/competitions/{id}', Contr\Competitions\ShowController::class)->name('competitions.show');
+Route::get('/competitions/{id}/{showContentOnly?}', Contr\Competitions\ShowController::class)->name('competitions.show');
 Route::get('/athletes/{id}', Contr\Athletes\ShowController::class)->name('athletes.show');
 Route::get('/forecasts/', Contr\Forecasts\IndexController::class)->name('forecasts.index');
 Route::get('/forecasts/summary', Contr\Forecasts\Summary\IndexController::class)->name('forecasts.summary.index');

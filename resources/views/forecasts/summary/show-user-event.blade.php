@@ -25,6 +25,24 @@
                             hx-target="#forecast"
                             class="cursor-pointer"
                         >{!! $competition->getTitle() !!}</a>
+                        @if($competition->results->count())
+                                <a
+                                    class="text-blue-400 cursor-pointer"
+                                    hx-get="{{route('competitions.show', ['id' => $competition->race_remote_id, 'showContentOnly' => 1])}}"
+                                    hx-target="#results"
+                                >
+                                    @if($competition->results_handled_at)
+                                        <div class="float-right px-2 py-0.5 rounded bg-green-200 text-green-600 text-xs font-semibold">
+                                            Finish protocol
+                                        </div>
+                                    @else
+                                        <div class="float-right px-2 py-0.5 rounded bg-yellow-200 text-yellow-600 text-xs font-semibold">
+                                            Start list
+                                        </div>
+                                    @endif
+
+                                </a>
+                        @endif
                     </td>
                     <td class="px-2 py-2 whitespace-nowrap text-sm font-medium text-right">{{$regular = $competition->forecast->awards->where('type', \App\Enums\Forecast\AwardPointEnum::REGULAR_POINT)->first()?->points ?? 0}}</td>
                     <td class="px-2 py-2 whitespace-nowrap text-sm font-medium text-right">{{$bonus = $competition->forecast->awards->where('type', \App\Enums\Forecast\AwardPointEnum::BONUS_POINT)->first()?->points ?? 0}}</td>
@@ -50,6 +68,7 @@
     </table>
 
     <div id="forecast">
-
+    </div>
+    <div id="results">
     </div>
 </div>

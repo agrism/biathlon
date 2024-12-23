@@ -17,7 +17,7 @@ class ShowController extends Controller
 {
     protected LinkHelper $linkHelper;
 
-    public function __invoke(Request $request, string $id, LinkHelper $linkHelper, SeasonHelper $seasonHelper): View
+    public function __invoke(Request $request, string $id, LinkHelper $linkHelper, SeasonHelper $seasonHelper, ?string $showContentOnly = null): View
     {
         $this->linkHelper = $linkHelper;
 
@@ -44,6 +44,7 @@ END ASC');
         $data = $data->paginate(perPage: 2000);
 
         return GenericViewIndexHelper::instance()
+            ->doNotUseLayout(!!$showContentOnly)
             ->setTitle('Results: ' .$competition->getTitle())
             ->setData($data)
             ->setHeaders(['rank','bib','Athlete','Nat','flag','shooting','behind', 'wc points'])

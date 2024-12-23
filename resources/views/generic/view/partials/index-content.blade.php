@@ -1,5 +1,5 @@
 @if($subTitle)
-    <h1 class="mb-4 mt-10 text-xl font-extrabold leading-none tracking-tight text-gray-900 md:text-xl lg:text-xl  text-center ">{{$subTitle}}</h1>
+<h1 class="mb-4 mt-10 text-xl font-extrabold leading-none tracking-tight text-gray-900 md:text-xl lg:text-xl  text-center ">{!! $subTitle!!}</h1>
 @endif
 
 
