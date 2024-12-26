@@ -58,6 +58,14 @@ Route::get('test2.gro', function (){
     return $a->json();
 });
 
+Route::get('test2.grod', function (){
+    dump('GROTIAN Selina');
+
+    $a = (new \App\Services\BiathlonResultApi)->athlete('BTGER22503200401');
+
+    dd($a->json());
+});
+
 
 
 
