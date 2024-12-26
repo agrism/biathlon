@@ -52,6 +52,14 @@ Route::get('test3', function (){
     dd($a->json()['Badges']);
 });
 
+Route::get('test2.gro', function (){
+    $a = (new \App\Services\BiathlonResultApi)->athlete('BTGER22503200401');
+
+    return $a->json();
+});
+
+
+
 
 Route::get('test4', function (){
 
