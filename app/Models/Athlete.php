@@ -49,7 +49,7 @@ class Athlete extends Model
     protected $casts = [
         'birth_date' => 'datetime',
         'details' => AthleteDetailsCast::class,
-        'details_updated_at' => 'timestamp',
+        'details_updated_at' => 'datetime',
     ];
 
     public function results(): HasMany
