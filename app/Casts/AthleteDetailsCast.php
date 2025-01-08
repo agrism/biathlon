@@ -164,7 +164,7 @@ class AthleteDetailsCast implements CastsAttributes
             StatSkiing: data_get($details, 'StatSkiing', []),
             StatSkiKMB: data_get($details, 'StatSkiKMB', []),
             StatStarts: data_get($details, 'StatStarts', []) ?: [],
-            StatLevel: data_get($details, 'StatLevel', []) ?: [],
+            StatLevel: (array)data_get($details, 'StatLevel', []) ?: [],
             RNKS: collect(data_get($details, 'RNKS', []))->map(fn($d) => new RNKItemValueObject(
                 Description: data_get($d, 'Description'),
                 Individual: data_get($d, 'Individual'),
