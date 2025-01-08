@@ -4,6 +4,7 @@ namespace App\Casts;
 
 use App\Enums\Forecast\AwardPointEnum;
 
+use App\Helpers\ArrayHelper;
 use App\ValueObjects\Helpers\Forecasts\FinalDataValueObject\AthleteValueObject;
 use App\ValueObjects\Helpers\Forecasts\FinalDataValueObject\FinalDataValueObject;
 use App\ValueObjects\Helpers\Forecasts\FinalDataValueObject\PointValueObject;
@@ -28,7 +29,7 @@ class ForecastFinalDataCast implements CastsAttributes
                 tempId: data_get($athlete, 'tempId'),
                 name: data_get($athlete, 'name'),
                 flagUrl: data_get($athlete, 'flagUrl'),
-                stats: AthleteStatsDetailsCast::createDetails( (array)data_get($athlete, 'stats', [])),
+                stats: AthleteStatsDetailsCast::createDetails( ArrayHelper::instance()->toArray(data_get($athlete, 'stats', []))),
             );
         };
 
