@@ -9,7 +9,7 @@
 
     {{--    <script src="https://cdn.tailwindcss.com"></script>--}}
     <title>Biathlon +</title>
-    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
 {{--    <script--}}
 {{--        src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp,container-queries"></script>--}}
 {{--    <script src="https://unpkg.com/htmx.org@1.9.12"--}}
