@@ -5,19 +5,14 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-{{--    <meta name="htmx-config" content='{"indicatorSelector": "#spinner"}'>--}}
-
-    {{--    <script src="https://cdn.tailwindcss.com"></script>--}}
     <title>Biathlon +</title>
-    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
-{{--    <script--}}
-{{--        src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp,container-queries"></script>--}}
-{{--    <script src="https://unpkg.com/htmx.org@1.9.12"--}}
-{{--            integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2"--}}
-{{--            crossorigin="anonymous"></script>--}}
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
+
     <style>
         .htmx-request.indicator {
             color: #ef4444;  /* Red during loading */
