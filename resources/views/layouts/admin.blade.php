@@ -10,8 +10,7 @@
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    @vite('resources/js/app.js')
-{{--    @vite('resources/css/app.css')--}}
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         .htmx-request.indicator {

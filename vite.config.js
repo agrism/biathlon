@@ -5,7 +5,7 @@ export default defineConfig({
     plugins: [
         laravel({
             input: [
-                // 'resources/css/app.css',
+                'resources/css/app.css',
                 'resources/js/app.js'
             ],
             refresh: true,
@@ -16,9 +16,6 @@ export default defineConfig({
         outDir: 'public/build',
         // Configure asset handling
         rollupOptions: {
-            input: {
-                app: '/resources/js/app.js',
-            },
             output: {
                 assetFileNames: (assetInfo) => {
                     let extType = assetInfo.name.split('.').at(1);
