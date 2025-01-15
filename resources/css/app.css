@@ -66,5 +66,5 @@
     background-size: contain;  /* or 'cover' depending on your needs */
     background-repeat: no-repeat;
     background-position: center;
-    transform: scale(2);
+    transform: scale(2.5);
 }
