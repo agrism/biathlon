@@ -49,8 +49,18 @@
     background-position: center;
     transform: scale(1.8);
 }
-.fischer {
+.fischer, .fischer {
     background-image: url('../images/fisher.webp');
+    /*width: 20px;  !* Set appropriate width *!*/
+    height: 16px; /* Set appropriate height */
+    background-size: contain;  /* or 'cover' depending on your needs */
+    background-repeat: no-repeat;
+    background-position: center;
+    transform: scale(1.5);
+}
+
+.kastle, .kästle {
+    background-image: url('../images/kastle.webp');
     /*width: 20px;  !* Set appropriate width *!*/
     height: 16px; /* Set appropriate height */
     background-size: contain;  /* or 'cover' depending on your needs */
