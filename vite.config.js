@@ -13,7 +13,7 @@ export default defineConfig({
     ],
     build: {
         // Specify output directory for processed assets
-        outDir: 'public/assets',
+        outDir: 'public/build',
         // Configure asset handling
         rollupOptions: {
             input: {
