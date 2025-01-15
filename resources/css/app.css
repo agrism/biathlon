@@ -68,3 +68,13 @@
     background-position: center;
     transform: scale(2.5);
 }
+
+.ogasaka {
+    background-image: url('../images/ogasaka.webp');
+    /*width: 20px;  !* Set appropriate width *!*/
+    height: 16px; /* Set appropriate height */
+    background-size: contain;  /* or 'cover' depending on your needs */
+    background-repeat: no-repeat;
+    background-position: center;
+    transform: scale(2);
+}
