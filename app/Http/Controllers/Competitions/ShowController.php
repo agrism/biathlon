@@ -10,6 +10,7 @@ use App\Models\EventCompetition;
 use App\Models\EventCompetitionResult;
 use App\ValueObjects\Athletes\Details\ItemValueObject;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class ShowController extends Controller
@@ -78,7 +79,7 @@ END ASC');
                         return $item->Description == 'Skis';
                     })->first()?->Value ?: '-';
 
-                    return $brand === '-' ? $brand : '<div class="'.$brand.'" alt="'.$brand.'"></div>';
+                    return $brand === '-' ? $brand : '<div class="'.Str::of($brand)->lower()->value().'" alt="'.$brand.'"></div>';
 
                 },
             ])

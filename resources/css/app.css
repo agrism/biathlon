@@ -3,7 +3,7 @@
 @import "tailwindcss/utilities";
 
 
-.Atomic {
+.atomic {
     background-image: url('../images/atomic.webp');
     /*width: 20px;  !* Set appropriate width *!*/
     height: 16px; /* Set appropriate height */
@@ -12,7 +12,7 @@
     background-position: center;
     transform: scale(2);
 }
-.Rossignol {
+.rossignol {
     background-image: url('../images/rossignol.webp');
     /*width: 20px;  !* Set appropriate width *!*/
     height: 16px; /* Set appropriate height */
@@ -22,7 +22,7 @@
     transform: scale(2.5);
 }
 
-.Swix {
+.swix {
     background-image: url('../images/swix.webp');
     /*width: 20px;  !* Set appropriate width *!*/
     height: 16px; /* Set appropriate height */
@@ -31,7 +31,7 @@
     background-position: center;
     transform: scale(2);
 }
-.Salomon {
+.salomon {
     background-image: url('../images/salomon.webp');
     /*width: 20px;  !* Set appropriate width *!*/
     height: 16px; /* Set appropriate height */
@@ -40,7 +40,7 @@
     background-position: center;
     transform: scale(2.5);
 }
-.Madshus {
+.madshus {
     background-image: url('../images/madshus.webp');
     /*width: 20px;  !* Set appropriate width *!*/
     height: 20px; /* Set appropriate height */
