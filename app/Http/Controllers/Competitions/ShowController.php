@@ -6,10 +6,9 @@ use App\Helpers\Generic\GenericViewIndexHelper;
 use App\Helpers\LinkHelper;
 use App\Helpers\SeasonHelper;
 use App\Http\Controllers\Controller;
-use App\Models\Athlete;
-use App\Models\Event;
 use App\Models\EventCompetition;
 use App\Models\EventCompetitionResult;
+use App\ValueObjects\Athletes\Details\ItemValueObject;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -47,7 +46,7 @@ END ASC');
             ->doNotUseLayout(!!$showContentOnly)
             ->setTitle('Results: ' .$competition->getTitle())
             ->setData($data)
-            ->setHeaders(['rank','bib','Athlete','Nat','flag','shooting','behind', 'wc points'])
+            ->setHeaders(['rank','bib','Athlete','Nat','flag','ski','shooting','behind', 'wc points'])
             ->setDataKeys([
                 function (EventCompetitionResult $result): string {
                     return $this->getLink($result, $result->rank ?: '-');
@@ -63,6 +62,12 @@ END ASC');
                 },
                 function (EventCompetitionResult $result): string {
                     return $this->getLink($result, '<img src="'.$result->athlete->flag_uri.'" style="height:20px;" />');
+                },
+                function (EventCompetitionResult $result): string {
+                    $equipment = $result->athlete->details->Equipment;
+                    return collect($equipment ?? [])->filter(function(ItemValueObject $item){
+                            return $item->Description == 'Skis';
+                    })->first()?->Value ?: '-';
                 },
                 function (EventCompetitionResult $result): string {
                     return $this->getLink($result, $result->shootings ?: '-');

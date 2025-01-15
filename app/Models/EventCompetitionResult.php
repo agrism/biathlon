@@ -42,6 +42,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property ?AthleteStatsDetailValueObject $stat_details
  *
  * @property ?Athlete $athlete
+ * @property ?Competition $competition
  */
 class EventCompetitionResult extends Model
 {
@@ -52,5 +53,10 @@ class EventCompetitionResult extends Model
     public function athlete(): BelongsTo
     {
         return $this->belongsTo(Athlete::class, 'athlete_id');
+    }
+
+    public function competition():BelongsTo
+    {
+        return $this->belongsTo(EventCompetition::class, 'event_competition_id');
     }
 }
