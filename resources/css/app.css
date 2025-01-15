@@ -1,3 +1,60 @@
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
+
+
+.Atomic {
+    background-image: url('../images/atomic.webp');
+    /*width: 20px;  !* Set appropriate width *!*/
+    height: 16px; /* Set appropriate height */
+    background-size: contain;  /* or 'cover' depending on your needs */
+    background-repeat: no-repeat;
+    background-position: center;
+    transform: scale(2);
+}
+.Rossignol {
+    background-image: url('../images/rossignol.webp');
+    /*width: 20px;  !* Set appropriate width *!*/
+    height: 16px; /* Set appropriate height */
+    background-size: contain;  /* or 'cover' depending on your needs */
+    background-repeat: no-repeat;
+    background-position: center;
+    transform: scale(2.5);
+}
+
+.Swix {
+    background-image: url('../images/swix.webp');
+    /*width: 20px;  !* Set appropriate width *!*/
+    height: 16px; /* Set appropriate height */
+    background-size: contain;  /* or 'cover' depending on your needs */
+    background-repeat: no-repeat;
+    background-position: center;
+    transform: scale(2);
+}
+.Salomon {
+    background-image: url('../images/salomon.webp');
+    /*width: 20px;  !* Set appropriate width *!*/
+    height: 16px; /* Set appropriate height */
+    background-size: contain;  /* or 'cover' depending on your needs */
+    background-repeat: no-repeat;
+    background-position: center;
+    transform: scale(2.5);
+}
+.Madshus {
+    background-image: url('../images/madshus.webp');
+    /*width: 20px;  !* Set appropriate width *!*/
+    height: 20px; /* Set appropriate height */
+    background-size: contain;  /* or 'cover' depending on your needs */
+    background-repeat: no-repeat;
+    background-position: center;
+    transform: scale(2.1);
+}
+.Fischer {
+    background-image: url('../images/fisher.webp');
+    /*width: 20px;  !* Set appropriate width *!*/
+    height: 16px; /* Set appropriate height */
+    background-size: contain;  /* or 'cover' depending on your needs */
+    background-repeat: no-repeat;
+    background-position: center;
+    transform: scale(2);
+}

@@ -46,7 +46,7 @@ END ASC');
             ->doNotUseLayout(!!$showContentOnly)
             ->setTitle('Results: ' .$competition->getTitle())
             ->setData($data)
-            ->setHeaders(['rank','bib','Athlete','Nat','flag','ski','shooting','behind', 'wc points'])
+            ->setHeaders(['rank','bib','Athlete','Nat','flag','shooting','behind', 'wc points', 'Equipment'])
             ->setDataKeys([
                 function (EventCompetitionResult $result): string {
                     return $this->getLink($result, $result->rank ?: '-');
@@ -64,12 +64,6 @@ END ASC');
                     return $this->getLink($result, '<img src="'.$result->athlete->flag_uri.'" style="height:20px;" />');
                 },
                 function (EventCompetitionResult $result): string {
-                    $equipment = $result->athlete->details->Equipment;
-                    return collect($equipment ?? [])->filter(function(ItemValueObject $item){
-                            return $item->Description == 'Skis';
-                    })->first()?->Value ?: '-';
-                },
-                function (EventCompetitionResult $result): string {
                     return $this->getLink($result, $result->shootings ?: '-');
                 },
                 function (EventCompetitionResult $result): string {
@@ -77,6 +71,15 @@ END ASC');
                 },
                 function (EventCompetitionResult $result): string {
                     return $this->getLink($result, $result->wc ?: '-');
+                },
+                function (EventCompetitionResult $result): string {
+                    $equipment = $result->athlete->details->Equipment;
+                    $brand = collect($equipment ?? [])->filter(function(ItemValueObject $item){
+                        return $item->Description == 'Skis';
+                    })->first()?->Value ?: '-';
+
+                    return $brand === '-' ? $brand : '<div class="'.$brand.'" alt="'.$brand.'"></div>';
+
                 },
             ])
             ->render();

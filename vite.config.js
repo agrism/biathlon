@@ -8,4 +8,23 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    build: {
+        // Specify output directory for processed assets
+        outDir: 'public/assets',
+        // Configure asset handling
+        rollupOptions: {
+            input: {
+                app: '/resources/js/app.js',
+            },
+            output: {
+                assetFileNames: (assetInfo) => {
+                    let extType = assetInfo.name.split('.').at(1);
+                    if (/png|jpe?g|svg|gif|tiff|bmp|ico|webp/i.test(extType)) {
+                        extType = 'images';
+                    }
+                    return `${extType}/[name][extname]`;
+                },
+            },
+        },
+    },
 });
