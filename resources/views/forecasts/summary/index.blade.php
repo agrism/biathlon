@@ -33,7 +33,8 @@ foreach($data['users'] as $user) {
 	for ($i = 0; $i < count($summary_table); $i++) {
 		if ($summary_table[$row][$column] < $summary_table[$i][$column]) { $winner = false; }
 	}
-	$winners_table[$user['name']][$userEvent['eventId']] = $winner;
+	if ($summary_table[$row][$column] == 0) { $winner = false; }
+    $winners_table[$user['name']][$userEvent['eventId']] = $winner; 
 
 	$column++;
 	}
