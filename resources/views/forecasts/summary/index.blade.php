@@ -39,7 +39,7 @@
                 				@if ($isWinner = (($userEvent['winner'] ?? false) == true))
                                     <span class="inline-flex items-center rounded-md border border-yellow-400 bg-yellow-100 px-1 py-0.5 -ml-1">
                                 @endif
-                                    {{$userEvent['regular'] ?? 0}} <small>+{{$userEvent['bonus'] ?? 0}}</small>
+                                    <span class="hover:underline">{{$userEvent['regular'] ?? 0}} <small>+{{$userEvent['bonus'] ?? 0}}</small></span>
                 				@if ($isWinner)
                                     </span>
                                 @endif
