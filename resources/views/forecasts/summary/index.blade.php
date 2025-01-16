@@ -1,48 +1,5 @@
 @extends('layouts.admin', ['heading' => isset($helper) ? $helper->title(): ''])
 
-<?php
-
-$summary_table = array();
-$winners_table = array();
-
-$row = 0;
-foreach($data['users'] as $user) {
-
-	$column = 0;
-	$summary_table[$row] = array();
-
-	foreach($user['events'] as $userEvent) {
-
-		$summary_table[$row][$column] = ($userEvent['regular'] ?? 0) + ($userEvent['bonus'] ?? 0);
-		$column++;
-	}
-
-$row++;
-}
-
-$row = 0;
-foreach($data['users'] as $user) {
-
-	$column = 0;
-	$winners_table[$user['name']] = array();
-
-	foreach($user['events'] as $userEvent) {
-
-	$winner = true;
-
-	for ($i = 0; $i < count($summary_table); $i++) {
-		if ($summary_table[$row][$column] < $summary_table[$i][$column]) { $winner = false; }
-	}
-	if ($summary_table[$row][$column] == 0) { $winner = false; }
-    $winners_table[$user['name']][$userEvent['eventId']] = $winner; 
-
-	$column++;
-	}
-$row++;
-}
-
-?>
-
 @section('content')
 
     <h1 class="mb-4 mt-4 text-2xl font-extrabold leading-none tracking-tight text-gray-900 md:text-2xl lg:text-3xl  text-center ">
@@ -75,18 +32,22 @@ $row++;
                         <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">{{$user['name'] ?? '-'}}</td>
                         @foreach($user['events'] as $userEvent)
                             <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
-                                <a hx-get="{{route('forecasts.summary.user-event', ['userId' => $user['id'] ?? 'y', 'eventId' => $userEvent['eventId'] ?? 'x'])}}"
+                                <div hx-get="{{route('forecasts.summary.user-event', ['userId' => $user['id'] ?? 'y', 'eventId' => $userEvent['eventId'] ?? 'x'])}}"
                                     hx-target="#user-event"
                                    class="cursor-pointer"
                                 >
-                				@if ($isWinner = $winners_table[$user['name']][$userEvent['eventId']] == true)
-                                <u>
+                				@if ($isWinner = (($userEvent['winner'] ?? false) == true))
+                                <div class="relative inline-block group">
+                                    <span class="inline-flex items-center rounded-md border border-yellow-400 bg-yellow-100 px-1 py-0.5 -ml-1">
                                 @endif
-
-                                {{$userEvent['regular'] ?? 0}} <small>+{{$userEvent['bonus'] ?? 0}}</small>
-
+                                    <span class="underline decoration-gray-500 hover:decoration-blue-600">{{$userEvent['regular'] ?? 0}} <small>+{{$userEvent['bonus'] ?? 0}}</small></span>
                 				@if ($isWinner)
-                                </u>
+                                    </span>
+                                    <div class="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-gray-900 text-white text-sm rounded whitespace-nowrap">
+                                        Winner
+                                        <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                    </div>
+                                </div>
                                 @endif
 
                                 </a>
