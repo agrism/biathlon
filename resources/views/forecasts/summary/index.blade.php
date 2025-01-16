@@ -8,15 +8,15 @@ $winners_table = array();
 $row = 0;
 foreach($data['users'] as $user) {
 
-	$column = 0;	
+	$column = 0;
 	$summary_table[$row] = array();
-	
+
 	foreach($user['events'] as $userEvent) {
 
 		$summary_table[$row][$column] = ($userEvent['regular'] ?? 0) + ($userEvent['bonus'] ?? 0);
 		$column++;
 	}
-	
+
 $row++;
 }
 
@@ -24,21 +24,19 @@ $row = 0;
 foreach($data['users'] as $user) {
 
 	$column = 0;
-	$winners_table[$user] = array();
+	$winners_table[$user['name']] = array();
 
 	foreach($user['events'] as $userEvent) {
 
 	$winner = true;
-	
-	for ($i = 0; $i < count($summary_table[]); $i++) {
+
+	for ($i = 0; $i < count($summary_table); $i++) {
 		if ($summary_table[$row][$column] < $summary_table[$i][$column]) { $winner = false; }
 	}
-	
-	$winners_table[$user][$userEvent] = $winner;
-		
+	$winners_table[$user['name']][$userEvent['eventId']] = $winner;
+
 	$column++;
 	}
-	
 $row++;
 }
 
@@ -80,16 +78,16 @@ $row++;
                                     hx-target="#user-event"
                                    class="cursor-pointer"
                                 >
-                				@if ($winners_table[$user][$userEvent] == true)
+                				@if ($isWinner = $winners_table[$user['name']][$userEvent['eventId']] == true)
                                 <u>
                                 @endif
-                                                
+
                                 {{$userEvent['regular'] ?? 0}} <small>+{{$userEvent['bonus'] ?? 0}}</small>
-                
-                				@if ($winners_table[$user][$userEvent] == true)
+
+                				@if ($isWinner)
                                 </u>
                                 @endif
-                                    
+
                                 </a>
                             </td>
                         @endforeach
