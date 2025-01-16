@@ -1,47 +1,5 @@
 @extends('layouts.admin', ['heading' => isset($helper) ? $helper->title(): ''])
 
-<?php
-
-$summary_table = array();
-$winners_table = array();
-
-$row = 0;
-foreach($data['users'] as $user) {
-
-	$column = 0;
-	$summary_table[$row] = array();
-
-	foreach($user['events'] as $userEvent) {
-
-		$summary_table[$row][$column] = ($userEvent['regular'] ?? 0) + ($userEvent['bonus'] ?? 0);
-		$column++;
-	}
-
-$row++;
-}
-
-$row = 0;
-foreach($data['users'] as $user) {
-
-	$column = 0;
-	$winners_table[$user['name']] = array();
-
-	foreach($user['events'] as $userEvent) {
-
-	$winner = true;
-
-	for ($i = 0; $i < count($summary_table); $i++) {
-		if ($summary_table[$row][$column] < $summary_table[$i][$column]) { $winner = false; }
-	}
-	$winners_table[$user['name']][$userEvent['eventId']] = $winner;
-
-	$column++;
-	}
-$row++;
-}
-
-?>
-
 @section('content')
 
     <h1 class="mb-4 mt-4 text-2xl font-extrabold leading-none tracking-tight text-gray-900 md:text-2xl lg:text-3xl  text-center ">
@@ -78,14 +36,12 @@ $row++;
                                     hx-target="#user-event"
                                    class="cursor-pointer"
                                 >
-                				@if ($isWinner = $winners_table[$user['name']][$userEvent['eventId']] == true)
-                                <u>
+                				@if ($isWinner = (($userEvent['winner'] ?? false) == true))
+                                    <span class="inline-flex items-center rounded-md border border-yellow-400 bg-yellow-100 px-1 py-0.5 -ml-1">
                                 @endif
-
-                                {{$userEvent['regular'] ?? 0}} <small>+{{$userEvent['bonus'] ?? 0}}</small>
-
+                                    {{$userEvent['regular'] ?? 0}} <small>+{{$userEvent['bonus'] ?? 0}}</small>
                 				@if ($isWinner)
-                                </u>
+                                    </span>
                                 @endif
 
                                 </a>

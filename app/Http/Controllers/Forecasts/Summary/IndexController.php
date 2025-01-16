@@ -103,6 +103,28 @@ class IndexController extends Controller
         $data['events'][] = 'Bonus';
         $data['events'][] = 'Total';
 
+        foreach ($data['users'][0]['events'] ?? [] as $eventIndex => $event){
+            $maxPoints = 0;
+            $winnerUserIndexes = [];
+            foreach ($data['users'] ?? [] as $userIndex => $user){
+                $userPoints = ($user['events'][$eventIndex]['regular'] ?? 0) + ($user['events'][$eventIndex]['bonus'] ?? 0);
+
+                if($userPoints === 0){
+                    continue;
+                } elseif($userPoints == $maxPoints){
+                    $winnerUserIndexes[] = $userIndex;
+                } elseif($userPoints > $maxPoints){
+                    $winnerUserIndexes = [$userIndex];
+                }
+
+                $maxPoints = max($userPoints, $maxPoints);
+            }
+
+            foreach ($winnerUserIndexes as $winnerUserIndex){
+                $data['users'][$winnerUserIndex]['events'][$eventIndex]['winner'] = true;
+            }
+        }
+
         return view('forecasts.summary.index', compact('data'));
     }
 }
