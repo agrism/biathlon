@@ -24,6 +24,9 @@ Route::group([
     'middleware' => AuthMiddleware::class,
 ], function(){
     Route::get('/forecasts/{id}/select-athlete/{place}/place/{athlete}/submit', Contr\Forecasts\SubmitSelectedAthleteController::class)->name('forecasts.select-athlete.submit');
+    Route::get('/forecasts/{id}/select-athlete/{place}/place/move/{direction}', Contr\Forecasts\MoveUpDownPlaceController::class)
+        ->where('direction', 'up|down')
+        ->name('forecasts.select-athlete.place.move.up-down');
 
     Route::get('/',Contr\Private\IndexController::class)->name('private.index');
     Route::get('/profile', Contr\Private\ProfileController::class)->name('private.profile');

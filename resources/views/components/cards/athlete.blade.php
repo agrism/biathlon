@@ -39,16 +39,36 @@
             @if(auth()->check())
                 @if($forecast->submit_deadline_at->gt(now()))
                     @if($athlete->name)
-                        <x-buttons.button
-                            class="my-3"
-                            hx-get="{{route('forecasts.select-athlete', ['id' => $forecast->id, 'place' => $index])}}"
-                            hx-target="#selected-athletes"
-                        >
-                            Edit
-                        </x-buttons.button>
+                        <div class="flex justify-between items-center">
+                            <!-- With styling example -->
+                            @if($index !== 0)
+                            <i class="fas fa-circle-arrow-up text-green-700 text-xl my-3 cursor-pointer pr-1"
+                               hx-get="{{route('forecasts.select-athlete.place.move.up-down', ['id' => $forecast->id, 'place' =>$index, 'direction' => \App\Enums\MoveDirectionEnum::UP->value])}}"
+                               hx-target="#selected-athletes"
+                            ></i>
+                            @else
+                                <i class="my-3"></i>
+                            @endif
+                            <x-buttons.button
+                                class="my-3"
+                                hx-get="{{route('forecasts.select-athlete', ['id' => $forecast->id, 'place' => $index])}}"
+                                hx-target="#selected-athletes"
+                            >
+                                Edit
+                            </x-buttons.button>
+                            @if($index < 5)
+                            <i class="fas fa-circle-arrow-down text-red-500 text-xl my-3 cursor-pointer pl-1"
+                               hx-get="{{route('forecasts.select-athlete.place.move.up-down', ['id' => $forecast->id, 'place' =>$index, 'direction' => \App\Enums\MoveDirectionEnum::DOWN->value])}}"
+                               hx-target="#selected-athletes"
+                            ></i>
+                            @else
+                                <i class="my-3"></i>
+                            @endif
+                        </div>
+
                     @else
                         <x-buttons.button
-                            class="my-3"
+                            class="my-3 md:text-sm"
                             hx-get="{{route('forecasts.select-athlete', ['id' => $forecast->id, 'place' => $index])}}"
                             hx-target="#selected-athletes"
                         >
