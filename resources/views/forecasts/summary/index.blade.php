@@ -29,7 +29,7 @@
 
                 @foreach($data['users'] as $user)
                     <tr class="odd:bg-white even:bg-gray-100">
-                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">{{$user['name'] ?? '-'}}</td>
+                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium"><strong class="user">{{$user['name'] ?? '-'}}</strong></td>
                         @foreach($user['events'] as $userEvent)
                             <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
                                 <div hx-get="{{route('forecasts.summary.user-event', ['userId' => $user['id'] ?? 'y', 'eventId' => $userEvent['eventId'] ?? 'x'])}}"
