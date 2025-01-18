@@ -1,4 +1,4 @@
-<div class="border border-black-100 p-4">
+<div class="border border-black-100 p-4 shadow-xl hover:shadow-2xl">
     <div class="flex flex-col justify-between h-full">
         <div class="" style="min-height: 200px;">
             <strong style="font-size:32px;">
@@ -42,10 +42,12 @@
                         <div class="flex justify-between items-center">
                             <!-- With styling example -->
                             @if($index !== 0)
-                            <i class="fas fa-circle-arrow-up text-green-700 text-xl my-3 cursor-pointer pr-1"
-                               hx-get="{{route('forecasts.select-athlete.place.move.up-down', ['id' => $forecast->id, 'place' =>$index, 'direction' => \App\Enums\MoveDirectionEnum::UP->value])}}"
-                               hx-target="#selected-athletes"
-                            ></i>
+                                <x-tooltip text="Move up">
+                                    <i class="fas fa-circle-arrow-up text-green-700 text-xl cursor-pointer pr-1"
+                                       hx-get="{{route('forecasts.select-athlete.place.move.up-down', ['id' => $forecast->id, 'place' =>$index, 'direction' => \App\Enums\MoveDirectionEnum::UP->value])}}"
+                                       hx-target="#selected-athletes"
+                                    ></i>
+                                </x-tooltip>
                             @else
                                 <i class="my-3"></i>
                             @endif
@@ -57,10 +59,13 @@
                                 Edit
                             </x-buttons.button>
                             @if($index < 5)
-                            <i class="fas fa-circle-arrow-down text-red-500 text-xl my-3 cursor-pointer pl-1"
-                               hx-get="{{route('forecasts.select-athlete.place.move.up-down', ['id' => $forecast->id, 'place' =>$index, 'direction' => \App\Enums\MoveDirectionEnum::DOWN->value])}}"
-                               hx-target="#selected-athletes"
-                            ></i>
+                                <x-tooltip text="Move down">
+                                    <i class="fas fa-circle-arrow-down text-red-500 text-xl cursor-pointer pl-1"
+                                       hx-get="{{route('forecasts.select-athlete.place.move.up-down', ['id' => $forecast->id, 'place' =>$index, 'direction' => \App\Enums\MoveDirectionEnum::DOWN->value])}}"
+                                       hx-target="#selected-athletes"
+                                    ></i>
+                                </x-tooltip>
+
                             @else
                                 <i class="my-3"></i>
                             @endif
