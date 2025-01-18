@@ -13,47 +13,6 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body hx-boost="true" hx-indicator="#status">
-{{--<div id="status" class="indicator fixed inset-0 z-50 flex items-center justify-center">--}}
-{{--    <div class="rounded-lg px-6 py-4 flex items-center gap-3">--}}
-{{--        <div class="w-5 h-5 rounded-full border-2 border-gray-300 border-t-red-600 animate-spin"></div>--}}
-{{--        <div class="w-5 h-5 rounded-full border-2 border-gray-300 border-t-red-600 animate-spin"></div>--}}
-{{--        <div class="w-5 h-5 rounded-full border-2 border-gray-300 border-t-red-600 animate-spin"></div>--}}
-{{--        <div class="w-5 h-5 rounded-full border-2 border-gray-300 border-t-red-600 animate-spin"></div>--}}
-{{--        <div class="w-5 h-5 rounded-full border-2 border-gray-300 border-t-red-600 animate-spin"></div>--}}
-{{--        <span class="text-red-700 font-medium"></span>--}}
-{{--    </div>--}}
-{{--</div>--}}
-
-{{--<div id="status" class="indicator fixed inset-0 z-50 flex items-center justify-center">--}}
-{{--    <div class="rounded-lg px-6 py-4 flex items-center gap-3 bg-white border-2 border-black">--}}
-{{--        <div class="w-5 h-5 rounded-full border-2 border-gray-300 border-t-red-600 animate-spin"></div>--}}
-{{--        <div class="w-5 h-5 rounded-full border-2 border-gray-300 border-t-red-600 animate-spin [animation-delay:0.1s]"></div>--}}
-{{--        <div class="w-5 h-5 rounded-full border-2 border-gray-300 border-t-red-600 animate-spin [animation-delay:0.2s]"></div>--}}
-{{--        <div class="w-5 h-5 rounded-full border-2 border-gray-300 border-t-red-600 animate-spin [animation-delay:0.3s]"></div>--}}
-{{--        <div class="w-5 h-5 rounded-full border-2 border-gray-300 border-t-red-600 animate-spin [animation-delay:0.4s]"></div>--}}
-{{--    </div>--}}
-{{--</div>--}}
-
-{{--<div id="status" class="indicator fixed inset-0 z-50 flex items-center justify-center">--}}
-{{--    <div class="rounded-md px-6 py-4 flex items-center gap-4 bg-white border-2 border-grey">--}}
-{{--        <div class="w-5 h-5 rounded-full border-2 border-gray-300 border-t-black border-l-black border-r-black border-b-grey animate-spin [animation-delay:0.1s]"></div>--}}
-{{--        <div class="w-5 h-5 rounded-full border-2 border-gray-300 border-t-black border-l-black border-r-black border-b-grey animate-spin [animation-delay:0.1s]"></div>--}}
-{{--        <div class="w-5 h-5 rounded-full border-2 border-gray-300 border-t-black border-l-black border-r-black border-b-grey animate-spin [animation-delay:0.1s]"></div>--}}
-{{--        <div class="w-5 h-5 rounded-full border-2 border-gray-300 border-t-black border-l-black border-r-black border-b-grey animate-spin [animation-delay:0.1s]"></div>--}}
-{{--        <div class="w-5 h-5 rounded-full border-2 border-gray-300 border-t-black border-l-black border-r-black border-b-grey animate-spin [animation-delay:0.1s]"></div>--}}
-{{--    </div>--}}
-{{--</div>--}}
-
-
-{{--<div id="status" class="indicator fixed inset-0 z-50 flex items-center justify-center">--}}
-{{--    <div class="rounded-md px-6 py-4 flex items-center gap-4 bg-white border-2 border-grey">--}}
-{{--        <div class="w-5 h-5 rounded-full border-2 border-gray-300 bg-black"></div>--}}
-{{--        <div class="w-5 h-5 rounded-full border-2 border-gray-300 bg-black"></div>--}}
-{{--        <div class="w-5 h-5 rounded-full border-2 border-gray-300 bg-black"></div>--}}
-{{--        <div class="w-5 h-5 rounded-full border-2 border-gray-300 bg-black"></div>--}}
-{{--        <div class="w-5 h-5 rounded-full border-2 border-gray-300 bg-black"></div>--}}
-{{--    </div>--}}
-{{--</div>--}}
 
 <div id="status" class="indicator fixed inset-0 z-50 flex items-center justify-center">
     <div class="rounded-md px-6 py-4 flex items-center gap-4 bg-white border-2 border-grey">
@@ -64,8 +23,6 @@
         <div class="circle w-5 h-5 rounded-full border-2 border-gray-300 bg-black"></div>
     </div>
 </div>
-
-
 
 @include('menu', ['ignoreHome' => true])
 <div class="container" style="margin: 0 auto">
@@ -78,7 +35,6 @@
     <div class="cont">
         @yield('content')
     </div>
-
 
     <div class="text-gray-400 px-2 text-sm">
         Response time: {{round(microtime(true) - LARAVEL_START, 3)}}s
@@ -94,9 +50,7 @@
             mobileMenu.classList.toggle('hidden');
         });
     } catch {
-
     }
 </script>
-
 </body>
 </html>
