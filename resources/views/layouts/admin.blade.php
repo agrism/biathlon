@@ -11,52 +11,6 @@
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-    <style>
-        .htmx-request.indicator {
-            color: #ef4444;  /* Red during loading */
-        }
-
-        .indicator {
-            display: none;
-        }
-        .htmx-request.indicator {
-            display: flex;
-        }
-
-        .circle {
-            animation: fadeToWhite .5s forwards;
-        }
-
-        .circle:nth-child(1) {
-            animation-delay: 0s;
-        }
-
-        .circle:nth-child(2) {
-            animation-delay: .5s;
-        }
-
-        .circle:nth-child(3) {
-            animation-delay: 1s;
-        }
-
-        .circle:nth-child(4) {
-            animation-delay: 1.5s;
-        }
-
-        .circle:nth-child(5) {
-            animation-delay: 2s;
-        }
-
-        @keyframes fadeToWhite {
-            0% {
-                background-color: black;
-            }
-            100% {
-                background-color: white;
-            }
-        }
-    </style>
 </head>
 <body hx-boost="true" hx-indicator="#status">
 {{--<div id="status" class="indicator fixed inset-0 z-50 flex items-center justify-center">--}}
