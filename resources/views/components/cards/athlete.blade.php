@@ -7,7 +7,7 @@
                 </strong>
 
                 <x-tooltip :text="$athlete->isHidden ? 'Hidden for others' : 'Visible for others'">
-                    <i class="fa {{$athlete->isHidden ? 'fa-eye-slash text-red-500' : 'fa-eye text-gray-400'}} w-5 h-5 text-md cursor-pointer"
+                    <i class="fa {{$athlete->isHidden ? 'fa-eye-slash text-red-500 hover:text-red-600' : 'fa-eye text-gray-400 hover:text-gray-500'}} w-5 h-5 text-md cursor-pointer"
                        hx-get="{{route('forecasts.select-athlete.place.hide', ['id' => $forecast->id, 'place' =>$index])}}"
                        hx-target="#selected-athletes"
                     ></i>
