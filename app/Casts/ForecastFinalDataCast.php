@@ -22,7 +22,6 @@ class ForecastFinalDataCast implements CastsAttributes
      */
     public function get(Model $model, string $key, mixed $value, array $attributes): mixed
     {
-
         $athleteFactory = function(array $athlete): AthleteValueObject {
             return new AthleteValueObject(
                 id: data_get($athlete, 'id'),
@@ -30,6 +29,7 @@ class ForecastFinalDataCast implements CastsAttributes
                 name: data_get($athlete, 'name'),
                 flagUrl: data_get($athlete, 'flagUrl'),
                 stats: AthleteStatsDetailsCast::createDetails( ArrayHelper::instance()->toArray(data_get($athlete, 'stats', []))),
+                isHidden: boolval(data_get($athlete, 'isHidden', false)),
             );
         };
 
@@ -58,7 +58,6 @@ class ForecastFinalDataCast implements CastsAttributes
     public function set(Model $model, string $key, mixed $value, array $attributes): mixed
     {
         if ($value instanceof FinalDataValueObject) {
-
             return json_encode($value->export());
         }
 

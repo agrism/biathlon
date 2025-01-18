@@ -28,6 +28,9 @@ Route::group([
         ->where('direction', 'up|down')
         ->name('forecasts.select-athlete.place.move.up-down');
 
+    Route::get('/forecasts/{id}/select-athlete/{place}/place/hide', Contr\Forecasts\HidePlaceController::class)
+        ->name('forecasts.select-athlete.place.hide');
+
     Route::get('/',Contr\Private\IndexController::class)->name('private.index');
     Route::get('/profile', Contr\Private\ProfileController::class)->name('private.profile');
 

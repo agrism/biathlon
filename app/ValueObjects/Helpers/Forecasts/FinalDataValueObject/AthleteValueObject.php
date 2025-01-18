@@ -13,6 +13,7 @@ class AthleteValueObject
         public ?string $name,
         public ?string $flagUrl,
         public ?AthleteStatsDetailValueObject $stats = null,
+        public ?bool $isHidden = false,
     )
     {
     }
@@ -25,6 +26,7 @@ class AthleteValueObject
             'name' => $this->name,
             'flagUrl' => $this->flagUrl,
             'stats' => $this->stats?->export(),
+            'isHidden' => $this->isHidden,
         ];
     }
 
