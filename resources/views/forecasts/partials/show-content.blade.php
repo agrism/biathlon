@@ -51,15 +51,20 @@
             @foreach($forecast->final_data->users as $user)
                 <tr class="odd:bg-white even:bg-gray-100">
                     <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
-                        {{$user->name}}
+                        <strong>{{$user->name}}</strong>
                     </td>
 
                     @foreach($user->getAthletes() as $athlete)
                         <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
-                            <img src="{{$athlete->flagUrl}}"
-                                 style="height:20px;display:inline-block;"
-                            >&nbsp{{$athlete->name}}</a>
-                            <x-cards.athlete-stat :athlete="$athlete"></x-cards.athlete-stat>
+                            @if($athlete->isHidden)
+                                <i class="fa fa-eye-slash"></i>
+                            @else
+                                <img src="{{$athlete->flagUrl}}"
+                                     style="height:20px;display:inline-block;"
+                                >&nbsp{{$athlete->name}}</a>
+                                <x-cards.athlete-stat :athlete="$athlete"></x-cards.athlete-stat>
+                            @endif
+
                         </td>
                     @endforeach
                 </tr>
