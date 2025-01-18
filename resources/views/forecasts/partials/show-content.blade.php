@@ -57,7 +57,11 @@
                     @foreach($user->getAthletes() as $athlete)
                         <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
                             @if($athlete->isHidden)
-                                <i class="fa fa-eye-slash"></i>
+                                <div class="flex justify-center items-center w-full h-full text-lg">
+                                    <x-tooltip text="This prediction is hidden by owner">
+                                        <i class="fa fa-eye-slash text-gray-400"></i>
+                                    </x-tooltip>
+                                </div>
                             @else
                                 <img src="{{$athlete->flagUrl}}"
                                      style="height:20px;display:inline-block;"
@@ -136,7 +140,6 @@
                             <x-cards.athlete-stat :athlete="$athlete"></x-cards.athlete-stat>
                         </td>
                     @endforeach
-
                 </tr>
 
                 @foreach($forecast->final_data->users as $user)
