@@ -9,7 +9,7 @@
         BMW IBU World Cup Biathlon, season 24/25</h2>
 
     <style>
-        .peer:checked ~ div span {
+        .peer:checked ~ div small {
             display: block;
         }
     </style>
@@ -64,7 +64,7 @@
                                             @if($isWinner)
                                         </span>
                                                 @endif
-                                                <span class="hidden peer-checked:block text-[10px]">{{$userEvent['regular'] ?? 0}}+{{$userEvent['bonus'] ?? 0}}</span>
+                                                <small class="hidden peer-checked:block text-[10px]">{{$userEvent['regular'] ?? 0}}+{{$userEvent['bonus'] ?? 0}}</small>
 
                                                 @if ($isWinner)
                                                     </span>
