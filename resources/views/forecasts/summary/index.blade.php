@@ -18,7 +18,10 @@
         <input type="checkbox" id="info-1" class="hidden peer">
         <label for="info-1" class="cursor-pointer">
             <span class="inline-block peer-checked:hidden">
-                <i class="fa fa-info-circle text-gray-400"></i>
+                <x-tooltip position="right" text="click to show/hide point details">
+                        <i class="fa fa-info-circle text-gray-400"></i>
+                </x-tooltip>
+
             </span>
         </label>
 
@@ -46,7 +49,7 @@
                             <td class="px-2 py-2 whitespace-nowrap text-sm font-medium"><strong
                                     class="user">{{$user['name'] ?? '-'}}</strong></td>
                             @foreach($user['events'] as $userEvent)
-                                <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
+                                <td class="px-2 py-1 whitespace-nowrap text-sm font-medium">
                                     <div
                                         hx-get="{{route('forecasts.summary.user-event', ['userId' => $user['id'] ?? 'y', 'eventId' => $userEvent['eventId'] ?? 'x'])}}"
                                         hx-target="#user-event"
