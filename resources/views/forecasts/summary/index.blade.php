@@ -64,7 +64,7 @@
                                             @if($isWinner)
                                         </span>
                                                 @endif
-                                                <small class="hidden peer-checked:block text-[10px]">{{$userEvent['regular'] ?? 0}}+{{$userEvent['bonus'] ?? 0}}</small>
+                                                <small class="hidden peer-checked:block">{{$userEvent['regular'] ?? 0}}+{{$userEvent['bonus'] ?? 0}}</small>
 
                                                 @if ($isWinner)
                                                     </span>
