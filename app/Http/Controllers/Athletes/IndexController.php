@@ -26,6 +26,8 @@ class IndexController extends Controller
 
     public function __invoke(Request $request): View
     {
+        $this->registerBread('Athletes');
+
         GenericViewIndexHelper::instance()->saveFilterDataAll(request: $request, keys: [
             self::FILTER_COUNTRY,
             self::FILTER_NAME,
