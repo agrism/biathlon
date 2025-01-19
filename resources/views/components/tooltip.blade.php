@@ -3,7 +3,11 @@
     if(!in_array($position, ['top', 'right'])){
         $position = 'top';
     }
+
+    $show = $show ?? true;
 @endphp
+
+@if($show)
 
 <div class="relative inline-block group">
     {{$slot}}
@@ -26,3 +30,7 @@
 
 
 </div>
+
+@else
+    {{$slot}}
+@endif

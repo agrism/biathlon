@@ -53,32 +53,14 @@
                                     <div
                                         hx-get="{{route('forecasts.summary.user-event', ['userId' => $user['id'] ?? 'y', 'eventId' => $userEvent['eventId'] ?? 'x'])}}"
                                         hx-target="#user-event"
-                                        class="cursor-pointer"
+                                        class="cursor-pointer py-1 px-1"
                                     >
-                                        @if ($isWinner = (($userEvent['winner'] ?? false) == true))
-                                            <div class="relative inline-block group">
-                                                @endif
-                                                @if($isWinner)
-                                                    <span
-                                                        class="inline-flex items-center rounded-md border border-yellow-400 bg-yellow-100 px-1 py-0 -ml-1">
-                                            @endif
-                                        <span
-                                            class="underline decoration-gray-500 hover:decoration-blue-600">{{($userEvent['regular'] ?? 0) + ($userEvent['bonus'] ?? 0)}}</span>
-                                            @if($isWinner)
-                                        </span>
-                                                @endif
-                                                <small class="hidden peer-checked:block">{{$userEvent['regular'] ?? 0}}+{{$userEvent['bonus'] ?? 0}}</small>
-
-                                                @if ($isWinner)
-                                                    </span>
-                                                <div
-                                                    class="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-gray-900 text-white text-sm rounded whitespace-nowrap">
-                                                    Winner
-                                                    <div
-                                                        class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                                                </div>
-                                            </div>
-                                        @endif
+                                        <x-tooltip text="Winner" :show="$isWinner = ($userEvent['winner'] ?? false) == true">
+                                            <span class="underline decoration-gray-500 hover:decoration-blue-600 @if($isWinner) rounded-md border border-yellow-400 bg-yellow-100 px-1 py-1 @endif">
+                                                {{($userEvent['regular'] ?? 0) + ($userEvent['bonus'] ?? 0)}}
+                                            </span>
+                                        </x-tooltip>
+                                        <small class="hidden peer-checked:block">{{$userEvent['regular'] ?? 0}}+{{$userEvent['bonus'] ?? 0}}</small>
                                     </div>
 
                                     </a>
