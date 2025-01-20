@@ -61,7 +61,7 @@
                                                 {{($userEvent['regular'] ?? 0) + ($userEvent['bonus'] ?? 0)}}
                                             </span>
                                         </x-tooltip>
-                                        <small class="hidden peer-checked:block pt-1 text-gray-400">{{$userEvent['regular'] ?? 0}}+{{$userEvent['bonus'] ?? 0}}</small>
+                                        <small class="hidden peer-checked:block pt-[2px] text-gray-400">{{$userEvent['regular'] ?? 0}}+{{$userEvent['bonus'] ?? 0}}</small>
                                     </div>
 
                                     </a>
