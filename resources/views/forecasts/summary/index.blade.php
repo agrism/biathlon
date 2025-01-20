@@ -46,8 +46,9 @@
 
                     @foreach($data['users'] as $user)
                         <tr class="odd:bg-white even:bg-gray-100">
-                            <td class="px-2 py-2 whitespace-nowrap text-sm font-medium"><strong
-                                    class="user">{{$user['name'] ?? '-'}}</strong></td>
+                            <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
+                                <strong class="user">{{$user['name'] ?? '-'}}</strong>
+                            </td>
                             @foreach($user['events'] as $userEvent)
                                 <td class="px-2 py-1 whitespace-nowrap text-sm font-medium">
                                     <div
@@ -60,7 +61,7 @@
                                                 {{($userEvent['regular'] ?? 0) + ($userEvent['bonus'] ?? 0)}}
                                             </span>
                                         </x-tooltip>
-                                        <small class="hidden peer-checked:block">{{$userEvent['regular'] ?? 0}}+{{$userEvent['bonus'] ?? 0}}</small>
+                                        <small class="hidden peer-checked:block pt-1 text-gray-400">{{$userEvent['regular'] ?? 0}}+{{$userEvent['bonus'] ?? 0}}</small>
                                     </div>
 
                                     </a>
