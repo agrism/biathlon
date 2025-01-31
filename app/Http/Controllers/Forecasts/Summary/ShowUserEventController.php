@@ -11,18 +11,24 @@ use App\Models\Forecast;
 use App\Models\ForecastAward;
 use App\Models\Season;
 use App\Models\User;
+use App\ValueObjects\Helpers\Forecasts\FinalDataValueObject\AthleteValueObject;
+use App\ValueObjects\Helpers\Forecasts\FinalDataValueObject\UserValueObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ShowUserEventController extends Controller
 {
+    protected ?int $userId = null;
+    protected ?int $authUserId = null;
     public function __invoke(Request $request, string $userId, string $eventId): View
     {
-        $user = User::query()->where('id', $userId)->first();
+        $this->authUserId = auth()->id();
+
+        $user = User::query()->where('id', $this->userId = $userId)->first();
         $event = Event::query()
-            ->with(['competitions.forecast.awards.user'=> function($q)use($userId): void{
-                $q->where('id', $userId);
+            ->with(['competitions.forecast.awards.user'=> function($q): void{
+                $q->where('id', $this->userId);
             }])
             ->with('competitions.results')
             ->where('id', $eventId)->first();
@@ -31,12 +37,53 @@ class ShowUserEventController extends Controller
             abort(404);
         }
 
-        $event->competitions->each(function(EventCompetition &$competition)use($userId):void{
-            $awards = $competition->forecast->awards->filter(function(ForecastAward $award)use($userId):bool{
-                return $award->user_id == $userId;
+        $event->competitions->map(function(EventCompetition $competition):EventCompetition{
+            $awards = $competition->forecast->awards->filter(function(ForecastAward $award):bool{
+                return $award->user_id == $this->userId;
             });
             $competition->forecast->awards = $awards;
+
+            if(!$this->authUserId){
+                return $competition;
+            }
+
+            if(!$authUserAthletes = collect($competition->forecast->final_data->users)->where('id', $this->authUserId)->first()?->athletes){
+                return $competition;
+            }
+
+            $isAllAthletesSubmitted =collect($authUserAthletes)->filter(function(AthleteValueObject $athlete):bool{
+                return $athlete->id !== null;
+            })->count() > 5;
+
+            $competition->forecast->isAllAthletesSubmitted = $isAllAthletesSubmitted;
+
+//            $competition->forecast->isForecastAllDataSubmitted =
+//                collect(
+//                collect($competition->forecast->final_data->users)
+//                ->where('id', $this->userId)
+//                ->first()?->athletes, [])->filter(function(AthleteValueObject $athlete): bool{
+//                    return true;
+//                    return $athlete->id !== null;
+//                })->count();
+//
+//            dd($competition->forecast->isForecastAllDataSubmitted);
+
+            return $competition;
         });
+
+//        $event->competitions->map(function(EventCompetition $competition): EventCompetition{
+//            $completed = [];
+//            collect($competition->forecast->final_data->users)->each(function(UserValueObject $user)use(&$completed){
+//                $completed[$user->id] = collect($user->athletes)->filter(fn(AthleteValueObject $athlete) => !!$athlete->id)->count() > 5;
+//            });
+//
+//            dd($completed);
+//
+//
+//            return $competition;
+//        });
+//
+//        dd($event->competitions->first()->forecast->final_data);
 
         return view('forecasts.summary.show-user-event', compact('event', 'user'));
     }

@@ -4,6 +4,9 @@
         <thead>
             <tr>
                 <th class="px-1 py-2 text-start text-xs font-medium  text-gray-500 uppercase dark:text-neutral-500">Competition</th>
+                @if(auth()->check())
+                <th class="px-1 py-2 text-start text-xs font-medium  text-gray-500 dark:text-neutral-500"><x-tooltip text="Is your bids submitted?"><span class="uppercase">Ready?</span></x-tooltip></th>
+                @endif
                 <th class="px-1 py-2 text-start text-xs font-medium  text-gray-500 uppercase dark:text-neutral-500">Points</th>
                 <th class="px-1 py-2 text-start text-xs font-medium  text-gray-500 uppercase dark:text-neutral-500">Bonus</th>
                 <th class="px-1 py-2 text-start text-xs font-medium  text-gray-500 uppercase dark:text-neutral-500">Total</th>
@@ -44,6 +47,14 @@
                                 </a>
                         @endif
                     </td>
+                    @if(auth()->check())
+                    <td class="px-2 py-2 whitespace-nowrap text-sm font-medium text-right">
+                        <i class="cursor-pointer fa-circle @if($competition->forecast?->isAllAthletesSubmitted) fa-regular text-gray-500  bg-white @else fas @endif"
+                            hx-get="{{route('forecasts.show', ['id' => $competition->forecast->id, 'showContentOnly' => 1])}}"
+                            hx-target="#forecast"
+                        ></i>
+                    </td>
+                    @endif
                     <td class="px-2 py-2 whitespace-nowrap text-sm font-medium text-right">{{$regular = $competition->forecast->awards->where('type', \App\Enums\Forecast\AwardPointEnum::REGULAR_POINT)->first()?->points ?? 0}}</td>
                     <td class="px-2 py-2 whitespace-nowrap text-sm font-medium text-right">{{$bonus = $competition->forecast->awards->where('type', \App\Enums\Forecast\AwardPointEnum::BONUS_POINT)->first()?->points ?? 0}}</td>
                     <td class="px-2 py-2 whitespace-nowrap text-sm font-medium text-right">{{$total = $regular + $bonus}}</td>
@@ -60,6 +71,9 @@
         <tfoot>
             <tr>
                 <th class="px-1 py-2 text-end text-sm font-medium  text-gray-500 uppercase dark:text-neutral-500"></th>
+                @if(auth()->check())
+                <th class="px-1 py-2 text-end text-sm font-medium  text-gray-500 uppercase dark:text-neutral-500"></th>
+                @endif
                 <th class="px-1 py-2 text-end text-sm font-medium  text-gray-500 uppercase dark:text-neutral-500">{{$totalRegularPoints}}</th>
                 <th class="px-1 py-2 text-end text-sm font-medium  text-gray-500 uppercase dark:text-neutral-500">{{$totalBonusPoints}}</th>
                 <th class="px-1 py-2 text-end text-sm font-medium  text-gray-500 uppercase dark:text-neutral-500">{{$totalPoints}}</th>
