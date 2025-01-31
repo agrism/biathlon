@@ -57,33 +57,8 @@ class ShowUserEventController extends Controller
 
             $competition->forecast->isAllAthletesSubmitted = $isAllAthletesSubmitted;
 
-//            $competition->forecast->isForecastAllDataSubmitted =
-//                collect(
-//                collect($competition->forecast->final_data->users)
-//                ->where('id', $this->userId)
-//                ->first()?->athletes, [])->filter(function(AthleteValueObject $athlete): bool{
-//                    return true;
-//                    return $athlete->id !== null;
-//                })->count();
-//
-//            dd($competition->forecast->isForecastAllDataSubmitted);
-
             return $competition;
         });
-
-//        $event->competitions->map(function(EventCompetition $competition): EventCompetition{
-//            $completed = [];
-//            collect($competition->forecast->final_data->users)->each(function(UserValueObject $user)use(&$completed){
-//                $completed[$user->id] = collect($user->athletes)->filter(fn(AthleteValueObject $athlete) => !!$athlete->id)->count() > 5;
-//            });
-//
-//            dd($completed);
-//
-//
-//            return $competition;
-//        });
-//
-//        dd($event->competitions->first()->forecast->final_data);
 
         return view('forecasts.summary.show-user-event', compact('event', 'user'));
     }
