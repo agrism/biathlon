@@ -16,8 +16,8 @@ Route::get('/forecasts/summary/{userId}/{eventId}/show', Contr\Forecasts\Summary
 Route::get('/forecasts/{id}/{showContentOnly?}', Contr\Forecasts\ShowController::class)->name('forecasts.show');
 Route::get('/forecasts/{id}/select-athlete/{place}/place', Contr\Forecasts\SelectAthleteController::class)->name('forecasts.select-athlete');
 
-Route::get('/tweet', Contr\Twitter\IndexController::class)->name('twitter.index');
-Route::get('/api/tweets', Contr\Twitter\FetchController::class)->name('twitter.fetch');
+//Route::get('/tweet', Contr\Twitter\IndexController::class)->name('twitter.index');
+//Route::get('/api/tweets', Contr\Twitter\FetchController::class)->name('twitter.fetch');
 
 Route::get('test', function(){
     return '<div>1222</div>';
