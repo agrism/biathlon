@@ -6,19 +6,18 @@ use App\Enums\DisciplineEnum;
 use App\Helpers\LinkHelper;
 use App\Helpers\SeasonHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Forecasts\Summary\ShowUserEventController;
 use App\Models\Athlete;
 use App\Models\Forecast;
-use App\Models\ForecastSubmittedData;
 use App\ValueObjects\Athletes\AthleteStatsDetailValueObject;
 use App\ValueObjects\Helpers\Forecasts\FinalDataValueObject\AthleteValueObject;
-use App\ValueObjects\Helpers\Forecasts\ForecastFirstSixPlacesDataValueObject;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\Response;
 
 class SubmitSelectedAthleteController extends Controller
 {
-    public function __invoke(Request $request, string $id, string $place, string $athlete, LinkHelper $linkHelper): View|Response
+    public function __invoke(Request $request, string $id, string $place, string $athlete, LinkHelper $linkHelper): View|Response|string
     {
         if(!auth()->check()){
             abort(401, 'Login first');
@@ -28,7 +27,7 @@ class SubmitSelectedAthleteController extends Controller
             abort(401, 'Place provided: '.$place);
         }
 
-        if(!$forecast = Forecast::query()->where('id', $id)->first()){
+        if(!$forecast = Forecast::query()->with('competition')->where('id', $id)->first()){
             abort(404, 'Forecast not found: '.$id);
         }
 
@@ -68,6 +67,8 @@ class SubmitSelectedAthleteController extends Controller
         $forecast->final_data->updateUser($userValueObject);
         $forecast->save();
 
-        return (new ShowController())($request, $id, $linkHelper, SeasonHelper::instance(), true);
+        $content = (new ShowController())($request, $id, $linkHelper, SeasonHelper::instance(), true);
+
+        return response($content)->header('HX-Trigger', 'getIsUserCompletedForecastData-'.$forecast->id);
     }
 }

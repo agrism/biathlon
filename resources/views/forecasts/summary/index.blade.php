@@ -15,7 +15,7 @@
     </style>
 
     <div class="relative">
-        <input type="checkbox" id="info-1" class="hidden peer">
+        <input type="checkbox" id="info-1" name="info-1" class="hidden peer">
         <label for="info-1" class="cursor-pointer">
             <span class="inline-block peer-checked:hidden">
                 <x-tooltip position="right" text="click to show/hide point details">

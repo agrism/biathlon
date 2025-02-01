@@ -13,10 +13,10 @@ enum InputTypeEnum: string
     public function getElement(string $name, ?string $value = null, string $style = null, string $classes = null, array $options = []): string
     {
         return match ($this){
-            self::TEXT => '<input type="text" name="'.$name.'" value="'.$value.'" style="'.$style.'" class="'.$classes.'" />',
-            self::DATE => '<input type="date" name="'.$name.'" value="'.$value.'" style="'.$style.'" class="'.$classes.'"  />',
+            self::TEXT => '<input type="text" name="'.$name.'" id="'.$name.'" value="'.$value.'" style="'.$style.'" class="'.$classes.'" />',
+            self::DATE => '<input type="date" name="'.$name.'" id="'.$name.'" value="'.$value.'" style="'.$style.'" class="'.$classes.'"  />',
             self::SELECT => (function() use($name, $style, $value, $classes, $options){
-                $return[] ='<select type="date" name="'.$name.'" value="'.$value.'" style="'.$style.'" class="'.$classes.'">';
+                $return[] ='<select type="date" name="'.$name.'"  id="'.$name.'" value="'.$value.'" style="'.$style.'" class="'.$classes.'">';
                 foreach ($options as $key => $option){
                     $return[] = '<option value="'.$key.'"  '.($value == $key ? 'selected' : '').'>'.$option.'</option>';
                 }
