@@ -61,7 +61,8 @@ class SubmitSelectedAthleteController extends Controller
                 statShooting: $athleteModel->stat_shooting,
                 statShootingProne: $athleteModel->stat_shooting_prone,
                 statShootingStanding: $athleteModel->stat_shooting_standing,
-            )
+            ),
+            isHidden: data_get($userValueObject->athletes, $place)?->isHidden ?? false
         ));
 
         $forecast->final_data->updateUser($userValueObject);
