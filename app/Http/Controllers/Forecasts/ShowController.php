@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\Forecasts;
 
+use App\Enums\DisciplineEnum;
 use App\Helpers\FavoriteHelper;
 use App\Helpers\LinkHelper;
 use App\Helpers\SeasonHelper;
 use App\Http\Controllers\Controller;
+use App\Models\Athlete;
+use App\Models\EventCompetitionResult;
 use App\Models\Forecast;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,10 +23,15 @@ class ShowController extends Controller
     {
         $this->linkHelper = $linkHelper;
 
-        $forecast = Forecast::query()->with('competition')
+        $forecast = Forecast::query()->with('competition.results.athlete')
             ->where('id', $id)
             ->first();
 
+        $isTeamDiscipline = DisciplineEnum::tryFrom($forecast->competition->discipline_remote_id)->isTeamDiscipline();
+
+        $startingUserTempIds = $forecast->competition->results->map(function (EventCompetitionResult $result)use($isTeamDiscipline){
+            return $result->athlete->attachTempId(isTeamDiscipline: $isTeamDiscipline)->temp_id;
+        })->toArray();
 
         if(!$forecast){
             return redirect()->to(route('forecasts.index'));
@@ -36,9 +44,9 @@ class ShowController extends Controller
         }
 
         if($showContentOnly){
-            return view('forecasts.partials.show-content', compact('forecast', 'favoriteAthleteIds'));
+            return view('forecasts.partials.show-content', compact('forecast', 'favoriteAthleteIds', 'startingUserTempIds'));
         }
 
-        return view('forecasts.show', compact('forecast', 'favoriteAthleteIds'));
+        return view('forecasts.show', compact('forecast', 'favoriteAthleteIds', 'startingUserTempIds'));
     }
 }

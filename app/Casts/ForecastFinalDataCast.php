@@ -30,6 +30,7 @@ class ForecastFinalDataCast implements CastsAttributes
                 flagUrl: data_get($athlete, 'flagUrl'),
                 stats: AthleteStatsDetailsCast::createDetails( ArrayHelper::instance()->toArray(data_get($athlete, 'stats', []))),
                 isHidden: boolval(data_get($athlete, 'isHidden', false)),
+                isInStartList: boolval(data_get($athlete, 'isInStartList', false)),
             );
         };
 

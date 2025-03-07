@@ -55,7 +55,7 @@
                     </td>
 
                     @foreach($user->getAthletes() as $athlete)
-                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
+                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium @if(!in_array($athlete->tempId, $startingUserTempIds ??[])) bg-red-100 @endif">
                             @if($forecast->submit_deadline_at->gt(now()) && $athlete->isHidden)
                                 <div class="flex justify-center items-center w-full h-full text-lg">
                                     <x-tooltip text="This prediction is hidden by owner">
@@ -148,7 +148,7 @@
                             {{$user->name}}
                         </td>
                         @foreach($user->getAthletes() as $athlete)
-                            <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
+                            <td class="px-2 py-2 whitespace-nowrap text-sm font-medium  @if(!in_array($athlete->tempId, $startingUserTempIds ??[])) bg-red-100 @endif">
                                 <img src="{{$athlete->flagUrl}}" style="height:20px;display:inline-block;">&nbsp;{{$athlete->name}}
                                 <x-cards.athlete-stat :athlete="$athlete"></x-cards.athlete-stat>
                             </td>

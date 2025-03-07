@@ -14,6 +14,7 @@ class AthleteValueObject
         public ?string $flagUrl,
         public ?AthleteStatsDetailValueObject $stats = null,
         public ?bool $isHidden = false,
+        public ?bool $isInStartList = false,
     )
     {
     }
@@ -27,6 +28,7 @@ class AthleteValueObject
             'flagUrl' => $this->flagUrl,
             'stats' => $this->stats?->export(),
             'isHidden' => $this->isHidden,
+            'isInStartList' => $this->isInStartList,
         ];
     }
 
