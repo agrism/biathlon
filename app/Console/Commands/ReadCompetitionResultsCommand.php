@@ -41,6 +41,11 @@ class ReadCompetitionResultsCommand extends Command
             })
             ->whereNull('results_handled_at')
             ->get()->each(function (EventCompetition $competition) use ($api): bool {
+
+                if(in_array(1, ['BT2425SWRLCP08SWIN', 'BT2425SWRLCP08SMIN'])){
+                    return true;
+                }
+
                 $response = $api->results(raceId: $competition->race_remote_id);
 
                 if ($response->status() !== Response::HTTP_OK) {
