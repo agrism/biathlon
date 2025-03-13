@@ -33,7 +33,7 @@ class ReadCompetitionResultsCommand extends Command
     public function handle(BiathlonResultApi $api)
     {
         EventCompetition::query()
-            ->where('start_time', '>', Carbon::parse('2024-01-01'))
+            ->where('start_time', '>', Carbon::parse('2025-01-01'))
             ->where('start_time', '<', now()->addDay())
             ->with(['results', 'event'])
             ->whereHas('event', function ($q) {
@@ -44,6 +44,7 @@ class ReadCompetitionResultsCommand extends Command
                 $response = $api->results(raceId: $competition->race_remote_id);
 
                 if ($response->status() !== Response::HTTP_OK) {
+                    dump(['code'=> $response->status()]);
                     dd($response->getBody());
                     return true;
                 }
