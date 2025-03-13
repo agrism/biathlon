@@ -42,7 +42,7 @@ class ReadCompetitionResultsCommand extends Command
             ->whereNull('results_handled_at')
             ->get()->each(function (EventCompetition $competition) use ($api): bool {
 
-                if(in_array(1, ['BT2425SWRLCP08SWIN', 'BT2425SWRLCP08SMIN'])){
+                if(in_array($competition->race_remote_id, ['BT2425SWRLCP08SWIN', 'BT2425SWRLCP08SMIN'])){
                     return true;
                 }
 
