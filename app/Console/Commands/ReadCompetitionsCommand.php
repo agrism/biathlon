@@ -32,6 +32,7 @@ class ReadCompetitionsCommand extends Command
     public function handle(BiathlonResultApi $api)
     {
         Event::query()
+            ->where('start_date', '>', now()->startOfYear())
 //            ->where('id', '>', 258)
 //            ->where('id', '>', 513)
             ->get()->each(function (Event $event) use ($api): bool {

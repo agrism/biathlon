@@ -31,10 +31,10 @@ class GenerateMissingForecastsCommand extends Command
     {
         EventCompetition::query()
             ->where('start_time', '>', now()->subMonths(3))
-            ->with('forecasts')
+            ->with('forecast')
             ->get()
             ->each(function (EventCompetition $competition): bool {
-                if ($competition->forecasts->count() > 0) {
+                if ($competition->forecast) {
                     return true;
                 }
 
