@@ -44,8 +44,11 @@ class ReadCompetitionResultsCommand extends Command
                 $response = $api->results(raceId: $competition->race_remote_id);
 
                 if ($response->status() !== Response::HTTP_OK) {
-                    dump(['code'=> $response->status()]);
-                    dd($response->getBody());
+                    dd([
+                        '$competition->race_remote_id' =>  $competition->race_remote_id,
+                        'code'=> $response->status(),
+                        'responseBody' => $response->getBody()->getContents(),
+                    ]);
                     return true;
                 }
 
