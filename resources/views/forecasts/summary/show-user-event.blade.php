@@ -21,7 +21,7 @@
                 $totalBonusPoints = 0;
                 $totalPoints = 0;
             @endphp
-            @foreach($event->competitions->sortBy('start_date') as $competition)
+            @foreach($event->competitions->sortBy('start_time') as $competition)
 
                 <tr class="odd:bg-white even:bg-gray-100">
                     @if(auth()->check())
