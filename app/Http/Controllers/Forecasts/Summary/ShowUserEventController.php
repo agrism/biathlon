@@ -37,7 +37,7 @@ class ShowUserEventController extends Controller
             abort(404);
         }
 
-        $event->competitions->map(function(EventCompetition $competition):EventCompetition{
+        $event->competitions->sortBy('start_date')->map(function(EventCompetition $competition):EventCompetition{
             $awards = $competition->forecast->awards->filter(function(ForecastAward $award):bool{
                 return $award->user_id == $this->userId;
             });
