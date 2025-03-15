@@ -56,7 +56,7 @@ class IndexController extends Controller
             $userAwardsInEvent = [];
 
             /** @var EventCompetition $competition */
-            foreach ($event->competitions as $competition){
+            foreach ($event->competitions->sortBy('start_time') as $competition){
                 /** @var ForecastAward $award */
                 foreach ($competition->forecast->awards as $award) {
                     $prev =  $userAwardsInEvent[$award->user->name][$award->type->value] ?? 0;
