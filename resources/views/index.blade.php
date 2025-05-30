@@ -79,28 +79,14 @@
             const totalSeconds2 = Math.floor((targetDate - now) / 1000);
             document.getElementById("countdown2").innerText = totalSeconds2.toLocaleString() + ' seconds';
 
-
-
             const days3 = Math.floor(totalSeconds2 / (60 * 60 * 24));
-            const seconds3 = totalSeconds % (60 * 60 * 24); // seconds remaining after full days
+            const seconds3 = totalSeconds2 % (60 * 60 * 24); // seconds remaining after full days
 
             document.getElementById("countdown3").innerText =
-                `${days3} day${days3 !== 1 ? 's' : ''} and ${seconds3} second${seconds3 !== 1 ? 's' : ''}`;
+                `${days3} day${days3 !== 1 ? 's' : ''} and ${seconds3.toLocaleString()} second${seconds3 !== 1 ? 's' : ''}`;
 
 
         }, 1000);
 
-
-        // const countdown = setInterval(() => {
-        //     const now = new Date();
-        //     const totalSeconds = Math.floor((targetDate - now) / 1000);
-        //
-        //     if (totalSeconds <= 0) {
-        //         clearInterval(countdown);
-        //         document.getElementById("countdown").innerText = "0";
-        //     } else {
-        //         document.getElementById("countdown").innerText = totalSeconds.toLocaleString();
-        //     }
-        // }, 1000);
     </script>
 @endsection
