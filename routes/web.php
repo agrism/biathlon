@@ -5,7 +5,8 @@ use App\Models\Event;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers as Contr;
 
-Route::get('/', Contr\Events\IndexController::class)->name('home');
+Route::get('/', Contr\IndexController::class)->name('home');
+Route::get('/events', Contr\Events\IndexController::class)->name('events.index');
 Route::get('/events/{id}', Contr\Events\ShowController::class)->name('events.show');
 Route::get('/competitions/{id}/{showContentOnly?}', Contr\Competitions\ShowController::class)->name('competitions.show');
 Route::get('/athletes', Contr\Athletes\IndexController::class)->name('athletes.index');
@@ -18,10 +19,6 @@ Route::get('/forecasts/{id}/select-athlete/{place}/place', Contr\Forecasts\Selec
 
 //Route::get('/tweet', Contr\Twitter\IndexController::class)->name('twitter.index');
 //Route::get('/api/tweets', Contr\Twitter\FetchController::class)->name('twitter.fetch');
-
-Route::get('test', function(){
-    return '<div>1222</div>';
-});
 
 Route::group([
     'prefix' => 'private',
