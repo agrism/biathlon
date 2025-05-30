@@ -2,6 +2,12 @@
 
 @section('content')
 
+    <style>
+        p {
+            padding: 15px;
+        }
+    </style>
+
 
 
     <h2 class="mb-4 mt-4 text-2xl font-extrabold leading-none tracking-tight text-gray-900 md:text-2xl lg:text-3xl  text-center ">
@@ -14,7 +20,7 @@
     <br>
     <br>
     <br>
-    <h1 class="mb-4 mt-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-2xl lg:text-3xl  text-center text-red-500">
+    <h1 class="mb-4 mt-4 text-4xl leading-none tracking-tight text-gray-900 md:text-2xl lg:text-3xl  text-center" style="color: #020288">
         <p>Only
         <p id="countdown"></p>
         <p>or</p>
