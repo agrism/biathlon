@@ -18,6 +18,7 @@ class IndexController extends Controller
 
         $event = Event::query()
             ->where('season_id', $season?->id)
+            ->where('level', 1)
             ->where('start_date', '>', now())
             ->first();
 
