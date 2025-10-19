@@ -44,54 +44,134 @@ Route::group([
 });
 
 
-Route::get('test', function (){
-    $a = (new \App\Services\BiathlonResultApi)->athlete('BTFRA11608199201');
+//Route::get('test', function (){
+//    $a = (new \App\Services\BiathlonResultApi)->athlete('BTFRA11608199201');
+//
+//    dd($a->json());
+//});
+//
+//Route::get('test2', function (){
+//    $a = (new \App\Services\BiathlonResultApi)->athlete('BTITA20402199501');
+//
+//    dd($a->json());
+//});
+//
+//Route::get('test3', function (){
+//    $a = (new \App\Services\BiathlonResultApi)->athlete('BTNOR11605199301');
+//
+//    dump($a->json());
+//    dump($a->json()['RNKS']);
+//    dd($a->json()['Badges']);
+//});
+//
+//Route::get('test2.gro', function (){
+//    $a = (new \App\Services\BiathlonResultApi)->athlete('BTGER22503200401');
+//
+//    return $a->json();
+//});
+//
+//Route::get('test2.grod', function (){
+//    dump('GROTIAN Selina');
+//
+//    $a = (new \App\Services\BiathlonResultApi)->athlete('BTGER22503200401');
+//
+//    dd($a->json());
+//});
 
-    dd($a->json());
+Route::get('/test-dainis', function (){
+
+    $forecasts = \App\Models\Forecast::query()->where('status', \App\Enums\Forecast\ForecastStatusEnum::COMPLETED)->get();
+
+    $return = [];
+
+    $users = \App\Models\User::query()->get();
+
+    $userTotalPoints = [];
+
+    foreach ($users as $user){
+        $userTotalPoints[$user->name]['old'] = 0;
+        $userTotalPoints[$user->name]['new'] = 0;
+    }
+
+//    dump($forecasts);
+    foreach ($forecasts as $forecast){
+        /** @var \App\Models\Forecast $forecast */
+//        dd($forecast->final_data);
+
+
+        $returnItem = [];
+
+        $returnItem['name'] = $forecast->competition->description . ', at: ' .$forecast->competition->start_time?->format('m/Y');
+
+
+        foreach ($users as $user){
+
+            $dainisCalc = new \App\Helpers\Forecasts\ForecastDainisServiceHelper;
+            $dainisCalc->calculateUserPoints(forecast: $forecast, user: $user);
+
+//            dump($user->name);
+//            dump($dainisCalc->getMainPoints());
+//            dump($dainisCalc->getBonusPoints());
+//            dd(1);
+
+            $userTotalPoints[$user->name]['old'] += $oldRegular = $forecast->awards->where('user_id',$user->id)->where('type',\App\Enums\Forecast\AwardPointEnum::REGULAR_POINT)->first()?->points;
+            $userTotalPoints[$user->name]['old'] += $oldBonus = $forecast->awards->where('user_id',$user->id)->where('type',\App\Enums\Forecast\AwardPointEnum::BONUS_POINT)->first()?->points;
+            $userTotalPoints[$user->name]['new'] += $newRegular = $dainisCalc->getMainPoints();
+            $userTotalPoints[$user->name]['new'] += $newBonus =$dainisCalc->getBonusPoints();
+
+            $returnItem['users'][] = [
+                'name' =>$user->name,
+                'points' => [
+                    [
+                        'type' => $forecast->type->name,
+                        'points' => [
+                            'regular' => $oldRegular,
+                            'bonus' => $oldBonus,
+                        ],
+                    ],
+                    [
+                        'type' => \App\Enums\Forecast\ForecastTypeEnum::FORECAST_DAINIS_SCHEMA->name,
+                        'points' => [
+                            'regular' => $newRegular,
+                            'bonus' => $newBonus,
+                        ]
+                    ]
+
+                ]
+            ];
+
+//            echo '<td colspan="2">'.$user->name.'</td>';
+//
+//            foreach ($forecast->awards->where('user_id', $user->id) as $award){
+//                echo '<td>';
+//                echo $award->type->value;
+//                echo '</td>';
+//                echo '<td>';
+//                echo $award->points;
+//                echo '</td>';
+
+
+//                $s = new \App\Helpers\Forecasts\ForecastDainisServiceHelper;
+//
+//                $s->calculateUserPoints($forecast, $award->user);
+//                dump($s->getMainPoints());
+//                dd($s->getBonusPoints());
+
+
+//                echo '</td>';
+//            }
+        }
+
+
+        $return[] = $returnItem;
+    }
+
+    $return[]=$userTotalPoints;
+
+    return $return;
 });
 
-Route::get('test2', function (){
-    $a = (new \App\Services\BiathlonResultApi)->athlete('BTITA20402199501');
 
-    dd($a->json());
-});
-
-Route::get('test3', function (){
-    $a = (new \App\Services\BiathlonResultApi)->athlete('BTNOR11605199301');
-
-    dump($a->json());
-    dump($a->json()['RNKS']);
-    dd($a->json()['Badges']);
-});
-
-Route::get('test2.gro', function (){
-    $a = (new \App\Services\BiathlonResultApi)->athlete('BTGER22503200401');
-
-    return $a->json();
-});
-
-Route::get('test2.grod', function (){
-    dump('GROTIAN Selina');
-
-    $a = (new \App\Services\BiathlonResultApi)->athlete('BTGER22503200401');
-
-    dd($a->json());
-});
-
-
-
-
-Route::get('test4', function (){
-
-    $event = Event::query()
-        ->where('level', 1)
-        ->where('start_date', '<', now())
-        ->where('end_date', '>', now())
-        ->with('competitions.results.athlete')
-        ->first();
-
-    dd($event->competitions->pluck('results.athlete'));
-});
 
 
 

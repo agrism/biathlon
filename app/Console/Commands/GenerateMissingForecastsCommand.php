@@ -6,6 +6,7 @@ use App\Enums\Forecast\ForecastStatusEnum;
 use App\Enums\Forecast\ForecastTypeEnum;
 use App\Models\EventCompetition;
 use App\Models\Forecast;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class GenerateMissingForecastsCommand extends Command
@@ -42,7 +43,13 @@ class GenerateMissingForecastsCommand extends Command
                 $forecast->event_competition_id = $competition->id;
                 $forecast->status = ForecastStatusEnum::COMING;
                 $forecast->name = 'Forecast: ' . $competition->description;
-                $forecast->type = ForecastTypeEnum::FORECAST_FIRST_SIX_PLACES;
+
+                if(now()->lt(Carbon::now('2025-10-20 00:00:00'))){
+                    $forecast->type = ForecastTypeEnum::FORECAST_FIRST_SIX_PLACES;
+                } else {
+                    $forecast->type = ForecastTypeEnum::FORECAST_DAINIS_SCHEMA;
+                }
+
                 $forecast->submit_deadline_at = $competition->start_time;
                 $forecast->save();
 

@@ -3,7 +3,7 @@
 namespace App\Helpers\Forecasts;
 
 use App\Helpers\InstanceTrait;
-class PointCalculatorServiceHelper extends ForecastAbstractionHelper
+class PointCalculatorServiceHelper
 {
     use InstanceTrait;
 

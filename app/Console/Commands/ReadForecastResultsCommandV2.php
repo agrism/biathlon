@@ -18,14 +18,14 @@ use App\ValueObjects\Helpers\Forecasts\FinalDataValueObject\UserValueObject;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 
-class ReadForecastResultsCommand extends Command
+class ReadForecastResultsCommandV2 extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'app:read-forecast-results-command';
+    protected $signature = 'app:read-forecast-results-command-v2';
 
     /**
      * The console command description.
@@ -46,7 +46,7 @@ class ReadForecastResultsCommand extends Command
             ->whereHas('competition', function (Builder $builder) {
                 $builder->whereNotNull('results_handled_at');
             })
-            ->where('status', ForecastStatusEnum::COMING)
+            ->where('status', ForecastStatusEnum::COMPLETED)
             ->get();
 
         $forecastsToHande->each(function (Forecast $forecast) {
@@ -82,7 +82,7 @@ class ReadForecastResultsCommand extends Command
                 })->toArray();
 
             foreach ($forecast->final_data->users as &$user) {
-                $pointService = $forecast->type->getHelper();
+                $pointService = ForecastFirstSixPlacesServiceHelper::instance();
                 $pointService->calculateUserPoints(forecast: $forecast, user: $user->getModel());
 
                 $user->points = [
