@@ -175,7 +175,7 @@ Route::get('/test-dainis', function (Request $request){
             echo '<tr style="background-color: #e5e7eb"><td>Bonus '.$diff.'</td><td><input name="bonus[individual]['.$diff.']" type="text" value="'.data_get($dainisCalc->getMatrix(), 'bonus.individual.'.$diff).'"></td><td><input name="bonus[team]['.$diff.']" value="'.data_get($dainisCalc->getMatrix(), 'bonus.team.'.$diff).'" type="text"></td></tr>';
         }
 
-        echo '<tr><td colspan="10" style="text-align: right"><a href="/test-dainis"><button type="button" style="margin-right: 5px">Set default</button></a><button>submit matrix</button></td></tr>';
+        echo '<tr><td colspan="10" style="text-align: right"><a href="/test-dainis"><button type="button" style="margin-right: 5px">Reset to default</button></a><button>submit matrix</button></td></tr>';
         echo '</tbody>';
         echo '</table>';
         echo '</form>';
