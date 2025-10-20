@@ -235,7 +235,7 @@ HTML;
             $agrisOld, $dainisOld, $greyOld, $andrisOld,
         ];
         echo '<tr><td>Old sys %</td><td>'.round($agrisOldPerc,2).'%</td><td>'.round($greyOldPerc, 2).'%</td><td>'.round($dainisOldPerc, 2).'%</td><td>'.round($andrisOldPerc,2).'%</td><td>'.round($oldTotalPercent,2).'%</td></tr>';
-        echo '<tr><td>Old sys rank</td><td>'.$getPlace(provided: $agrisOld,all:  $all).'</td><td>'.$getPlace(provided: $greyOld,all:  $all).'</td><td>'.$getPlace(provided: $dainisOld,all:  $all).'</td><td>'.$getPlace(provided: $andrisOld,all:  $all).'</td><td>'.round($oldTotalPercent,2).'%</td></tr>';
+        echo '<tr><td>Old sys rank</td><td>'.$getPlace(provided: $agrisOld,all:  $all).'</td><td>'.$getPlace(provided: $greyOld,all:  $all).'</td><td>'.$getPlace(provided: $dainisOld,all:  $all).'</td><td>'.$getPlace(provided: $andrisOld,all:  $all).'</td><td></td></tr>';
 
 
         echo '<tr><td colspan="100">&nbsp;</td></tr>';
@@ -253,10 +253,10 @@ HTML;
         $newTotalPercent += $andrisNewPerc = $andrisNew / $newTotal * 100;
         echo '<tr><td>New sys %</td><td>'.round($agrisNewPerc,2).'%</td><td>'.round($greyNewPerc, 2).'%</td><td>'.round($dainisNewPerc, 2).'%</td><td>'.round($andrisNewPerc,2).'%</td><td>'.round($newTotalPercent,2).'%</td></tr>';
         $all = [$agrisNew, $greyNew, $dainisNew, $andrisNew];
-        echo '<tr><td>New sys rank</td><td>'.$getPlace(provided: $agrisNew,all:  $all).'</td><td>'.$getPlace(provided: $greyNew,all:  $all).'</td><td>'.$getPlace(provided: $dainisNew,all:  $all).'</td><td>'.$getPlace(provided: $andrisNew,all:  $all).'</td><td>'.round($oldTotalPercent,2).'%</td></tr>';
+        echo '<tr><td>New sys rank</td><td>'.$getPlace(provided: $agrisNew,all:  $all).'</td><td>'.$getPlace(provided: $greyNew,all:  $all).'</td><td>'.$getPlace(provided: $dainisNew,all:  $all).'</td><td>'.$getPlace(provided: $andrisNew,all:  $all).'</td><td></td></tr>';
         echo '<tr><td colspan="100">&nbsp;</td></tr>';
 
-        echo '<tr><td>%, delta (old-new)</td><td>'.round($agrisOldPerc-$agrisNewPerc,2).'%</td><td>'.round($greyOldPerc - $greyNewPerc, 2).'%</td><td>'.round($dainisOldPerc-$dainisNewPerc, 2).'%</td><td>'.round($andrisOldPerc-$andrisNewPerc,2).'%</td><td>'.round($newTotalPercent,2).'%</td></tr>';
+        echo '<tr><td>%, delta (old-new)</td><td>'.round($agrisOldPerc-$agrisNewPerc,2).'%</td><td>'.round($greyOldPerc - $greyNewPerc, 2).'%</td><td>'.round($dainisOldPerc-$dainisNewPerc, 2).'%</td><td>'.round($andrisOldPerc-$andrisNewPerc,2).'%</td><td></td></tr>';
 
 
         echo '</tbody>';
