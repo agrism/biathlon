@@ -164,7 +164,7 @@ Route::get('/test-dainis', function (Request $request){
         echo '<form action="test-dainis">';
         echo '<input type="hidden" name="mode" value="table">';
         echo '<table>';
-        echo '<thead><tr><th>Description</th><th>Individual</th><th>Team</th></tr></thead>';
+        echo '<thead><tr><th>Description</th><th>Individual points</th><th>Team points</th></tr></thead>';
         echo '<tbody>';
 
         foreach ([0,1,2,3,4,5] as $diff){
