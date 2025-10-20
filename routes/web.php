@@ -113,7 +113,7 @@ Route::get('/test-dainis', function (Request $request){
         $returnItem = [];
 
         $returnItem['name'] = $forecast->competition->description.', at: '.$forecast->competition->start_time?->format('m/Y');
-//        $returnItem['url'] = route('forecasts.summary.user-event', ['user_id' =>1, ]);
+        $returnItem['url'] = route('forecasts.show', $forecast->id);
 
 
         foreach ($users as $user) {
