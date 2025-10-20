@@ -24,6 +24,40 @@ class ForecastDainisServiceHelper extends ForecastAbstractionHelper
     protected array $resultAthleteIds = [];
     protected array $userGivenForecastAthleteIds = [];
 
+    protected array $matrix = [
+        'regular' => [
+            'individual' => [
+                0 => 100,
+                1 => 70,
+                2 => 50,
+                3 => 30,
+                4 => 20,
+                5 => 10,
+            ],
+            'team' => [
+                0 => 40,
+                1 => 28,
+                2 => 20,
+                3 => 12,
+                4 => 8,
+                5 => 4,
+            ]
+        ],
+        'bonus' => [
+            'individual' => [
+                'gold' => 100,
+                'silver' => 70,
+                'bronze' => 50,
+            ],
+            'team' => [
+                'gold' => 40,
+                'silver' => 28,
+                'bronze' => 20,
+            ],
+        ]
+
+    ];
+
     public function calculateUserPoints(Forecast $forecast, User $user): self
     {
         $this->mainPoints = 0;
@@ -39,6 +73,40 @@ class ForecastDainisServiceHelper extends ForecastAbstractionHelper
 
         $this->registerMainPoints();
         $this->registerBonusPoints();
+
+        return $this;
+    }
+
+    public function overrideMatrix(array $data): self
+    {
+        foreach([
+            'regular.individual.0',
+            'regular.individual.1',
+            'regular.individual.2',
+            'regular.individual.3',
+            'regular.individual.4',
+            'regular.individual.5',
+
+            'regular.team.0',
+            'regular.team.1',
+            'regular.team.2',
+            'regular.team.3',
+            'regular.team.4',
+            'regular.team.5',
+
+            'bonus.individual.gold',
+            'bonus.individual.silver',
+            'bonus.individual.bronze',
+
+            'bonus.team.gold',
+            'bonus.team.silver',
+            'bonus.team.bronze',
+                ] as $key){
+            $default = data_get($this->matrix, $key);
+            data_set($this->matrix, $key, data_get($data, $key, $default));
+        }
+
+
 
         return $this;
     }
@@ -65,22 +133,22 @@ class ForecastDainisServiceHelper extends ForecastAbstractionHelper
 
         if($this->foundGoldPlace()){
             $this->bonusPoints += match ($this->isTeamDiscipline){
-                false => 40,
-                true => 100,
+                false => data_get($this->matrix, 'bonus.individual.gold'),
+                true => data_get($this->matrix, 'bonus.team.gold'),
             };
         }
 
         if($this->foundSilverPlace()){
             $this->bonusPoints += match ($this->isTeamDiscipline){
-                false => 28,
-                true => 70,
+                false => data_get($this->matrix, 'bonus.individual.silver'),
+                true => data_get($this->matrix, 'bonus.team.silver'),
             };
         }
 
         if($this->foundBronzePlace()){
             $this->bonusPoints += match ($this->isTeamDiscipline){
-                false => 20,
-                true => 50,
+                false => data_get($this->matrix, 'bonus.individual.bronze'),
+                true => data_get($this->matrix, 'bonus.team.bronze'),
             };
         }
 
@@ -121,23 +189,23 @@ class ForecastDainisServiceHelper extends ForecastAbstractionHelper
     {
         if($this->isTeamDiscipline){
             return match ($precisionDelta){
-                0 => 40,
-                1 => 28,
-                2 => 20,
-                3 => 12,
-                4 => 8,
-                5 => 4,
+                0 => data_get($this->matrix, 'regular.team.0'),
+                1 => data_get($this->matrix, 'regular.team.1'),
+                2 => data_get($this->matrix, 'regular.team.2'),
+                3 => data_get($this->matrix, 'regular.team.3'),
+                4 => data_get($this->matrix, 'regular.team.4'),
+                5 => data_get($this->matrix, 'regular.team.5'),
                 default => 0
             };
         }
 
         return match ($precisionDelta){
-            0 => 100,
-            1 => 70,
-            2 => 50,
-            3 => 30,
-            4 => 20,
-            5 => 10,
+            0 => data_get($this->matrix, 'regular.individual.0'),
+            1 => data_get($this->matrix, 'regular.individual.1'),
+            2 => data_get($this->matrix, 'regular.individual.2'),
+            3 => data_get($this->matrix, 'regular.individual.3'),
+            4 => data_get($this->matrix, 'regular.individual.4'),
+            5 => data_get($this->matrix, 'regular.individual.5'),
             default => 0
         };
     }
@@ -155,5 +223,10 @@ class ForecastDainisServiceHelper extends ForecastAbstractionHelper
     private function foundBronzePlace(): bool
     {
         return ($this->resultAthleteIds[2] ?? 'x') == ($this->userGivenForecastAthleteIds[2] ?? 'y');
+    }
+
+    public function getMatrix(): array
+    {
+        return $this->matrix;
     }
 }

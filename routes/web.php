@@ -2,20 +2,24 @@
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Models\Event;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers as Contr;
 
 Route::get('/', Contr\IndexController::class)->name('home');
 Route::get('/events', Contr\Events\IndexController::class)->name('events.index');
 Route::get('/events/{id}', Contr\Events\ShowController::class)->name('events.show');
-Route::get('/competitions/{id}/{showContentOnly?}', Contr\Competitions\ShowController::class)->name('competitions.show');
+Route::get('/competitions/{id}/{showContentOnly?}',
+    Contr\Competitions\ShowController::class)->name('competitions.show');
 Route::get('/athletes', Contr\Athletes\IndexController::class)->name('athletes.index');
 Route::get('/athletes/{id}', Contr\Athletes\ShowController::class)->name('athletes.show');
 Route::get('/forecasts/', Contr\Forecasts\IndexController::class)->name('forecasts.index');
 Route::get('/forecasts/summary', Contr\Forecasts\Summary\IndexController::class)->name('forecasts.summary.index');
-Route::get('/forecasts/summary/{userId}/{eventId}/show', Contr\Forecasts\Summary\ShowUserEventController::class)->name('forecasts.summary.user-event');
+Route::get('/forecasts/summary/{userId}/{eventId}/show',
+    Contr\Forecasts\Summary\ShowUserEventController::class)->name('forecasts.summary.user-event');
 Route::get('/forecasts/{id}/{showContentOnly?}', Contr\Forecasts\ShowController::class)->name('forecasts.show');
-Route::get('/forecasts/{id}/select-athlete/{place}/place', Contr\Forecasts\SelectAthleteController::class)->name('forecasts.select-athlete');
+Route::get('/forecasts/{id}/select-athlete/{place}/place',
+    Contr\Forecasts\SelectAthleteController::class)->name('forecasts.select-athlete');
 
 //Route::get('/tweet', Contr\Twitter\IndexController::class)->name('twitter.index');
 //Route::get('/api/tweets', Contr\Twitter\FetchController::class)->name('twitter.fetch');
@@ -24,9 +28,11 @@ Route::group([
     'prefix' => 'private',
 //    'middleware' => 'auth:web',
     'middleware' => AuthMiddleware::class,
-], function(){
-    Route::get('/forecasts/{id}/select-athlete/{place}/place/{athlete}/submit', Contr\Forecasts\SubmitSelectedAthleteController::class)->name('forecasts.select-athlete.submit');
-    Route::get('/forecasts/{id}/select-athlete/{place}/place/move/{direction}', Contr\Forecasts\MoveUpDownPlaceController::class)
+], function () {
+    Route::get('/forecasts/{id}/select-athlete/{place}/place/{athlete}/submit',
+        Contr\Forecasts\SubmitSelectedAthleteController::class)->name('forecasts.select-athlete.submit');
+    Route::get('/forecasts/{id}/select-athlete/{place}/place/move/{direction}',
+        Contr\Forecasts\MoveUpDownPlaceController::class)
         ->where('direction', 'up|down')
         ->name('forecasts.select-athlete.place.move.up-down');
 
@@ -36,11 +42,11 @@ Route::group([
     Route::get('/forecasts/{id}/submit-status', Contr\Forecasts\AuthUserSubmitStatusController::class)
         ->name('forecasts.submit-status');
 
-    Route::get('/',Contr\Private\IndexController::class)->name('private.index');
+    Route::get('/', Contr\Private\IndexController::class)->name('private.index');
     Route::get('/profile', Contr\Private\ProfileController::class)->name('private.profile');
 
-    Route::get('/favorites/athletes/{id}/toggle', Contr\Favorites\AthleteToggleController::class)->name('favorites.toggle');
-
+    Route::get('/favorites/athletes/{id}/toggle',
+        Contr\Favorites\AthleteToggleController::class)->name('favorites.toggle');
 });
 
 
@@ -78,9 +84,14 @@ Route::group([
 //    dd($a->json());
 //});
 
-Route::get('/test-dainis', function (){
+Route::get('/test-dainis', function (Request $request){
 
-    $forecasts = \App\Models\Forecast::query()->where('status', \App\Enums\Forecast\ForecastStatusEnum::COMPLETED)->get();
+    $dainisCalc = new \App\Helpers\Forecasts\ForecastDainisServiceHelper;
+    $dainisCalc->overrideMatrix($request->all());
+
+
+    $forecasts = \App\Models\Forecast::query()->where('status',
+        \App\Enums\Forecast\ForecastStatusEnum::COMPLETED)->get();
 
     $return = [];
 
@@ -88,39 +99,40 @@ Route::get('/test-dainis', function (){
 
     $userTotalPoints = [];
 
-    foreach ($users as $user){
+    foreach ($users as $user) {
         $userTotalPoints[$user->name]['old'] = 0;
         $userTotalPoints[$user->name]['new'] = 0;
     }
 
 //    dump($forecasts);
-    foreach ($forecasts as $forecast){
+    foreach ($forecasts as $forecast) {
         /** @var \App\Models\Forecast $forecast */
 //        dd($forecast->final_data);
 
 
         $returnItem = [];
 
-        $returnItem['name'] = $forecast->competition->description . ', at: ' .$forecast->competition->start_time?->format('m/Y');
+        $returnItem['name'] = $forecast->competition->description.', at: '.$forecast->competition->start_time?->format('m/Y');
+//        $returnItem['url'] = route('forecasts.summary.user-event', ['user_id' =>1, ]);
 
 
-        foreach ($users as $user){
+        foreach ($users as $user) {
 
-            $dainisCalc = new \App\Helpers\Forecasts\ForecastDainisServiceHelper;
             $dainisCalc->calculateUserPoints(forecast: $forecast, user: $user);
 
-//            dump($user->name);
-//            dump($dainisCalc->getMainPoints());
-//            dump($dainisCalc->getBonusPoints());
-//            dd(1);
+            $userTotalPoints[$user->name]['old'] += $oldRegular = $forecast->awards
+                ->where('user_id', $user->id)
+                ->where('type', \App\Enums\Forecast\AwardPointEnum::REGULAR_POINT)->first()?->points;
 
-            $userTotalPoints[$user->name]['old'] += $oldRegular = $forecast->awards->where('user_id',$user->id)->where('type',\App\Enums\Forecast\AwardPointEnum::REGULAR_POINT)->first()?->points;
-            $userTotalPoints[$user->name]['old'] += $oldBonus = $forecast->awards->where('user_id',$user->id)->where('type',\App\Enums\Forecast\AwardPointEnum::BONUS_POINT)->first()?->points;
+            $userTotalPoints[$user->name]['old'] += $oldBonus = $forecast->awards
+                ->where('user_id', $user->id)
+                ->where('type', \App\Enums\Forecast\AwardPointEnum::BONUS_POINT)->first()?->points;
+
             $userTotalPoints[$user->name]['new'] += $newRegular = $dainisCalc->getMainPoints();
-            $userTotalPoints[$user->name]['new'] += $newBonus =$dainisCalc->getBonusPoints();
+            $userTotalPoints[$user->name]['new'] += $newBonus = $dainisCalc->getBonusPoints();
 
             $returnItem['users'][] = [
-                'name' =>$user->name,
+                'name' => $user->name,
                 'points' => [
                     [
                         'type' => $forecast->type->name,
@@ -139,36 +151,125 @@ Route::get('/test-dainis', function (){
 
                 ]
             ];
-
-//            echo '<td colspan="2">'.$user->name.'</td>';
-//
-//            foreach ($forecast->awards->where('user_id', $user->id) as $award){
-//                echo '<td>';
-//                echo $award->type->value;
-//                echo '</td>';
-//                echo '<td>';
-//                echo $award->points;
-//                echo '</td>';
-
-
-//                $s = new \App\Helpers\Forecasts\ForecastDainisServiceHelper;
-//
-//                $s->calculateUserPoints($forecast, $award->user);
-//                dump($s->getMainPoints());
-//                dd($s->getBonusPoints());
-
-
-//                echo '</td>';
-//            }
         }
-
 
         $return[] = $returnItem;
     }
 
-    $return[]=$userTotalPoints;
+    $return[] = $userTotalPoints;
 
-    return $return;
+    if($request->input('mode') == 'table' || true){
+
+
+        echo '<form action="test-dainis">';
+        echo '<input type="hidden" name="mode" value="table">';
+        echo '<table>';
+        echo '<thead><tr><th>Desr.</th><th>Individual</th><th>Team</th></tr></thead>';
+        echo '<tbody>';
+
+        foreach ([0,1,2,3,4,5] as $diff){
+            echo '<tr style="background-color: #8bf1be"><td>regular, diff '.$diff.'</td><td><input name="regular[individual]['.$diff.']" type="text" value="'.data_get($dainisCalc->getMatrix(), 'regular.individual.'.$diff).'"></td><td><input name="regular[team]['.$diff.']" value="'.data_get($dainisCalc->getMatrix(), 'regular.team.'.$diff).'" type="text"></td></tr>';
+        }
+
+        foreach (['gold','silver','bronze'] as $diff){
+            echo '<tr style="background-color: #e5e7eb"><td>Bonus '.$diff.'</td><td><input name="bonus[individual]['.$diff.']" type="text" value="'.data_get($dainisCalc->getMatrix(), 'bonus.individual.'.$diff).'"></td><td><input name="bonus[team]['.$diff.']" value="'.data_get($dainisCalc->getMatrix(), 'bonus.team.'.$diff).'" type="text"></td></tr>';
+        }
+
+        echo '<tr><td colspan="10" style="text-align: right"><a href="/test-dainis"><button type="button" style="margin-right: 5px">Set default</button></a><button>submit matrix</button></td></tr>';
+        echo '</tbody>';
+        echo '</table>';
+        echo '</form>';
+        echo '<hr>';
+
+
+
+
+        echo <<<HTML
+<style>
+    table {
+            border-collapse: collapse;
+    }
+    td:nth-child(n+2) {
+        text-align: right;
+    }
+    td, th {
+        padding: 5px;
+        border: 1px solid black;
+    }
+    input {
+        text-align: right;
+    }
+</style>
+HTML;
+
+        $getPlace = function (int $provided, array $all){
+            rsort($all);
+            $place = 0;
+            foreach ($all as $item){
+                $place +=1;
+                if($provided !== intval($item)){
+                    continue;
+                }
+                break;
+
+            }
+            return $place;
+        };
+
+        echo '<table>';
+        echo '<thead><tr><th></th><th>Agris</th><th>Grey</th><th>Dainis</th><th>Andris</th><th>Total</th></tr></thead>';
+        echo '<tbody>';
+        $oldTotal =0;
+        $oldTotal += $agrisOld = data_get($userTotalPoints, 'Agris.old');
+        $oldTotal += $greyOld = data_get($userTotalPoints, 'Grey.old');
+        $oldTotal += $dainisOld = data_get($userTotalPoints, 'Dainis.old');
+        $oldTotal += $andrisOld = data_get($userTotalPoints, 'Andris.old');
+        echo '<tr><td>Old sys</td><td>'.$agrisOld.'</td><td>'.$greyOld.'</td><td>'.$dainisOld.'</td><td>'.$andrisOld.'</td><td>'.$oldTotal.'</td></tr>';
+        $oldTotalPercent = 0;
+        $oldTotalPercent += $agrisOldPerc = $agrisOld / $oldTotal * 100;
+        $oldTotalPercent += $greyOldPerc = $greyOld / $oldTotal * 100;
+        $oldTotalPercent += $dainisOldPerc = $dainisOld / $oldTotal * 100;
+        $oldTotalPercent += $andrisOldPerc = $andrisOld / $oldTotal * 100;
+
+        $all = [
+            $agrisOld, $dainisOld, $greyOld, $andrisOld,
+        ];
+        echo '<tr><td>Old sys %</td><td>'.round($agrisOldPerc,2).'%</td><td>'.round($greyOldPerc, 2).'%</td><td>'.round($dainisOldPerc, 2).'%</td><td>'.round($andrisOldPerc,2).'%</td><td>'.round($oldTotalPercent,2).'%</td></tr>';
+        echo '<tr><td>Old sys rank</td><td>'.$getPlace(provided: $agrisOld,all:  $all).'</td><td>'.$getPlace(provided: $greyOld,all:  $all).'</td><td>'.$getPlace(provided: $dainisOld,all:  $all).'</td><td>'.$getPlace(provided: $andrisOld,all:  $all).'</td><td>'.round($oldTotalPercent,2).'%</td></tr>';
+
+
+        echo '<tr><td colspan="100">&nbsp;</td></tr>';
+
+        $newTotal =0;
+        $newTotal += $agrisNew = data_get($userTotalPoints, 'Agris.new');
+        $newTotal += $greyNew = data_get($userTotalPoints, 'Grey.new');
+        $newTotal += $dainisNew = data_get($userTotalPoints, 'Dainis.new');
+        $newTotal += $andrisNew = data_get($userTotalPoints, 'Andris.new');
+        echo '<tr><td>New sys</td><td>'.$agrisNew.'</td><td>'.$greyNew.'</td><td>'.$dainisNew.'</td><td>'.$andrisNew.'</td><td>'.$newTotal.'</td></tr>';
+        $newTotalPercent = 0;
+        $newTotalPercent += $agrisNewPerc = $agrisNew / $newTotal * 100;
+        $newTotalPercent += $greyNewPerc = $greyNew / $newTotal * 100;
+        $newTotalPercent += $dainisNewPerc = $dainisNew / $newTotal * 100;
+        $newTotalPercent += $andrisNewPerc = $andrisNew / $newTotal * 100;
+        echo '<tr><td>New sys %</td><td>'.round($agrisNewPerc,2).'%</td><td>'.round($greyNewPerc, 2).'%</td><td>'.round($dainisNewPerc, 2).'%</td><td>'.round($andrisNewPerc,2).'%</td><td>'.round($newTotalPercent,2).'%</td></tr>';
+        $all = [$agrisNew, $greyNew, $dainisNew, $andrisNew];
+        echo '<tr><td>New sys rank</td><td>'.$getPlace(provided: $agrisNew,all:  $all).'</td><td>'.$getPlace(provided: $greyNew,all:  $all).'</td><td>'.$getPlace(provided: $dainisNew,all:  $all).'</td><td>'.$getPlace(provided: $andrisNew,all:  $all).'</td><td>'.round($oldTotalPercent,2).'%</td></tr>';
+        echo '<tr><td colspan="100">&nbsp;</td></tr>';
+
+        echo '<tr><td>%, delta (old-new)</td><td>'.round($agrisOldPerc-$agrisNewPerc,2).'%</td><td>'.round($greyOldPerc - $greyNewPerc, 2).'%</td><td>'.round($dainisOldPerc-$dainisNewPerc, 2).'%</td><td>'.round($andrisOldPerc-$andrisNewPerc,2).'%</td><td>'.round($newTotalPercent,2).'%</td></tr>';
+
+
+        echo '</tbody>';
+        echo '</table>';
+    }
+
+    echo '<pre>';
+    echo json_encode($return, JSON_PRETTY_PRINT);
+    echo '</pre>';
+
+
+
+//    return $return;
 });
 
 
