@@ -64,15 +64,24 @@ class ForecastDainisServiceHelper extends ForecastAbstractionHelper
         $this->bonusPoints = 0;
 
         if($this->foundGoldPlace()){
-            $this->bonusPoints += 100;
+            $this->bonusPoints += match ($this->isTeamDiscipline){
+                false => 50,
+                true => 100,
+            };
         }
 
         if($this->foundSilverPlace()){
-            $this->bonusPoints += 70;
+            $this->bonusPoints += match ($this->isTeamDiscipline){
+                false => 35,
+                true => 70,
+            };
         }
 
         if($this->foundBronzePlace()){
-            $this->bonusPoints += 50;
+            $this->bonusPoints += match ($this->isTeamDiscipline){
+                false => 25,
+                true => 50,
+            };
         }
 
         return $this;
@@ -110,6 +119,18 @@ class ForecastDainisServiceHelper extends ForecastAbstractionHelper
 
     private function precisionDeltaPoints(int $precisionDelta): int
     {
+        if($this->isTeamDiscipline){
+            return match ($precisionDelta){
+                0 => 50,
+                1 => 35,
+                2 => 25,
+                3 => 15,
+                4 => 10,
+                5 => 8,
+                default => 0
+            };
+        }
+
         return match ($precisionDelta){
             0 => 100,
             1 => 70,
