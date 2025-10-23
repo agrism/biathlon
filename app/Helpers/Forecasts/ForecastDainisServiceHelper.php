@@ -27,32 +27,32 @@ class ForecastDainisServiceHelper extends ForecastAbstractionHelper
     protected array $matrix = [
         'regular' => [
             'individual' => [
-                0 => 100,
-                1 => 70,
-                2 => 50,
-                3 => 30,
-                4 => 20,
-                5 => 10,
+                0 => 21,
+                1 => 15,
+                2 => 12,
+                3 => 9,
+                4 => 6,
+                5 => 3,
             ],
             'team' => [
-                0 => 40,
-                1 => 28,
-                2 => 20,
-                3 => 12,
-                4 => 8,
-                5 => 4,
+                0 => 7,
+                1 => 5,
+                2 => 4,
+                3 => 3,
+                4 => 2,
+                5 => 1,
             ]
         ],
         'bonus' => [
             'individual' => [
-                'gold' => 100,
-                'silver' => 70,
-                'bronze' => 50,
+                'gold' => 90,
+                'silver' => 60,
+                'bronze' => 30,
             ],
             'team' => [
-                'gold' => 40,
-                'silver' => 28,
-                'bronze' => 20,
+                'gold' => 30,
+                'silver' => 20,
+                'bronze' => 10,
             ],
         ]
 

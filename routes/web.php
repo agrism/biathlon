@@ -89,6 +89,20 @@ Route::get('/test-dainis', function (Request $request){
     $dainisCalc = new \App\Helpers\Forecasts\ForecastDainisServiceHelper;
     $dainisCalc->overrideMatrix($request->all());
 
+    $getRank = function (int $provided, array $all){
+        rsort($all);
+        $place = 0;
+        foreach ($all as $item){
+            $place +=1;
+            if($provided !== intval($item)){
+                continue;
+            }
+            break;
+
+        }
+        return $place;
+    };
+
 
     $forecasts = \App\Models\Forecast::query()->where('status',
         \App\Enums\Forecast\ForecastStatusEnum::COMPLETED)->get();
@@ -139,18 +153,47 @@ Route::get('/test-dainis', function (Request $request){
                         'points' => [
                             'regular' => $oldRegular,
                             'bonus' => $oldBonus,
+                            'total' => $oldRegular +  $oldBonus,
                         ],
+                        'rank' => null,
                     ],
                     [
                         'type' => \App\Enums\Forecast\ForecastTypeEnum::FORECAST_DAINIS_SCHEMA->name,
                         'points' => [
                             'regular' => $newRegular,
                             'bonus' => $newBonus,
-                        ]
+                            'total' => $newRegular + $newBonus,
+                        ],
+                        'rank' => null,
+                        'rankIncrease' => null,
                     ]
 
                 ]
             ];
+        }
+
+        $userOldPoints = [];
+        $userNewPoints = [];
+
+        foreach ($returnItem['users'] as $u){
+            $userOldPoints[data_get($u, 'name')] = data_get($u, 'points.0.points.total', 0);
+            $userNewPoints[data_get($u, 'name')] = data_get($u, 'points.1.points.total', 0);
+        }
+
+//        dd($userOldPoints, $userNewPoints);
+
+        foreach ($returnItem['users'] as $i => $u){
+            data_set($returnItem, 'users.'.$i.'.points.0.rank', $oldRank= $getRank(
+                provided: data_get($userOldPoints, data_get($u, 'name')),
+                all:  $userOldPoints),
+            );
+
+            data_set($returnItem, 'users.'.$i.'.points.1.rank', $newRank = $getRank(
+                provided: data_get($userNewPoints, data_get($u, 'name')),
+                all:  $userNewPoints),
+            );
+
+            data_set($returnItem, 'users.'.$i.'.points.1.rankIncrease', $oldRank - $newRank);
         }
 
         $return[] = $returnItem;
@@ -202,20 +245,6 @@ Route::get('/test-dainis', function (Request $request){
 </style>
 HTML;
 
-        $getPlace = function (int $provided, array $all){
-            rsort($all);
-            $place = 0;
-            foreach ($all as $item){
-                $place +=1;
-                if($provided !== intval($item)){
-                    continue;
-                }
-                break;
-
-            }
-            return $place;
-        };
-
         echo '<table>';
         echo '<thead><tr><th></th><th>Agris</th><th>Grey</th><th>Dainis</th><th>Andris</th><th>Total</th></tr></thead>';
         echo '<tbody>';
@@ -235,7 +264,7 @@ HTML;
             $agrisOld, $dainisOld, $greyOld, $andrisOld,
         ];
         echo '<tr><td>Old sys %</td><td>'.round($agrisOldPerc,2).'%</td><td>'.round($greyOldPerc, 2).'%</td><td>'.round($dainisOldPerc, 2).'%</td><td>'.round($andrisOldPerc,2).'%</td><td>'.round($oldTotalPercent,2).'%</td></tr>';
-        echo '<tr><td>Old sys rank</td><td>'.$getPlace(provided: $agrisOld,all:  $all).'</td><td>'.$getPlace(provided: $greyOld,all:  $all).'</td><td>'.$getPlace(provided: $dainisOld,all:  $all).'</td><td>'.$getPlace(provided: $andrisOld,all:  $all).'</td><td></td></tr>';
+        echo '<tr><td>Old sys rank</td><td>'.$getRank(provided: $agrisOld,all:  $all).'</td><td>'.$getRank(provided: $greyOld,all:  $all).'</td><td>'.$getRank(provided: $dainisOld,all:  $all).'</td><td>'.$getRank(provided: $andrisOld,all:  $all).'</td><td></td></tr>';
 
 
         echo '<tr><td colspan="100">&nbsp;</td></tr>';
@@ -253,13 +282,51 @@ HTML;
         $newTotalPercent += $andrisNewPerc = $andrisNew / $newTotal * 100;
         echo '<tr><td>New sys %</td><td>'.round($agrisNewPerc,2).'%</td><td>'.round($greyNewPerc, 2).'%</td><td>'.round($dainisNewPerc, 2).'%</td><td>'.round($andrisNewPerc,2).'%</td><td>'.round($newTotalPercent,2).'%</td></tr>';
         $all = [$agrisNew, $greyNew, $dainisNew, $andrisNew];
-        echo '<tr><td>New sys rank</td><td>'.$getPlace(provided: $agrisNew,all:  $all).'</td><td>'.$getPlace(provided: $greyNew,all:  $all).'</td><td>'.$getPlace(provided: $dainisNew,all:  $all).'</td><td>'.$getPlace(provided: $andrisNew,all:  $all).'</td><td></td></tr>';
+        echo '<tr><td>New sys rank</td><td>'.$getRank(provided: $agrisNew,all:  $all).'</td><td>'.$getRank(provided: $greyNew,all:  $all).'</td><td>'.$getRank(provided: $dainisNew,all:  $all).'</td><td>'.$getRank(provided: $andrisNew,all:  $all).'</td><td></td></tr>';
         echo '<tr><td colspan="100">&nbsp;</td></tr>';
 
         echo '<tr><td>%, delta (old-new)</td><td>'.round($agrisOldPerc-$agrisNewPerc,2).'%</td><td>'.round($greyOldPerc - $greyNewPerc, 2).'%</td><td>'.round($dainisOldPerc-$dainisNewPerc, 2).'%</td><td>'.round($andrisOldPerc-$andrisNewPerc,2).'%</td><td></td></tr>';
 
 
         echo '</tbody>';
+        echo '</table>';
+
+
+        // table2
+
+        echo '<hr>';
+
+        echo '<table>';
+            echo '<thead>';
+                echo '<tr>';
+                foreach (['Agris', 'Grey', 'Dainis', 'Andris'] as $name){
+                    echo '<th colspan="3">'.$name.'</th>';
+                }
+                echo '</tr>';
+                echo '<tr>';
+                foreach (['Agris', 'Grey', 'Dainis', 'Andris'] as $name){
+                    echo '<th>old place</th>';
+                    echo '<th>new place</th>';
+                    echo '<th>up</th>';
+                }
+                echo '</tr>';
+            echo '</thead>';
+
+            echo '<tbody>';
+            foreach ($return as $forecast){
+                echo '<tr style="background-color: #c3f8dd;">';
+                echo '<td colspan="100"><a href="'.(data_get($forecast, 'url')).'" target="_blank">'.data_get($forecast, 'name').'</a></td>';
+                echo '</tr>';
+                echo '<tr>';
+                foreach (data_get($forecast, 'users', []) as $user){
+                    echo '<td>'.data_get($user, 'points.0.rank').'</td>';
+                    echo '<td>'.data_get($user, 'points.1.rank').'</td>';
+                    $rankIncrease = data_get($user, 'points.1.rankIncrease');
+                    echo '<td style="background-color: '.($rankIncrease > 0 ? 'green' : ($rankIncrease < 0 ? 'red': '')).'">'.data_get($user, 'points.1.rankIncrease').'</td>';
+                }
+                echo '</tr>';
+            }
+            echo '</tbody>';
         echo '</table>';
     }
     echo '<hr>';
