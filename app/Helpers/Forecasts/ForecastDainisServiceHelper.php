@@ -46,13 +46,13 @@ class ForecastDainisServiceHelper extends ForecastAbstractionHelper
         'bonus' => [
             'individual' => [
                 'gold' => 21,
-                'silver' => 12,
-                'bronze' => 6,
+                'silver' => 15,
+                'bronze' => 9,
             ],
             'team' => [
                 'gold' => 7,
-                'silver' => 4,
-                'bronze' => 2,
+                'silver' => 5,
+                'bronze' => 3,
             ],
         ]
 
