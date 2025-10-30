@@ -37,11 +37,15 @@
                         </td>
                     @endif
                     <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
+                        @if($competition->forecast)
                         <a
                             hx-get="{{route('forecasts.show', ['id' => $competition->forecast->id, 'showContentOnly' => 1])}}"
                             hx-target="#forecast"
                             class="cursor-pointer"
                         >{!! $competition->getTitle() !!}</a>
+                        @else
+                            {!! $competition->getTitle() !!}
+                        @endif
                         @if($competition->results->count())
                             <a
                                 class="text-blue-400 cursor-pointer"
@@ -61,8 +65,8 @@
                             </a>
                         @endif
                     </td>
-                    <td class="px-2 py-2 whitespace-nowrap text-sm font-medium text-right">{{$regular = $competition->forecast->awards->where('type', \App\Enums\Forecast\AwardPointEnum::REGULAR_POINT)->first()?->points ?? 0}}</td>
-                    <td class="px-2 py-2 whitespace-nowrap text-sm font-medium text-right">{{$bonus = $competition->forecast->awards->where('type', \App\Enums\Forecast\AwardPointEnum::BONUS_POINT)->first()?->points ?? 0}}</td>
+                    <td class="px-2 py-2 whitespace-nowrap text-sm font-medium text-right">{{$regular = $competition->forecast?->awards->where('type', \App\Enums\Forecast\AwardPointEnum::REGULAR_POINT)->first()?->points ?? 0}}</td>
+                    <td class="px-2 py-2 whitespace-nowrap text-sm font-medium text-right">{{$bonus = $competition->forecast?->awards->where('type', \App\Enums\Forecast\AwardPointEnum::BONUS_POINT)->first()?->points ?? 0}}</td>
                     <td class="px-2 py-2 whitespace-nowrap text-sm font-medium text-right">{{$total = $regular + $bonus}}</td>
                     @php
                         $totalRegularPoints += $regular;

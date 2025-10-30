@@ -38,10 +38,13 @@ class ShowUserEventController extends Controller
         }
 
         $event->competitions->map(function(EventCompetition $competition):EventCompetition{
-            $awards = $competition->forecast->awards->filter(function(ForecastAward $award):bool{
-                return $award->user_id == $this->userId;
-            });
-            $competition->forecast->awards = $awards;
+
+            if($competition->forecast){
+                $awards = $competition->forecast->awards->filter(function(ForecastAward $award):bool{
+                    return $award->user_id == $this->userId;
+                });
+                $competition->forecast->awards = $awards;
+            }
 
             if(!$this->authUserId){
                 return $competition;

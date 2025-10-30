@@ -25,11 +25,30 @@ class IndexController extends Controller
 
         $this->registerBread('Summary');
 
+        $seasons = [];
+
+        $seasons[] = [
+            'id' => 's2526',
+            'title' => 'BMW IBU World Cup Biathlon, season 25/26',
+            'data' => $this->getSeasonData(season: '2526'),
+        ];
+
+        $seasons[] = [
+            'id' => 'id2425',
+            'title' => 'BMW IBU World Cup Biathlon, season 24/25',
+            'data' => $this->getSeasonData(season: '2425'),
+        ];
+
+        return view('forecasts.summary.index', compact('seasons'));
+    }
+
+    protected function getSeasonData(string $season): array
+    {
         $season = Season::query()
             ->with(['events'=> function( $q){
                 $q->with('competitions.forecast.awards.user')->where('level', 1);
             }])
-            ->where('name', '2425')
+            ->where('name', $season)
             ->first();
 
         $users = User::query()->get();
@@ -58,7 +77,7 @@ class IndexController extends Controller
             /** @var EventCompetition $competition */
             foreach ($event->competitions->sortBy('start_time') as $competition){
                 /** @var ForecastAward $award */
-                foreach ($competition->forecast->awards as $award) {
+                foreach ($competition->forecast->awards ?? [] as $award) {
                     $prev =  $userAwardsInEvent[$award->user->name][$award->type->value] ?? 0;
                     $userAwardsInEvent[$award->user->name][$award->type->value] = $prev + $award->points;
                 }
@@ -125,6 +144,6 @@ class IndexController extends Controller
             }
         }
 
-        return view('forecasts.summary.index', compact('data'));
+        return $data;
     }
 }
