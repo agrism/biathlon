@@ -10,7 +10,7 @@
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    @vite(['resources/css/app.css', 'resources/css/app2.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @yield('style')
 </head>
 <body hx-boost="true" hx-indicator="#status"
