@@ -17,12 +17,17 @@ export default defineConfig({
         // Configure asset handling
         rollupOptions: {
             output: {
+                entryFileNames: 'assets/[name]-[hash].js',
+                chunkFileNames: 'assets/[name]-[hash].js',
                 assetFileNames: (assetInfo) => {
-                    let extType = assetInfo.name.split('.').at(1);
-                    if (/png|jpe?g|svg|gif|tiff|bmp|ico|webp/i.test(extType)) {
-                        extType = 'images';
+                    const extType = assetInfo.name.split('.')[1];
+                    if (/css/i.test(extType)) {
+                        return 'css/[name]-[hash][extname]'; // CSS gets hash
                     }
-                    return `${extType}/[name][extname]`;
+                    if (/png|jpe?g|svg|gif|tiff|bmp|ico|webp/i.test(extType)) {
+                        return 'images/[name][extname]';
+                    }
+                    return '[ext]/[name][extname]';
                 },
             },
         },
