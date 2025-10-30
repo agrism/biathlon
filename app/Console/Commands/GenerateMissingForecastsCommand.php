@@ -44,7 +44,7 @@ class GenerateMissingForecastsCommand extends Command
                 $forecast->status = ForecastStatusEnum::COMING;
                 $forecast->name = 'Forecast: ' . $competition->description;
 
-                if(now()->lt(Carbon::now('2025-10-20 00:00:00'))){
+                if(now()->lt(Carbon::parse('2025-10-20 00:00:00'))){
                     $forecast->type = ForecastTypeEnum::FORECAST_FIRST_SIX_PLACES;
                 } else {
                     $forecast->type = ForecastTypeEnum::FORECAST_DAINIS_SCHEMA;
