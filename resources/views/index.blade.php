@@ -43,10 +43,13 @@
         <div class="text-center ">
             <p id="countdown" class="mb-1 mt-1 text-xl leading-none tracking-tight text-white md:text-2xl lg:text-3xl  text-center text-bg-gradient1"></p>
         </div>
-{{--        <p>or</p>--}}
-{{--        <p id="countdown3"></p>--}}
-{{--        <p>or</p>--}}
-{{--        <p id="countdown2"></p>--}}
+        <div style="display: none;">
+            <p>or</p>
+            <p id="countdown3"></p>
+            <p>or</p>
+            <p id="countdown2"></p>
+        </div>
+
         <div class="text-center ">
             <p class="mb-1 mt-1 text-xl leading-none tracking-tight text-white md:text-2xl lg:text-3xl  text-center text-bg-gradient1">left...</p>
         </div>
