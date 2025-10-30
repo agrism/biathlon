@@ -122,3 +122,33 @@
     background-position: center;
     transform: scale(2);
 }
+
+.bgpic {
+    position: relative;
+    min-height: 100vh;
+}
+
+.bgpic::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('../images/aaron-doucett-j2T6auKwbRc-unsplash-2.jpg') center/cover;
+    opacity: 0.7;
+    z-index: -1;
+}
+
+/*th {*/
+/*    color: white;*/
+/*    background-color: #8bf1be;*/
+/*}*/
+
+/*h2 {*/
+/*    color: #8bf1be;*/
+/*}*/
+
+/*th {*/
+/*    border-radius: 5px;*/
+/*}*/

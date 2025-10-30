@@ -1,17 +1,33 @@
 @extends('layouts.admin', ['heading' => isset($helper) ? $helper->title(): ''])
 
-@section('content')
-
+@section('style')
     <style>
         p {
             padding: 15px;
         }
+
+        .text-bg-gradient {
+            background: linear-gradient(135deg, white 0%, #d0bfbf 100%);
+            color: black;
+            padding: 10px 20px;
+            border-radius: 6px;
+            display: inline;
+            align-content: center;
+            line-height: 2em;
+        }
     </style>
+@endsection
+
+@section('content')
 
 
+    <div class="bgpic" style="margin: -100px;padding: 100px;z-index: -1;background-color: black;">
 
-    <h2 class="mb-4 mt-4 text-2xl font-extrabold leading-none tracking-tight text-gray-900 md:text-2xl lg:text-3xl  text-center ">
-    {{/* @var \App\Models\Event $event */ $event->description }} season {{ implode('/', str_split($season->name, 2)) }}<br><br>
+
+    <h2 class="mb-12 mt-4 text-xl font-extrabold leading-none tracking-tight text-white md:text-2xl lg:text-3xl  text-center text-bg-gradient1">
+    {{/* @var \App\Models\Event $event */ $event->description }} season {{ implode('/', str_split($season->name, 2)) }}
+    </h2>
+    <h2 class="mb-4 mt-4 text-2xl font-extrabold leading-none tracking-tight text-white md:text-2xl lg:text-3xl  text-center text-bg-gradient1">
         starts at: {{$event->short_description}}, {{$event->first_competition_date->tz('Europe/Riga')->format('H:i \o\n d F Y.')}}
     </h2>
 
@@ -20,18 +36,23 @@
     <br>
     <br>
     <br>
-    <h1 class="mb-4 mt-4 text-4xl leading-none tracking-tight text-gray-900 md:text-2xl lg:text-3xl  text-center" style="color: #020288">
-        <p>Only
-        <p id="countdown"></p>
-        <p>or</p>
-        <p id="countdown3"></p>
-        <p>or</p>
-        <p id="countdown2"></p>
-        left...
-        </p>
+{{--    <h1 class="mb-4 mt-4 text-4xl leading-none tracking-tight text-white md:text-2xl lg:text-3xl  text-center" style="color: white;">--}}
+        <div class="text-center ">
+            <p class="mb-1 mt-1 text-xl leading-none tracking-tight text-white md:text-2xl lg:text-3xl  text-center text-bg-gradient1">Only</p>
+        </div>
+        <div class="text-center ">
+            <p id="countdown" class="mb-1 mt-1 text-xl leading-none tracking-tight text-white md:text-2xl lg:text-3xl  text-center text-bg-gradient1"></p>
+        </div>
+{{--        <p>or</p>--}}
+{{--        <p id="countdown3"></p>--}}
+{{--        <p>or</p>--}}
+{{--        <p id="countdown2"></p>--}}
+        <div class="text-center ">
+            <p class="mb-1 mt-1 text-xl leading-none tracking-tight text-white md:text-2xl lg:text-3xl  text-center text-bg-gradient1">left...</p>
+        </div>
 
-    </h1>
-
+{{--    </h1>--}}
+    </div>
 
     <script>
         // Set target date

@@ -11,8 +11,11 @@
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @yield('style')
 </head>
-<body hx-boost="true" hx-indicator="#status">
+<body hx-boost="true" hx-indicator="#status"
+      class="@yield('body-class')"
+>
 
 <div id="status" class="indicator fixed inset-0 z-50 flex items-center justify-center">
     <div class="rounded-md px-6 py-4 flex items-center gap-4 bg-white border-2 border-grey">
@@ -32,7 +35,7 @@
     <h1 class="mb-4 mt-4 text-2xl font-extrabold leading-none tracking-tight text-gray-900 md:text-2xl lg:text-3xl  text-center ">{!! $heading !!}</h1>
     @endif
 
-    <div class="cont">
+    <div class="cont" style="opacity: 1;">
         @yield('content')
     </div>
 
