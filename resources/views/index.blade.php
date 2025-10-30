@@ -21,7 +21,7 @@
 @section('content')
 
 
-    <div class="bgpic" style="margin: -100px;padding: 100px;z-index: -1;background-color: black;">
+    <div class="bgpic" style="z-index: -1;background-color: black;width: 100vw;margin-left: calc(-50vw + 50%);margin-bottom: -100px;margin-top: -100px;padding-top: 100px;color: white;">
 
 
     <h2 class="mb-12 mt-4 text-xl font-extrabold leading-none tracking-tight text-white md:text-2xl lg:text-3xl  text-center text-bg-gradient1">
