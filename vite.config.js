@@ -25,7 +25,7 @@ export default defineConfig({
                         return 'css/[name]-[hash][extname]'; // CSS gets hash
                     }
                     if (/png|jpe?g|svg|gif|tiff|bmp|ico|webp/i.test(extType)) {
-                        return 'images/[name][extname]';
+                        return 'images/[name]-[hash][extname]'; // ← ADD [hash] HERE
                     }
                     return 'assets/[name]-[hash][extname]';
                 },
