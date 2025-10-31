@@ -20,16 +20,26 @@ export default defineConfig({
                 entryFileNames: 'assets/[name]-[hash].js',
                 chunkFileNames: 'assets/[name]-[hash].js',
                 assetFileNames: (assetInfo) => {
-                    const extType = assetInfo.name.split('.')[1];
+                    const extType = assetInfo.name.split('.').pop();
+
                     if (/css/i.test(extType)) {
-                        return 'css/[name]-[hash][extname]'; // CSS gets hash
+                        return 'css/[name]-[hash][extname]';
                     }
+
+                    // For images - include hash for cache busting
                     if (/png|jpe?g|svg|gif|tiff|bmp|ico|webp/i.test(extType)) {
-                        return 'images/[name][extname]';
+                        return 'images/[name]-[hash][extname]';
                     }
-                    return '[ext]/[name][extname]';
+
+                    // Fonts and other assets
+                    if (/woff|woff2|eot|ttf|otf/i.test(extType)) {
+                        return 'fonts/[name]-[hash][extname]';
+                    }
+
+                    return 'assets/[name]-[hash][extname]';
                 },
             },
         },
     },
+    assetsInclude: ['**/*.webp', '**/*.jpg', '**/*.png', '**/*.svg'],
 });
