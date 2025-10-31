@@ -11,4 +11,26 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    build: {
+        // Specify output directory for processed assets
+        outDir: 'public/build',
+        // Configure asset handling
+        rollupOptions: {
+            output: {
+                entryFileNames: 'assets/[name]-[hash].js',
+                chunkFileNames: 'assets/[name]-[hash].js',
+                assetFileNames: (assetInfo) => {
+                    const extType = assetInfo.name.split('.')[1];
+                    if (/css/i.test(extType)) {
+                        return 'css/[name]-[hash][extname]'; // CSS gets hash
+                    }
+                    if (/png|jpe?g|svg|gif|tiff|bmp|ico|webp/i.test(extType)) {
+                        return 'images/[name][extname]';
+                    }
+                    return '[ext]/[name][extname]';
+                },
+            },
+        },
+    },
+    assetsInclude: ['**/*.webp', '**/*.jpg', '**/*.png', '**/*.svg'],
 });
