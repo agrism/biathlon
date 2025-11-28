@@ -45,7 +45,8 @@ class ReadAthletesCommand extends Command
                     if($result->athlete->details_updated_at->gt(now()->startOfDay())){
                         return;
                     }
-                    usleep(100_000);
+//                    usleep(100_000);
+                    sleep(3);
                     static::readAnsSaveAthleteDetailsData($result->athlete);
                 });
             });

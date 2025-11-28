@@ -50,7 +50,7 @@ class ShowUserEventController extends Controller
                 return $competition;
             }
 
-            if(!$authUserAthletes = collect($competition->forecast->final_data->users)->where('id', $this->authUserId)->first()?->athletes){
+            if(!$authUserAthletes = collect($competition->forecast?->final_data?->users ?? [])->where('id', $this->authUserId)->first()?->athletes){
                 return $competition;
             }
 

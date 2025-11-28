@@ -11,4 +11,5 @@ Artisan::command('inspire', function () {
 
 Schedule::command('app:read-competition-results')->everyFiveMinutes();
 Schedule::command('app:read-forecast-results-command')->everyMinute();
+Schedule::command('app:generate-missing-forecasts')->daily();
 Schedule::command('app:read-athletes')->daily();

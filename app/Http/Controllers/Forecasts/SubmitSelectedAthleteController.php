@@ -42,6 +42,19 @@ class SubmitSelectedAthleteController extends Controller
 
         $userValueObject = $forecast->final_data->getUserByUserModel(auth()->user());
         $userValueObject->athletes = $userValueObject->getAthletes();
+
+        $isAthleteAlreadyAdded = false;
+
+        collect($userValueObject->athletes)->each(function(AthleteValueObject $athleteValueObject) use(&$isAthleteAlreadyAdded, $athleteModel): void{
+            if($athleteModel->id == $athleteValueObject->id){
+                $isAthleteAlreadyAdded = true;
+            }
+        });
+
+        if($isAthleteAlreadyAdded){
+            abort(401, 'athlete is added already, athlete: '.$athleteModel->family_name);
+        }
+
         data_set($userValueObject->athletes, $place, new AthleteValueObject(
             id: $athleteModel->id,
             tempId: $athleteModel->attachTempId(
