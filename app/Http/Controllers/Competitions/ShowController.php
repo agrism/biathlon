@@ -40,7 +40,7 @@ CASE
     ELSE 999999
 END ASC');
         } else {
-            $data = $data->orderBy('bib');
+            $data = $data->orderByRaw('CAST(`rank` AS SIGNED INTEGER) ASC');
         }
 
         $data = $data->paginate(perPage: 2000);
