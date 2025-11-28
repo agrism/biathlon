@@ -34,7 +34,7 @@ class ReadCompetitionResultsCommand extends Command
     {
         EventCompetition::query()
             ->where('start_time', '>', Carbon::parse('2025-01-01'))
-            ->where('start_time', '<', now()->addDay())
+            ->where('start_time', '<', now()->addDays(2))
             ->with(['results', 'event'])
             ->whereHas('event', function ($q) {
                 $q->where('level', 1);
@@ -42,7 +42,10 @@ class ReadCompetitionResultsCommand extends Command
             ->whereNull('results_handled_at')
             ->get()->each(function (EventCompetition $competition) use ($api): bool {
 
+                $this->line('$competition: '. $$competition->id);
+
                 if(in_array($competition->race_remote_id, ['BT2425SWRLCP08SWIN', 'BT2425SWRLCP08SMIN'])){
+                    $this->line('skip');
                     return true;
                 }
 
