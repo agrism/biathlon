@@ -39,6 +39,8 @@ CASE
     WHEN `rank` <> "-" THEN CAST(`rank` AS SIGNED INTEGER)
     ELSE 999999
 END ASC');
+        } else {
+            $data = $data->orderBy('bib');
         }
 
         $data = $data->paginate(perPage: 2000);
