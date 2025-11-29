@@ -130,7 +130,7 @@
                 <tbody>
 
                 @foreach([[0,6], [5,6]] as $slices)
-                <tr class="odd:bg-white even:bg-gray-100">
+                <tr class="odd:bg-white even:bg-gray-100 @if($slices[0] != 0) opacity-30 @endif">
                     <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
                         <strong>IBU (@if($slices[0] == 0) 1-6 @else 7-12 @endif)</strong>
                     </td>
