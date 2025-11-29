@@ -15,4 +15,5 @@ abstract class ForecastAbstractionHelper
     abstract public function getMainPoints(): float;
 
     abstract public function getBonusPoints(): float;
+    abstract public function getPointDetails(): array;
 }

@@ -46,6 +46,12 @@ class ForecastFinalDataCast implements CastsAttributes
                     type: AwardPointEnum::tryFrom(data_get($point, 'type')),
                     value: data_get($point, 'value'),
                 ))->toArray(),
+                pointDetails: collect(data_get($user, 'pointDetails', []))->map(function(array $points){
+                    return collect($points)->map(fn($point) => new PointValueObject(
+                        type: AwardPointEnum::tryFrom(data_get($point, 'type')),
+                        value: data_get($point, 'value'),
+                    ))->toArray();
+                })->toArray(),
                 athletes: collect(data_get($user, 'athletes', []))->map(fn($athlete) => $athleteFactory($athlete))->toArray(),
             ))->toArray()
         );

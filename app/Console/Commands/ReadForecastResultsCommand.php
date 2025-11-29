@@ -2,11 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Casts\AthleteStatsDetailsCast;
 use App\Enums\DisciplineEnum;
 use App\Enums\Forecast\AwardPointEnum;
 use App\Enums\Forecast\ForecastStatusEnum;
-use App\Helpers\Forecasts\ForecastFirstSixPlacesServiceHelper;
 use App\Models\Athlete;
 use App\Models\Forecast;
 use App\Models\ForecastAward;
@@ -95,6 +93,8 @@ class ReadForecastResultsCommand extends Command
                         value: $pointService->getBonusPoints(),
                     )
                 ];
+
+                $user->pointDetails = $pointService->getPointDetails();
             }
 
             $forecast->status = ForecastStatusEnum::COMPLETED;

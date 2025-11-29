@@ -15,6 +15,7 @@ class UserValueObject
         public int $id,
         public string $name,
         public array $points = [],
+        public array $pointDetails = [],
         public array $athletes = [],
     ) {
     }
@@ -61,6 +62,11 @@ class UserValueObject
             'id' => $this->id,
             'name' => $this->name,
             'points' => collect($this->points)->map(fn(PointValueObject $point) => $point->export())->toArray(),
+            'pointDetails' => collect($this->pointDetails)->map(function(array $pointDetailItems){
+                return collect($pointDetailItems)->map(function(PointValueObject $pointValueObject){
+                    return $pointValueObject->export();
+                })->toArray();
+            })->toArray(),
             'athletes' => collect($this->athletes)->map(fn(AthleteValueObject $athlete) => $athlete->export())->toArray()
         ];
     }

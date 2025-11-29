@@ -3,12 +3,12 @@
 namespace App\Helpers\Forecasts;
 
 use App\Enums\DisciplineEnum;
+use App\Enums\Forecast\AwardPointEnum;
 use App\Helpers\InstanceTrait;
-use App\Models\Athlete;
 use App\Models\EventCompetition;
 use App\Models\Forecast;
-use App\Models\ForecastSubmittedData;
 use App\Models\User;
+use App\ValueObjects\Helpers\Forecasts\FinalDataValueObject\PointValueObject;
 
 class ForecastDainisServiceHelper extends ForecastAbstractionHelper
 {
@@ -21,8 +21,13 @@ class ForecastDainisServiceHelper extends ForecastAbstractionHelper
     protected float $mainPoints = 0;
     protected float $bonusPoints = 0;
 
+    protected array $pointDetails = [];
     protected array $resultAthleteIds = [];
+
     protected array $userGivenForecastAthleteIds = [];
+
+    protected const POINT_DETAILS_REGULAR_INDEX = 0;
+    protected const POINT_DETAILS_BONUS_INDEX = 1;
 
     protected array $matrix = [
         'regular' => [
@@ -62,6 +67,19 @@ class ForecastDainisServiceHelper extends ForecastAbstractionHelper
     {
         $this->mainPoints = 0;
         $this->bonusPoints = 0;
+
+        foreach (range(0,5) as $_){
+            $this->pointDetails[] = [
+                self::POINT_DETAILS_REGULAR_INDEX => new PointValueObject(
+                    type: AwardPointEnum::REGULAR_POINT,
+                    value: 0,
+                ),
+                self::POINT_DETAILS_BONUS_INDEX => new PointValueObject(
+                    type: AwardPointEnum::BONUS_POINT,
+                    value: 0,
+                ),
+            ];
+        }
 
         $this->competition = $forecast->competition;
 
@@ -121,6 +139,11 @@ class ForecastDainisServiceHelper extends ForecastAbstractionHelper
         return $this->bonusPoints;
     }
 
+    public function getPointDetails(): array
+    {
+        return $this->pointDetails;
+    }
+
     protected function registerMainPoints(): self
     {
         $this->mainPoints = $this->getPrecisionPoints();
@@ -132,24 +155,42 @@ class ForecastDainisServiceHelper extends ForecastAbstractionHelper
         $this->bonusPoints = 0;
 
         if($this->foundGoldPlace()){
-            $this->bonusPoints += match ($this->isTeamDiscipline){
+            $this->bonusPoints += $points = match ($this->isTeamDiscipline){
                 false => data_get($this->matrix, 'bonus.individual.gold'),
                 true => data_get($this->matrix, 'bonus.team.gold'),
             };
+
+            data_set(
+                target: $this->pointDetails,
+                key: '0.' . self::POINT_DETAILS_BONUS_INDEX,
+                value:  new PointValueObject(type: AwardPointEnum::BONUS_POINT,value: $points,),
+            );
         }
 
         if($this->foundSilverPlace()){
-            $this->bonusPoints += match ($this->isTeamDiscipline){
+            $this->bonusPoints += $points = match ($this->isTeamDiscipline){
                 false => data_get($this->matrix, 'bonus.individual.silver'),
                 true => data_get($this->matrix, 'bonus.team.silver'),
             };
+
+            data_set(
+                target: $this->pointDetails,
+                key: '1.' . self::POINT_DETAILS_BONUS_INDEX,
+                value:  new PointValueObject(type: AwardPointEnum::BONUS_POINT,value: $points,),
+            );
         }
 
         if($this->foundBronzePlace()){
-            $this->bonusPoints += match ($this->isTeamDiscipline){
+            $this->bonusPoints += $points = match ($this->isTeamDiscipline){
                 false => data_get($this->matrix, 'bonus.individual.bronze'),
                 true => data_get($this->matrix, 'bonus.team.bronze'),
             };
+
+            data_set(
+                target: $this->pointDetails,
+                key: '2.' . self::POINT_DETAILS_BONUS_INDEX,
+                value:  new PointValueObject(type: AwardPointEnum::BONUS_POINT,value: $points,),
+            );
         }
 
         return $this;
@@ -159,7 +200,11 @@ class ForecastDainisServiceHelper extends ForecastAbstractionHelper
     {
         $precisionPoints = 0;
 
+        $index = -1;
+
         foreach ($this->userGivenForecastAthleteIds as $userSelectedPlace => $userGivenForecastAthleteId){
+
+            $index++;
 
             $result = array_keys($this->resultAthleteIds, $userGivenForecastAthleteId);
 
@@ -169,11 +214,17 @@ class ForecastDainisServiceHelper extends ForecastAbstractionHelper
 
             $athleteResultPlace = array_shift($result);
 
-            $precisionPoints += $this->precisionDeltaPoints(
+            $precisionPoints += $points =  $this->precisionDeltaPoints(
                 $this->getPrecisionDelta(
                     userSelectedAthletePlace: $userSelectedPlace,
                     resultAthletePlace: $athleteResultPlace
                 )
+            );
+
+            data_set(
+                target: $this->pointDetails,
+                key: $index .'.' . self::POINT_DETAILS_REGULAR_INDEX,
+                value:  new PointValueObject(type: AwardPointEnum::REGULAR_POINT,value: $points,),
             );
         }
 

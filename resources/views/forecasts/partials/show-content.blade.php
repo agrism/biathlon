@@ -129,27 +129,47 @@
                 </thead>
                 <tbody>
 
+                @foreach([[0,6], [5,6]] as $slices)
                 <tr class="odd:bg-white even:bg-gray-100">
                     <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
-                        <strong>IBU</strong>
+                        <strong>IBU (@if($slices[0] == 0) 1-6 @else 7-11 @endif)</strong>
                     </td>
 
-                    @foreach($forecast->final_data->results as $athlete)
+                    @foreach(collect($forecast->final_data->results)->slice($slices[0], $slices[1])->toArray() as $index => $athlete)
                         <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
                             <img src="{{$athlete->flagUrl}}" style="height:20px;display:inline-block;">&nbsp;<strong>{{$athlete->name}}</strong>
                             <x-cards.athlete-stat :athlete="$athlete"></x-cards.athlete-stat>
                         </td>
                     @endforeach
                 </tr>
+                @endforeach
 
                 @foreach($forecast->final_data->users as $user)
                     <tr class="odd:bg-white even:bg-gray-100">
                         <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
                             {{$user->name}}
                         </td>
-                        @foreach($user->getAthletes() as $athlete)
+                        @foreach($user->getAthletes() as $index => $athlete)
                             <td class="px-2 py-2 whitespace-nowrap text-sm font-medium  @if(!in_array($athlete->tempId, $startingUserTempIds ??[])) bg-red-100 @endif">
-                                <img src="{{$athlete->flagUrl}}" style="height:20px;display:inline-block;">&nbsp;{{$athlete->name}}
+                                <img src="{{$athlete->flagUrl}}" style="height:20px;display:inline-block;">&nbsp;
+                                @if(isset($user->pointDetails[$index]) && is_array($arr = $user->pointDetails[$index]))
+                                    @php
+                                    $tooltipText = collect($arr)->map(function(\App\ValueObjects\Helpers\Forecasts\FinalDataValueObject\PointValueObject $point): string {
+                                        if($point->type == \App\Enums\Forecast\AwardPointEnum::BONUS_POINT){
+                                            return 'Bonus: '. $point->value;
+                                        }
+                                        if($point->type == \App\Enums\Forecast\AwardPointEnum::REGULAR_POINT){
+                                            return 'Regular: '. $point->value;
+                                        }
+                                        return '';
+                                    })->join(', ');
+                                    @endphp
+                                    <x-tooltip :text="$tooltipText">
+                                        {{$athlete->name}}
+                                    </x-tooltip>
+                                @else
+                                    {{$athlete->name}}
+                                @endif
                                 <x-cards.athlete-stat :athlete="$athlete"></x-cards.athlete-stat>
                             </td>
                         @endforeach

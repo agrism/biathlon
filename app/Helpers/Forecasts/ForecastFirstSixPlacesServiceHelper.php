@@ -55,6 +55,11 @@ class ForecastFirstSixPlacesServiceHelper extends ForecastAbstractionHelper
         return $this->bonusPoints;
     }
 
+    public function getPointDetails(): array
+    {
+        return []; // @TOOD
+    }
+
     protected function registerMainPoints(): self
     {
         $this->mainPoints += $this->pointCalculator->foundGoldPlace() ? $this->getPoint(
