@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Competitions;
 
+use App\Enums\DisciplineEnum;
 use App\Helpers\Generic\GenericViewIndexHelper;
 use App\Helpers\LinkHelper;
 use App\Helpers\SeasonHelper;
@@ -25,6 +26,8 @@ class ShowController extends Controller
             ->with('event.season')
             ->where('race_remote_id', $id)->first();
 
+        $isTeamDiscipline = DisciplineEnum::tryFrom($competition->discipline_remote_id)->isTeamDiscipline();
+
         $this->registerBread('Competition:'.$competition->short_description);
 
         $data = EventCompetitionResult::query()->with('athlete')
@@ -41,6 +44,9 @@ CASE
 END ASC');
         } else {
             $data = $data->orderByRaw('CAST(`bib` AS SIGNED INTEGER) ASC');
+            if($isTeamDiscipline){
+                $data->orderByRaw('CAST(`leg` AS SIGNED INTEGER) ASC');
+            }
         }
 
         $data = $data->paginate(perPage: 2000);
@@ -49,13 +55,16 @@ END ASC');
             ->doNotUseLayout(!!$showContentOnly)
             ->setTitle('Results: ' .$competition->getTitle())
             ->setData($data)
-            ->setHeaders(['rank','bib','Athlete','Nat','flag','shooting','behind', 'wc points', 'Equipment'])
+            ->setHeaders(['rank','bib','leg', 'Athlete','Nat','flag','shooting','behind', 'wc points', 'Equipment'])
             ->setDataKeys([
                 function (EventCompetitionResult $result): string {
                     return $this->getLink($result, $result->rank ?: '-');
                 },
                 function (EventCompetitionResult $result): string {
                     return $this->getLink($result, $result->bib ?: '-');
+                },
+                function (EventCompetitionResult $result) use($isTeamDiscipline): string {
+                    return $this->getLink($result, $isTeamDiscipline ? (!empty($result->leg) ? $result->leg: '')  : '');
                 },
                 function (EventCompetitionResult $result): string {
                     return $this->getLink($result, $result->athlete?->family_name .' '.$result->athlete?->given_name);

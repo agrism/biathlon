@@ -4,10 +4,8 @@ namespace App\Models;
 
 use App\Casts\AthleteStatsDetailsCast;
 use App\ValueObjects\Athletes\AthleteStatsDetailValueObject;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property integer $id
@@ -42,7 +40,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property ?AthleteStatsDetailValueObject $stat_details
  *
  * @property ?Athlete $athlete
- * @property ?Competition $competition
+ * @property ?EventCompetition $competition
  */
 class EventCompetitionResult extends Model
 {
