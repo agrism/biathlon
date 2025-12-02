@@ -39,7 +39,7 @@ class IndexController extends Controller
             $data = $data->with('submittedData');
         }
 
-        $data = $data->orderBy('submit_deadline_at', 'asc')->paginate(perPage: 100);
+        $data = $data->orderBy('submit_deadline_at', 'desc')->paginate(perPage: 100);
         $counter = 1;
 
         return GenericViewIndexHelper::instance()
