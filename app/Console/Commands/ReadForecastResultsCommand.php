@@ -54,7 +54,7 @@ class ReadForecastResultsCommand extends Command
 
             $forecast->final_data->results = $forecast->competition->getAthletesByRank(
                 isTeamDiscipline: $isTeamDiscipline,
-                limit: 11
+                limit: 12
             )
                 ->pluck('athlete')
                 ->map(function (Athlete $athlete): AthleteValueObject {
