@@ -16,16 +16,17 @@ class IndexController extends Controller
     {
         $season = Season::query()->where('name', '2526')->first();
 
-        $event = Event::query()
-            ->where('season_id', $season?->id)
-            ->where('level', 1)
-            ->where('start_date', '>', now())
-            ->first();
+//        $event = Event::query()
+//            ->where('season_id', $season?->id)
+//            ->where('level', 1)
+//            ->where('start_date', '>', now())
+//            ->first();
+//
+//        if($event){
+//            return view('index', compact('event', 'season'));
+//        }
 
-        if($event){
-            return view('index', compact('event', 'season'));
-        }
-
+        return app(\App\Http\Controllers\Forecasts\Summary\IndexController::class)( $request, $linkHelper);
         return app(\App\Http\Controllers\Events\IndexController::class)( $request, $linkHelper);
     }
 }
