@@ -42,7 +42,7 @@
                         </thead>
                         <tbody>
 
-                        @foreach($season['data']['users'] ?? [] as $user)
+                        @foreach($season['data']['users'] ?? [] as $i => $user)
                             <tr class="odd:bg-white even:bg-gray-100">
                                 <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
                                     <strong class="user">{{$user['name'] ?? '-'}}</strong>
@@ -75,8 +75,8 @@
                                 <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
                                     <strong>{{$user['total']['total'] ?? 0 }}</strong>
                                 </td>
-                                <td class="px-2 py-2 whitespace-nowrap text-sm text-gray-400">
-                                    <span>-{{$user['total']['diff'] ?? 0 }}</span>
+                                <td class="px-2 py-2 whitespace-nowrap text-sm text-gray-400 text-right">
+                                    <span>@if($i!==0)-@endif{{$user['total']['diff'] ?? 0 }}</span>
                                 </td>
                             </tr>
 
