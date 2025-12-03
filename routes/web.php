@@ -358,7 +358,8 @@ HTML;
         echo '<tr>';
         echo '<td colspan="1"><a href="'.(data_get($forecast, 'url')).'" target="_blank">'.data_get($forecast, 'name').'</a></td>';
         foreach ($forecast['users'] ?? [] as $user){
-            echo '<td data="'. data_get($user, 'name').'"> ' . $total[data_get($user, 'name')] += intval($user['points'][0]['points']['total'] ?? 0). '</td>';
+            echo '<td data="'. data_get($user, 'name').'"> ' . $t = intval($user['points'][0]['points']['total'] ?? 0). '</td>';
+            $total[data_get($user, 'name')] += $t;
         }
         echo '</tr>';
     }
