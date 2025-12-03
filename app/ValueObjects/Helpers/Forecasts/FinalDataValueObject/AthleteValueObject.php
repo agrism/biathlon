@@ -48,7 +48,7 @@ class AthleteValueObject
             $length = 2;
         }
 
-        return Str::of($firstName)->substr(0, $length)->ucfirst()->toString() . '. ' . $lastName;
+        return Str::of($firstName)->substr(0, $length)->ucfirst()->toString() . '.' . $lastName;
     }
 
     public function getModel(): ?Athlete
