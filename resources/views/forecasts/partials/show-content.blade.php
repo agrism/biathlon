@@ -48,12 +48,12 @@
 
             @foreach($forecast->final_data->users as $user)
                 <tr class="odd:bg-white even:bg-gray-100">
-                    <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
+                    <td class="px-2 py-2 whitespace-nowrap text-sm font-medium overflow-hidden">
                         <strong>{{$user->name}}</strong>
                     </td>
 
                     @foreach($user->getAthletes() as $athlete)
-                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium @if(!in_array($athlete->tempId, $startingUserTempIds ??[])) bg-red-100 @endif">
+                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium @if(!in_array($athlete->tempId, $startingUserTempIds ??[])) bg-red-100 @endif overflow-hidden">
                             @if($forecast->submit_deadline_at->gt(now()) && $athlete->isHidden)
                                 <div class="flex justify-center items-center w-full h-full text-lg">
                                     <x-tooltip text="This prediction is hidden by owner">
@@ -129,12 +129,12 @@
 
                 @foreach([[0,6], [6,6]] as $slices)
                 <tr class="odd:bg-white even:bg-gray-100 @if($slices[0] != 0) opacity-30 @endif">
-                    <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
+                    <td class="px-2 py-2 whitespace-nowrap text-sm font-medium overflow-hidden">
                         <strong>IBU @if($slices[0] == 0){{'(1-6)'}}@else{{'(7-12)'}}@endif</strong>
                     </td>
 
                     @foreach(collect($forecast->final_data->results)->slice($slices[0], $slices[1])->toArray() as $index => $athlete)
-                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
+                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium overflow-hidden">
                             <img src="{{$athlete->flagUrl}}" style="height:20px;display:inline-block;">&nbsp;<strong>{{$athlete->getShortName()}}</strong>
                             <x-cards.athlete-result-data :eventCompetionResult="$isTeamDiscipline ? null : $forecast->competition->results->where('athlete_id', $athlete->id)->first()"></x-cards.athlete-result-data>
                         </td>
@@ -144,11 +144,11 @@
 
                 @foreach($forecast->final_data->users as $user)
                     <tr class="odd:bg-white even:bg-gray-100">
-                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
+                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium overflow-hidden">
                             {{$user->name}}
                         </td>
                         @foreach($user->getAthletes() as $index => $athlete)
-                            <td class="px-2 py-2 whitespace-nowrap text-sm font-medium  @if(!in_array($athlete->tempId, $startingUserTempIds ??[])) bg-red-100 @endif">
+                            <td class="px-2 py-2 whitespace-nowrap text-sm font-medium  @if(!in_array($athlete->tempId, $startingUserTempIds ??[])) bg-red-100 @endif overflow-hidden">
                                 <img src="{{$athlete->flagUrl}}" style="height:20px;display:inline-block;">&nbsp;
                                 @if(isset($user->pointDetails[$index]) && is_array($arr = $user->pointDetails[$index]))
                                     @php
@@ -172,13 +172,13 @@
                             </td>
                         @endforeach
 
-                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium" style="text-align:center;">
+                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium overflow-hidden" style="text-align:center;">
                             {{ $regularPoints = $user->getPointsByType(type: \App\Enums\Forecast\AwardPointEnum::REGULAR_POINT)}}
                         </td>
-                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium" style="text-align:center;">
+                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium overflow-hidden" style="text-align:center;">
                             {{ $bonusPoints = $user->getPointsByType(type: \App\Enums\Forecast\AwardPointEnum::BONUS_POINT)}}
                         </td>
-                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium" style="text-align:center;">
+                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium overflow-hidden" style="text-align:center;">
                             {{$regularPoints + $bonusPoints}}
                         </td>
                     </tr>
