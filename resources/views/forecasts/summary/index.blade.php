@@ -76,7 +76,7 @@
                                     <strong>{{$user['total']['total'] ?? 0 }}</strong>
                                 </td>
                                 <td class="px-2 py-2 whitespace-nowrap text-sm text-gray-400">
-                                    <span>+{{$user['total']['diff'] ?? 0 }}</span>
+                                    <span>-{{$user['total']['diff'] ?? 0 }}</span>
                                 </td>
                             </tr>
 
