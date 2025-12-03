@@ -362,6 +362,16 @@ HTML;
         }
         echo '</tr>';
     }
+
+    foreach ($return as $forecast){
+        echo '<tr>';
+        echo '<td colspan="1"><a href="'.(data_get($forecast, 'url')).'" target="_blank">'.data_get($forecast, 'name').'</a></td>';
+        foreach ($forecast['users'] ?? [] as $user){
+            echo '<td data="'. data_get($user, 'name').'"> ' . $t = intval($user['points'][1]['points']['total'] ?? 0). '</td>';
+        }
+        echo '</tr>';
+    }
+
     echo '<tbody>';
     echo '</table>';
 
