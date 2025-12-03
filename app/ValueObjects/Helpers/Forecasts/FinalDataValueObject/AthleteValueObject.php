@@ -4,6 +4,7 @@ namespace App\ValueObjects\Helpers\Forecasts\FinalDataValueObject;
 
 use App\Models\Athlete;
 use App\ValueObjects\Athletes\AthleteStatsDetailValueObject;
+use Illuminate\Support\Str;
 
 class AthleteValueObject
 {
@@ -30,6 +31,24 @@ class AthleteValueObject
             'isHidden' => $this->isHidden,
             'isInStartList' => $this->isInStartList,
         ];
+    }
+
+    public function getShortName(): ?string
+    {
+        $exploded = explode(' ', $this->name);
+        if(count($exploded) < 2){
+            return $this->name;
+        }
+        $lastName = array_pop($exploded);
+        $firstName = array_pop($exploded);
+
+        $length = 1;
+
+        if(in_array($lastName, ['BOE', 'CLAUDE'])){
+            $length = 2;
+        }
+
+        return Str::of($firstName)->substr(0, $length)->ucfirst()->toString() . '. ' . $lastName;
     }
 
     public function getModel(): ?Athlete

@@ -44,9 +44,9 @@ class ShowController extends Controller
         }
 
         if($showContentOnly){
-            return view('forecasts.partials.show-content', compact('forecast', 'favoriteAthleteIds', 'startingUserTempIds'));
+            return view('forecasts.partials.show-content', compact('forecast', 'favoriteAthleteIds', 'startingUserTempIds', 'isTeamDiscipline'));
         }
 
-        return view('forecasts.show', compact('forecast', 'favoriteAthleteIds', 'startingUserTempIds'));
+        return view('forecasts.show', compact('forecast', 'favoriteAthleteIds', 'startingUserTempIds', 'isTeamDiscipline'));
     }
 }
