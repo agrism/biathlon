@@ -87,6 +87,7 @@ Route::group([
 Route::get('/test-dainis', function (Request $request){
 
     $dainisCalc = new \App\Helpers\Forecasts\ForecastDainisServiceHelper;
+    $oldCalc = new \App\Helpers\Forecasts\ForecastFirstSixPlacesServiceHelper;
     $dainisCalc->overrideMatrix($request->all());
 
     $getRank = function (int $provided, array $all){
@@ -104,8 +105,10 @@ Route::get('/test-dainis', function (Request $request){
     };
 
 
-    $forecasts = \App\Models\Forecast::query()->where('status',
-        \App\Enums\Forecast\ForecastStatusEnum::COMPLETED)->get();
+    $forecasts = \App\Models\Forecast::query()
+        ->where('status', \App\Enums\Forecast\ForecastStatusEnum::COMPLETED)
+        ->where('submit_deadline_at', '>', '2025-11-25 00:00:00')
+        ->get();
 
     $return = [];
 
@@ -133,14 +136,18 @@ Route::get('/test-dainis', function (Request $request){
         foreach ($users as $user) {
 
             $dainisCalc->calculateUserPoints(forecast: $forecast, user: $user);
+            $oldCalc->calculateUserPoints(forecast: $forecast, user: $user);
 
-            $userTotalPoints[$user->name]['old'] += $oldRegular = $forecast->awards
-                ->where('user_id', $user->id)
-                ->where('type', \App\Enums\Forecast\AwardPointEnum::REGULAR_POINT)->first()?->points;
+//            $userTotalPoints[$user->name]['old'] += $oldRegular = $forecast->awards
+//                ->where('user_id', $user->id)
+//                ->where('type', \App\Enums\Forecast\AwardPointEnum::REGULAR_POINT)->first()?->points;
+//
+//            $userTotalPoints[$user->name]['old'] += $oldBonus = $forecast->awards
+//                ->where('user_id', $user->id)
+//                ->where('type', \App\Enums\Forecast\AwardPointEnum::BONUS_POINT)->first()?->points;
 
-            $userTotalPoints[$user->name]['old'] += $oldBonus = $forecast->awards
-                ->where('user_id', $user->id)
-                ->where('type', \App\Enums\Forecast\AwardPointEnum::BONUS_POINT)->first()?->points;
+            $userTotalPoints[$user->name]['old'] += $oldRegular = $oldCalc->getMainPoints();
+            $userTotalPoints[$user->name]['old'] += $oldBonus = $oldCalc->getBonusPoints();
 
             $userTotalPoints[$user->name]['new'] += $newRegular = $dainisCalc->getMainPoints();
             $userTotalPoints[$user->name]['new'] += $newBonus = $dainisCalc->getBonusPoints();
