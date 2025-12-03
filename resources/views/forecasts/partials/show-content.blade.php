@@ -3,7 +3,6 @@ $athleteName = function(?string $athleteFullName): ?string{
     $explodedName = explode(',', $athleteFullName);
     return array_pop($explodedName);
 };
-
 @endphp
 
 <div class="px-2 py-2">
@@ -143,7 +142,7 @@ $athleteName = function(?string $athleteFullName): ?string{
 
                     @foreach(collect($forecast->final_data->results)->slice($slices[0], $slices[1])->toArray() as $index => $athlete)
                         <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
-                            <img src="{{$athlete->flagUrl}}" style="height:20px;display:inline-block;">&nbsp;<strong>{{$athlete->name}}</strong>
+                            <img src="{{$athlete->flagUrl}}" style="height:20px;display:inline-block;">&nbsp;<strong>{{$$athleteName($athlete->name)}}</strong>
                             <x-cards.athlete-stat :athlete="$athlete"></x-cards.athlete-stat>
                         </td>
                     @endforeach
