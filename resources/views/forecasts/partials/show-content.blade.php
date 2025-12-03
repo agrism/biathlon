@@ -1,4 +1,10 @@
+@php
+$athleteName = function(?string $athleteFullName): ?string{
+    $explodedName = explode(',', $athleteFullName);
+    return array_pop($explodedName);
+};
 
+@endphp
 
 <div class="px-2 py-2">
     <div id="selected-athletes">
@@ -65,7 +71,7 @@
                             @else
                                 <img src="{{$athlete->flagUrl}}"
                                      style="height:20px;display:inline-block;"
-                                >&nbsp{{$athlete->name}}</a>
+                                >&nbsp{{$athleteName($athlete->name)}}</a>
                                 <x-cards.athlete-stat :athlete="$athlete"></x-cards.athlete-stat>
                             @endif
 
@@ -165,10 +171,10 @@
                                     })->join(', ');
                                     @endphp
                                     <x-tooltip :text="$tooltipText">
-                                        {{$athlete->name}}
+                                        {{$athleteName($athlete->name)}}
                                     </x-tooltip>
                                 @else
-                                    {{$athlete->name}}
+                                    {{$athleteName($athlete->name)}}
                                 @endif
                                 <x-cards.athlete-stat :athlete="$athlete"></x-cards.athlete-stat>
                             </td>
