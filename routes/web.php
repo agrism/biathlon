@@ -343,17 +343,22 @@ HTML;
     echo '<table>';
     echo '<tr>';
     foreach (['comp' ,'Agris', 'Grey', 'Dainis', 'Andris'] as $name){
-        echo '<th colspan="3">'.$name.'</th>';
+        echo '<th colspan="1">'.$name.'</th>';
     }
     echo '</tr>';
     echo '<tbody>';
 
-    $total = [];
+    $total = [
+        'Agris' => 0,
+        'Grey' => 0,
+        'Dainis' => 0,
+        'Andris' => 0,
+    ];
     foreach ($return as $forecast){
         echo '<tr>';
-        echo '<td colspan="100"><a href="'.(data_get($forecast, 'url')).'" target="_blank">'.data_get($forecast, 'name').'</a></td>';
+        echo '<td colspan="1"><a href="'.(data_get($forecast, 'url')).'" target="_blank">'.data_get($forecast, 'name').'</a></td>';
         foreach ($forecast['users'] ?? [] as $user){
-            echo '<td data="'. data_get($user, 'name').'"> ' . $total[data_get($user, 'name')] = ($user['points'][0]['points']['total'] ?? 0). '</td>';
+            echo '<td data="'. data_get($user, 'name').'"> ' . $total[data_get($user, 'name')] += ($user['points'][0]['points']['total'] ?? 0). '</td>';
         }
         echo '</tr>';
     }
