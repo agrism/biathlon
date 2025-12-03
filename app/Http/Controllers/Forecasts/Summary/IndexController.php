@@ -121,6 +121,7 @@ class IndexController extends Controller
         $data['events'][] = 'Points';
         $data['events'][] = 'Bonus';
         $data['events'][] = 'Total';
+        $data['events'][] = 'Diff';
 
         foreach ($data['users'][0]['events'] ?? [] as $eventIndex => $event){
             $maxPoints = 0;

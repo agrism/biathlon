@@ -68,17 +68,15 @@
 
                                 <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
                                     <strong>{{$user['total']['regular'] ?? 0 }}</strong>
-                                    <small x-show="showDetails" class="block pt-[2px] text-gray-400" style="display: inline-block">&nbsp;</small>
                                 </td>
                                 <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
                                     <strong>{{$user['total']['bonus'] ?? 0 }}</strong>
-                                    <small x-show="showDetails" class="block pt-[2px] text-gray-400" style="display: inline-block">&nbsp;</small>
                                 </td>
                                 <td class="px-2 py-2 whitespace-nowrap text-sm font-medium">
                                     <strong>{{$user['total']['total'] ?? 0 }}</strong>
-                                    <x-tooltip text="Behind" :show="true">
-                                        <small x-show="showDetails" class="block pt-[2px] text-gray-400" style="display: inline-block">+{{$user['total']['diff'] ?? 0}}</small>
-                                    </x-tooltip>
+                                </td>
+                                <td class="px-2 py-2 whitespace-nowrap text-sm text-gray-400">
+                                    <span>+{{$user['total']['diff'] ?? 0 }}</span>
                                 </td>
                             </tr>
 
