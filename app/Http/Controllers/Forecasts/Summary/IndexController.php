@@ -144,6 +144,33 @@ class IndexController extends Controller
             }
         }
 
+        // add point diff
+
+        $userTotalPoints = [];
+
+        foreach ($data['users'] ?? [] as $user){
+            $userTotalPoints[$user['id']] = data_get($user, 'total.total');
+        }
+
+        arsort($userTotalPoints);
+
+        $maxPoints = 0;
+        $counter = 0;
+        $userDiffPoints = [];
+
+        foreach ($userTotalPoints as $userId => $userTotalPoints){
+            if($counter++ === 0){
+                $maxPoints = $userTotalPoints;
+            }
+
+            $userDiffPoints[$userId] = $maxPoints - $userTotalPoints;
+        }
+
+
+        foreach ($data['users'] as $index => $user){
+            data_set($data, 'users.'.$index.'.total.diff', data_get($userDiffPoints, $user['id']));
+        }
+
         return $data;
     }
 }
