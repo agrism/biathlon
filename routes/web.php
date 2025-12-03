@@ -360,7 +360,10 @@ HTML;
     echo '<tbody>';
     echo '</table>';
 
-    dump($total);
+    echo '<h1>Total</h1>'
+    echo '<pre>';
+    echo json_encode($total, JSON_PRETTY_PRINT);
+    echo '</pre>';
 
     echo '<pre>';
     echo json_encode($return, JSON_PRETTY_PRINT);
