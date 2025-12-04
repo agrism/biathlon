@@ -148,7 +148,7 @@
                             {{$user->name}}
                         </td>
                         @foreach($user->getAthletes() as $index => $athlete)
-                            <td class="px-2 py-2 whitespace-nowrap text-sm font-medium  @if(!in_array($athlete->tempId, $startingUserTempIds ??[])) bg-red-100 @endif">
+                            <td class="px-2 py-2 whitespace-nowrap text-sm font-medium  @if(!in_array($athlete->tempId, $startingUserTempIds ??[])) bg-red-100 @endif overflow-hidden">
                                 <img src="{{$athlete->flagUrl}}" style="height:15px;margin-top: -10px;display:inline-block;">&nbsp;
                                 @if(isset($user->pointDetails[$index]) && is_array($arr = $user->pointDetails[$index]))
                                     @php
@@ -163,12 +163,9 @@
                                     })->join(', ');
                                     @endphp
                                     <x-tooltip :text="$tooltipText">
-                                        <div class="max-w-full">
-                                            <div class="truncate inline-block">
-                                                {{$athlete->getShortName()}}
-                                            </div>
+                                        <div class="truncate inline-block">
+                                            {{$athlete->getShortName()}}
                                         </div>
-
                                     </x-tooltip>
                                 @else
                                     <div class="truncate inline-block">
