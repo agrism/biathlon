@@ -163,9 +163,12 @@
                                     })->join(', ');
                                     @endphp
                                     <x-tooltip :text="$tooltipText">
-                                        <div class="truncate inline-block">
-                                        {{$athlete->getShortName()}}
+                                        <div class="max-w-full">
+                                            <div class="truncate inline-block">
+                                                {{$athlete->getShortName()}}
+                                            </div>
                                         </div>
+
                                     </x-tooltip>
                                 @else
                                     <div class="truncate inline-block">
