@@ -9,11 +9,8 @@
 
 @if($show)
 
-<div class="relative inline-block group overflow-visible">
-    <div class="overflow-hidden">
-        {{$slot}}
-    </div>
-
+<div class="relative inline-block group">
+    {{$slot}}
 
     @if($position === 'top')
         <div
