@@ -63,7 +63,7 @@
                             @else
                                 <img src="{{$athlete->flagUrl}}"
                                      style="height:20px;display:inline-block;"
-                                >&nbsp{{$athlete->getShortName()}}</a>
+                                >&nbsp<div class="truncate inline-block">{{$athlete->getShortName()}}</div>
                                 <x-cards.athlete-stat :athlete="$athlete"></x-cards.athlete-stat>
                             @endif
 
@@ -163,14 +163,14 @@
                                     })->join(', ');
                                     @endphp
                                     <x-tooltip :text="$tooltipText">
-                                        <span class="truncate inline-block">
+                                        <div class="truncate inline-block">
                                         {{$athlete->getShortName()}}
-                                        </span>
+                                        </div>
                                     </x-tooltip>
                                 @else
-                                    <span class="truncate inline-block">
+                                    <div class="truncate inline-block">
                                     {{$athlete->getShortName()}}
-                                    </span>
+                                    </div>
                                 @endif
                                 <x-cards.athlete-result-data :eventCompetionResult="$isTeamDiscipline ? null : $forecast->competition->results->where('athlete_id', $athlete->id)->first()"></x-cards.athlete-result-data>
                             </td>
