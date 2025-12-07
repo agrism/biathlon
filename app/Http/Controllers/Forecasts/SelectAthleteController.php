@@ -60,7 +60,7 @@ class SelectAthleteController extends Controller
         $athletes = $athletes->where('gender_id', $gender->value);
         $athletes = $athletes->where('is_team', $discipline->isTeamDiscipline() ? 1 : 0);
         if(!$discipline->isTeamDiscipline() ){
-            $athletes = $athletes->where('functions', 'Athlete');
+            $athletes = $athletes->whereIn('functions', ['Athlete', 'Athlete, Official']);
         }
 
         if($country = GenericViewIndexHelper::instance()->getFilterValue(self::FILTER_COUNTRY)){
