@@ -46,7 +46,7 @@ class IndexController extends Controller
     {
         $season = Season::query()
             ->with(['events'=> function( $q){
-                $q->with('competitions.forecast.awards.user')->where('level', 1);
+                $q->with('competitions.forecast.awards.user')->where('level', 1)->orderBy('start_time');
             }])
             ->where('name', $season)
             ->first();
