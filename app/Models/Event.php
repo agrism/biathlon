@@ -47,6 +47,7 @@ class Event extends Model
         $return[] = $this->short_description;
         $return[] = $this->nat_long;
         $return[] = $this->first_competition_date->format('d.m').'-'.$this->end_date->format('d.m.Y');
+        $return = array_filter($return);
         return implode(', ', $return);
     }
 
