@@ -1,6 +1,6 @@
 <div class="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden max-h-[90vh] flex flex-col my-auto" onclick="event.stopPropagation()">
     <!-- Modal Sticky Header / Close Bar -->
-    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80 backdrop-blur-xs sticky top-0 z-20">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80 backdrop-blur-xs sticky top-0 z-20 shrink-0">
         <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Athlete Profile</span>
@@ -26,7 +26,7 @@
     </div>
 
     <!-- Modal Scrollable Body -->
-    <div class="p-6 space-y-6 overflow-y-auto">
+    <div id="athlete-modal-body" class="flex-1 p-6 space-y-6 overflow-y-auto overscroll-contain" onscroll="handleModalScroll(this)">
         <!-- Athlete Profile Banner -->
         <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-sky-950 text-white rounded-3xl p-6 sm:p-7 shadow-lg relative overflow-hidden">
             <div class="flex flex-col sm:flex-row items-center gap-6 relative z-10">
@@ -90,7 +90,7 @@
                 <h3 class="text-sm font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
                     <i class="fa-solid fa-list-check text-sky-500"></i> Competition Results
                 </h3>
-                <span class="text-xs font-bold text-slate-400">{{ count($athlete->results) }} races</span>
+                <span class="text-xs font-bold text-slate-400">{{ $resultsCount ?? count($results) }} races</span>
             </div>
 
             <div class="overflow-x-auto">
@@ -104,45 +104,12 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 bg-white">
-                        @forelse($athlete->results as $result)
-                            <tr class="hover:bg-slate-50/80 transition-colors">
-                                <td class="px-4 py-2.5 whitespace-nowrap">
-                                    @if($result->rank == 1)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-black bg-amber-100 text-amber-900 border border-amber-300">🥇 1st</span>
-                                    @elseif($result->rank == 2)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-black bg-slate-200 text-slate-800 border border-slate-300">🥈 2nd</span>
-                                    @elseif($result->rank == 3)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-black bg-amber-200 text-amber-950 border border-amber-400">🥉 3rd</span>
-                                    @elseif($result->rank)
-                                        <span class="font-bold text-slate-700">#{{ $result->rank }}</span>
-                                    @else
-                                        <span class="text-xs text-rose-500 font-semibold">DNF</span>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-2.5 whitespace-nowrap font-medium text-slate-800">
-                                    @if($result->competition)
-                                        <a href="{{ route('competitions.show', $result->competition->race_remote_id) }}" class="text-sky-600 hover:underline">
-                                            {{ $result->competition->description }}
-                                        </a>
-                                        <span class="text-xs text-slate-400 block">{{ $result->competition->start_time?->format('d M Y') }}</span>
-                                    @else
-                                        -
-                                    @endif
-                                </td>
-                                <td class="px-4 py-2.5 whitespace-nowrap">
-                                    <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-medium text-xs">
-                                        🎯 {{ $result->shootings ?: ($result->shooting_total ?? '-') }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-2.5 whitespace-nowrap text-slate-500 font-medium text-xs">
-                                    {{ $result->behind ? '+'.$result->behind : '-' }}
-                                </td>
-                            </tr>
-                        @empty
+                        @include('athletes.partials.result-rows', ['results' => $results, 'athlete' => $athlete])
+                        @if($results->isEmpty())
                             <tr>
                                 <td colspan="4" class="px-6 py-6 text-center text-slate-400 italic">No competition results recorded yet.</td>
                             </tr>
-                        @endforelse
+                        @endif
                     </tbody>
                 </table>
             </div>

@@ -13,6 +13,7 @@ Route::get('/competitions/{id}/{showContentOnly?}',
     Contr\Competitions\ShowController::class)->name('competitions.show');
 Route::get('/athletes', Contr\Athletes\IndexController::class)->name('athletes.index');
 Route::get('/athletes/{id}', Contr\Athletes\ShowController::class)->name('athletes.show');
+Route::get('/athletes/{id}/results', Contr\Athletes\ResultsController::class)->name('athletes.results');
 Route::get('/forecasts/', Contr\Forecasts\IndexController::class)->name('forecasts.index');
 Route::get('/forecasts/summary', Contr\Forecasts\Summary\IndexController::class)->name('forecasts.summary.index');
 Route::get('/forecasts/summary/{userId}/{eventId}/show',

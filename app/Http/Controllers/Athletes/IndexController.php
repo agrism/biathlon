@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Athletes;
 
-use App\Enums\FavoriteIconEnum;
 use App\Enums\FavoriteTypeEnum;
 use App\Enums\InputTypeEnum;
 use App\Helpers\FavoriteHelper;
@@ -12,7 +11,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Athlete;
 use App\ValueObjects\Helpers\Generic\FilterValueObject;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
 
 class IndexController extends Controller
@@ -45,34 +43,26 @@ class IndexController extends Controller
             });
         }
 
+        // Clean uniform sorting by World Cup points (descending) without artificial grouping
+        $athletes = $athletes->orderByDesc('stat_p_total')->orderBy('family_name');
+
         if (auth()->check()) {
             $favoriteIds = FavoriteHelper::instance()
                 ->getUserFavoriteIds(user: auth()->user(), type: FavoriteTypeEnum::ATHLETE);
 
-            $athletes = $athletes->get()->map(function (Athlete $athlete) use ($favoriteIds) {
+            $paginatedAthletes = $athletes->paginate(30);
+
+            $paginatedAthletes->getCollection()->transform(function (Athlete $athlete) use ($favoriteIds) {
                 $athlete->is_favorit = in_array($athlete->id, $favoriteIds);
                 return $athlete;
-            })
-                ->sortByDesc(function (Athlete $athlete) {
-                    return $athlete?->is_favorit;
-                });
-
-            $currentPage = request()->input('page', 1);
-
-            $athletes = new LengthAwarePaginator(
-                $athletes->forPage($currentPage, 30),
-                $athletes->count(),
-                30,
-                $currentPage,
-                ['path' => request()->url()]
-            );
+            });
         } else {
-            $athletes = $athletes->orderByDesc('stat_p_total')->paginate(30);
+            $paginatedAthletes = $athletes->paginate(30);
         }
 
         return GenericViewIndexHelper::instance()
             ->setTitle('Athletes')
-            ->setData($athletes)
+            ->setData($paginatedAthletes)
             ->setHeaders([
                 'Fav',
                 'Athlete',

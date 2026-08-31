@@ -65,7 +65,7 @@
                 <h2 class="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
                     <i class="fa-solid fa-list-check text-sky-500"></i> Competition Results
                 </h2>
-                <span class="text-xs font-bold text-slate-400">{{ count($athlete->results) }} entries</span>
+                <span class="text-xs font-bold text-slate-400">{{ $resultsCount ?? count($results) }} entries</span>
             </div>
 
             <div class="overflow-x-auto">
@@ -79,45 +79,12 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 bg-white">
-                        @forelse($athlete->results as $result)
-                            <tr class="hover:bg-slate-50/80 transition-colors">
-                                <td class="px-4 py-3 whitespace-nowrap">
-                                    @if($result->rank == 1)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-black bg-amber-100 text-amber-900 border border-amber-300">🥇 1st</span>
-                                    @elseif($result->rank == 2)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-black bg-slate-200 text-slate-800 border border-slate-300">🥈 2nd</span>
-                                    @elseif($result->rank == 3)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-black bg-amber-200 text-amber-950 border border-amber-400">🥉 3rd</span>
-                                    @elseif($result->rank)
-                                        <span class="font-bold text-slate-700">#{{ $result->rank }}</span>
-                                    @else
-                                        <span class="text-xs text-rose-500 font-semibold">DNF</span>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-3 whitespace-nowrap font-medium text-slate-800">
-                                    @if($result->competition)
-                                        <a href="{{ route('competitions.show', $result->competition->race_remote_id) }}" class="text-sky-600 hover:underline">
-                                            {{ $result->competition->description }}
-                                        </a>
-                                        <span class="text-xs text-slate-400 block">{{ $result->competition->start_time?->format('d M Y') }}</span>
-                                    @else
-                                        -
-                                    @endif
-                                </td>
-                                <td class="px-4 py-3 whitespace-nowrap">
-                                    <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-medium text-xs">
-                                        🎯 {{ $result->shootings ?: ($result->shooting_total ?? '-') }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3 whitespace-nowrap text-slate-500 font-medium text-xs">
-                                    {{ $result->behind ? '+'.$result->behind : '-' }}
-                                </td>
-                            </tr>
-                        @empty
+                        @include('athletes.partials.result-rows', ['results' => $results, 'athlete' => $athlete])
+                        @if($results->isEmpty())
                             <tr>
                                 <td colspan="4" class="px-6 py-8 text-center text-slate-400 italic">No competition results recorded yet.</td>
                             </tr>
-                        @endforelse
+                        @endif
                     </tbody>
                 </table>
             </div>

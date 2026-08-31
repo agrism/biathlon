@@ -62,12 +62,37 @@
 </footer>
 
 <script>
+    function triggerAutoLoad(container) {
+        if (!container) return;
+        const triggerEl = container.querySelector('.auto-load-trigger');
+        if (triggerEl && !triggerEl.dataset.loading) {
+            triggerEl.dataset.loading = 'true';
+            htmx.trigger(triggerEl, 'loadMore');
+        }
+    }
+
+    function handleModalScroll(el) {
+        if (!el) return;
+        const threshold = 350;
+        if (el.scrollHeight - el.scrollTop - el.clientHeight < threshold) {
+            triggerAutoLoad(el);
+        }
+    }
+    window.handleModalScroll = handleModalScroll;
+
+    window.addEventListener('scroll', function () {
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 450) {
+            triggerAutoLoad(document);
+        }
+    });
+
     function closeAthleteModal() {
         const show = document.getElementById('show');
         if (show) {
             show.innerHTML = '';
             show.classList.add('hidden');
         }
+        document.body.classList.remove('overflow-hidden');
     }
     window.closeAthleteModal = closeAthleteModal;
 
@@ -75,9 +100,16 @@
         if (evt.detail.target && evt.detail.target.id === 'show') {
             if (evt.detail.target.innerHTML.trim() !== '') {
                 evt.detail.target.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
             } else {
                 evt.detail.target.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
             }
+        }
+
+        const modalBody = document.getElementById('athlete-modal-body');
+        if (modalBody) {
+            handleModalScroll(modalBody);
         }
     });
 

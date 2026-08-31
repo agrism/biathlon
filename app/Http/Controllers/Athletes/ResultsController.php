@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers\Athletes;
 
-use App\Helpers\LinkHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Athlete;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-class ShowController extends Controller
+class ResultsController extends Controller
 {
     public function __invoke(Request $request, string $id): View
     {
@@ -26,16 +25,10 @@ class ShowController extends Controller
             ->orderByDesc('event_competition_results.id')
             ->paginate(10);
 
-        $resultsCount = $athlete->results()->count();
-
-        $this->registerBread('Athlete: ' . $athlete->getFullName());
-
-        $linkHelper = app(LinkHelper::class);
-
-        if ($request->header('HX-Request') && !$request->header('HX-Boosted') && !$request->has('full_page')) {
-            return view('athletes.partials.show-modal', compact('athlete', 'results', 'resultsCount', 'linkHelper'));
+        if (app()->bound('debugbar')) {
+            app('debugbar')->disable();
         }
 
-        return view('athletes.show', compact('athlete', 'results', 'resultsCount', 'linkHelper'));
+        return view('athletes.partials.result-rows', compact('athlete', 'results'));
     }
 }

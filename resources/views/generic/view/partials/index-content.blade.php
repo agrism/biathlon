@@ -133,6 +133,6 @@
 <!-- HTMX Modal Container -->
 <div
     id="show"
-    class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs p-4 sm:p-6 lg:p-8 flex items-center justify-center"
+    class="hidden fixed inset-0 z-50 overflow-hidden bg-slate-900/60 backdrop-blur-xs p-4 sm:p-6 lg:p-8 flex items-center justify-center"
     onclick="if(event.target === this) closeAthleteModal();"
 ></div>

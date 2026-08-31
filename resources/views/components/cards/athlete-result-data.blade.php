@@ -12,7 +12,7 @@
         </span>
         @if($eventCompetionResult->behind)
             <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-normal" title="Time Behind Leader">
-                +{{ $eventCompetionResult->behind }}
+                {{ str_starts_with($eventCompetionResult->behind, '+') ? $eventCompetionResult->behind : '+'.$eventCompetionResult->behind }}
             </span>
         @endif
     </div>
