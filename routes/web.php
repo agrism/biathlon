@@ -22,8 +22,7 @@ Route::get('/forecasts/{id}/{showContentOnly?}', Contr\Forecasts\ShowController:
 Route::get('/forecasts/{id}/select-athlete/{place}/place',
     Contr\Forecasts\SelectAthleteController::class)->name('forecasts.select-athlete');
 
-//Route::get('/tweet', Contr\Twitter\IndexController::class)->name('twitter.index');
-//Route::get('/api/tweets', Contr\Twitter\FetchController::class)->name('twitter.fetch');
+Route::get('/tweets', Contr\Twitter\TweetsController::class)->name('tweets.index');
 
 Route::group([
     'prefix' => 'private',
