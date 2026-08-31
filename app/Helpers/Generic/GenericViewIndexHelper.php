@@ -218,7 +218,7 @@ class GenericViewIndexHelper
     public function dataButton(string $route, string $title, string $routeHttpMethod = 'get'): string
     {
         return '<button
-            class="float-right bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-0 px-2 border border-blue-500 hover:border-transparent rounded"
+            class="inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-slate-100 hover:bg-sky-50 text-slate-700 hover:text-sky-600 font-semibold text-xs border border-slate-200 hover:border-sky-200 transition-colors cursor-pointer"
             type="button"
             hx-'.$routeHttpMethod.'="'.$route.'"
             hx-target="#show"

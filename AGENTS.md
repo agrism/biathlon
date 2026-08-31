@@ -6,7 +6,7 @@ Welcome to the **Biathlon** platform codebase. This document serves as the singl
 
 ## 1. Project Overview & Domain Context
 
-**Biathlon** is a Laravel-based platform that combines real-time International Biathlon Union (IBU) World Cup tracking with a competitive **Forecast (Fantasy/Prediction)** game.
+**Biathlon** is a Laravel-based platform that combines real-time International Biathlon Union (IBU) World Cup tracking with a competitive **Forecast / Prediction** game.
 
 ### Core Domain Capabilities
 1. **IBU API Data Sync**: Integrates with the official IBU Sport API (`https://biathlonresults.com/modules/sportapi/api/`) to pull seasons, events (World Cup stages), competitions (races), live results, and athlete bios/statistics.

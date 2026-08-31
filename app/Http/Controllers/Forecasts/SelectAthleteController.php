@@ -134,13 +134,14 @@ class SelectAthleteController extends Controller
                     $route = route('forecasts.select-athlete.submit', ['id' => $forecast->id, 'place' => $place, 'athlete' => $athlete->id]);
                     return <<<HTML
                             <button
-                                class="bg-transparent hover:bg-blue-400 text-blue-500 hover:text-white py-0 px-2 border border-blue-500 hover:border-transparent rounded"
+                                class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs shadow-xs transition-all hover:scale-110"
+                                title="Select Athlete"
                                 hx-get="$route"
                                 hx-target="#selected-athletes"
                                 hx-target=".cont"
                                 hx-indicator="#status"
                             >
-                                +
+                                <i class="fa-solid fa-plus text-[10px]"></i>
                             </button>
 HTML;
                 },

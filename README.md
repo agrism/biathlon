@@ -5,7 +5,7 @@
 [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
 [![HTMX](https://img.shields.io/badge/HTMX-1.9-336699?style=for-the-badge&logo=htmx&logoColor=white)](https://htmx.org)
 
-**Biathlon** is a modern Laravel web application and fantasy prediction platform for the **IBU World Cup Biathlon**. It synchronizes real-time race results, start lists, and athlete performance statistics directly from the International Biathlon Union (IBU) Sport API, powering an interactive 6-place prediction league with automated scoring engines.
+**Biathlon** is a modern Laravel web application and prediction platform for the **IBU World Cup Biathlon**. It synchronizes real-time race results, start lists, and athlete performance statistics directly from the International Biathlon Union (IBU) Sport API, powering an interactive 6-place prediction league with automated scoring engines.
 
 ---
 

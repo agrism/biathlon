@@ -1,124 +1,127 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 @import '@fortawesome/fontawesome-free/css/all.css';
 
-.htmx-request.indicator {
-    color: #ef4444;  /* Red during loading */
+:root {
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 }
 
+body {
+    font-family: var(--font-sans);
+    background-color: #f8fafc;
+    color: #1e293b;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* HTMX Loading Indicator with Biathlon Target Discs */
 .indicator {
     display: none;
 }
-.htmx-request.indicator {
+.htmx-request.indicator,
+.htmx-request .indicator {
     display: flex;
 }
 
-.circle {
-    animation: fadeToWhite .5s forwards;
+.target-disc {
+    width: 14px;
+    height: 14px;
+    border-radius: 9999px;
+    background-color: #0f172a;
+    border: 2px solid #94a3b8;
+    animation: targetHit 1.2s infinite ease-in-out;
 }
 
-.circle:nth-child(1) {
-    animation-delay: 0s;
-}
+.target-disc:nth-child(1) { animation-delay: 0.0s; }
+.target-disc:nth-child(2) { animation-delay: 0.2s; }
+.target-disc:nth-child(3) { animation-delay: 0.4s; }
+.target-disc:nth-child(4) { animation-delay: 0.6s; }
+.target-disc:nth-child(5) { animation-delay: 0.8s; }
 
-.circle:nth-child(2) {
-    animation-delay: .5s;
-}
-
-.circle:nth-child(3) {
-    animation-delay: 1s;
-}
-
-.circle:nth-child(4) {
-    animation-delay: 1.5s;
-}
-
-.circle:nth-child(5) {
-    animation-delay: 2s;
-}
-
-@keyframes fadeToWhite {
-    0% {
-        background-color: black;
+@keyframes targetHit {
+    0%, 100% {
+        background-color: #0f172a;
+        transform: scale(1);
     }
-    100% {
-        background-color: white;
+    50% {
+        background-color: #22c55e;
+        border-color: #15803d;
+        transform: scale(1.15);
+        box-shadow: 0 0 10px rgba(34, 197, 94, 0.6);
     }
 }
 
+/* Modern Card Hover Effects */
+.card-hover {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.08);
+}
 
+/* Ski Brand Icons */
 .atomic {
     background-image: url('../images/atomic.webp');
-    /*width: 20px;  !* Set appropriate width *!*/
-    height: 16px; /* Set appropriate height */
-    background-size: contain;  /* or 'cover' depending on your needs */
+    height: 16px;
+    background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
     transform: scale(1.8);
 }
 .rossignol {
     background-image: url('../images/rossignol.webp');
-    /*width: 20px;  !* Set appropriate width *!*/
-    height: 16px; /* Set appropriate height */
-    background-size: contain;  /* or 'cover' depending on your needs */
+    height: 16px;
+    background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
     transform: scale(2.1);
 }
-
 .swix {
     background-image: url('../images/swix.webp');
-    /*width: 20px;  !* Set appropriate width *!*/
-    height: 16px; /* Set appropriate height */
-    background-size: contain;  /* or 'cover' depending on your needs */
+    height: 16px;
+    background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
     transform: scale(2);
 }
 .salomon {
     background-image: url('../images/salomon.webp');
-    /*width: 20px;  !* Set appropriate width *!*/
-    height: 16px; /* Set appropriate height */
-    background-size: contain;  /* or 'cover' depending on your needs */
+    height: 16px;
+    background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
     transform: scale(2);
 }
 .madshus {
     background-image: url('../images/madshus.webp');
-    /*width: 20px;  !* Set appropriate width *!*/
-    height: 20px; /* Set appropriate height */
-    background-size: contain;  /* or 'cover' depending on your needs */
+    height: 20px;
+    background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
     transform: scale(1.8);
 }
 .fischer, .fisher {
     background-image: url('../images/fisher.webp');
-    /*width: 20px;  !* Set appropriate width *!*/
-    height: 16px; /* Set appropriate height */
-    background-size: contain;  /* or 'cover' depending on your needs */
+    height: 16px;
+    background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
     transform: scale(1.5);
 }
-
 .kastle, .kästle {
     background-image: url('../images/kastle.webp');
-    /*width: 20px;  !* Set appropriate width *!*/
-    height: 16px; /* Set appropriate height */
-    background-size: contain;  /* or 'cover' depending on your needs */
+    height: 16px;
+    background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
     transform: scale(2.5);
 }
-
 .ogasaka {
     background-image: url('../images/ogasaka.webp');
-    /*width: 20px;  !* Set appropriate width *!*/
-    height: 16px; /* Set appropriate height */
-    background-size: contain;  /* or 'cover' depending on your needs */
+    height: 16px;
+    background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
     transform: scale(2);
@@ -128,7 +131,6 @@
     position: relative;
     min-height: 100vh;
 }
-
 .bgpic::before {
     content: '';
     position: absolute;
@@ -137,19 +139,14 @@
     right: 0;
     bottom: 0;
     background: url('../images/aaron-doucett-j2t6aukwbrc-unsplash-2.webp') center/cover;
-    opacity: 0.7;
+    opacity: 0.15;
     z-index: -1;
 }
 
-/*th {*/
-/*    color: white;*/
-/*    background-color: #8bf1be;*/
-/*}*/
-
-/*h2 {*/
-/*    color: #8bf1be;*/
-/*}*/
-
-/*th {*/
-/*    border-radius: 5px;*/
-/*}*/
+/* Glassmorphism utility */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+}
