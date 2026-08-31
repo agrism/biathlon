@@ -41,17 +41,49 @@ class BreadCrumbHelper
     {
         $this->read();
 
-//        $count = count($this->objects);
-//
-//        return implode(' <span style="font-size: 14px;font-weight: bold">&#10095;</span> ', array_map(
-//            fn($object, $index) => ($count-1)  === $index ? '<span style="font-weight: bold">'.$object->title.'</span>' : '<a href="' . $object->route . '">' . $object->title . '</a>',
-//            $this->objects, array_keys(array_values($this->objects))
-//        ));
+        // Do not render breadcrumbs if only on the Home page
+        if (count($this->objects) <= 1 && (isset($this->objects['home']) || empty($this->objects))) {
+            return '';
+        }
 
-        return implode(' <span style="font-size: 14px;font-weight: bold">&#10095;</span> ', array_map(
-            fn($object, $index) => '<a href="' . $object->route . '">' . $object->title . '</a>',
-            $this->objects, array_keys(array_values($this->objects))
-        ));
+        $items = array_values($this->objects);
+        $total = count($items);
+
+        $html = '<nav class="flex items-center text-xs font-medium text-slate-500 py-2 px-3.5 bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-2xl shadow-2xs w-fit mb-5" aria-label="Breadcrumb">';
+        $html .= '<ol class="inline-flex items-center gap-1.5 flex-wrap">';
+
+        foreach ($items as $index => $object) {
+            $isLast = ($index === $total - 1);
+            $isFirst = ($index === 0);
+
+            // Clean title
+            $title = str_replace(':', ': ', $object->title);
+            $title = preg_replace('/\s+/', ' ', $title);
+
+            if ($index > 0) {
+                $html .= '<li class="text-slate-300 text-[10px] flex items-center select-none" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></li>';
+            }
+
+            if ($isLast) {
+                $html .= '<li class="inline-flex items-center font-bold text-slate-900 bg-slate-100/90 px-2.5 py-0.5 rounded-lg tracking-tight" aria-current="page">';
+                $html .= e($title);
+                $html .= '</li>';
+            } else {
+                $html .= '<li class="inline-flex items-center">';
+                $html .= '<a href="' . e($object->route) . '" class="inline-flex items-center gap-1.5 text-slate-500 hover:text-sky-600 transition-colors font-medium">';
+                if ($isFirst) {
+                    $html .= '<i class="fa-solid fa-house text-[11px] text-slate-400"></i>';
+                }
+                $html .= '<span>' . e($title) . '</span>';
+                $html .= '</a>';
+                $html .= '</li>';
+            }
+        }
+
+        $html .= '</ol>';
+        $html .= '</nav>';
+
+        return $html;
     }
 
     protected function read(): self

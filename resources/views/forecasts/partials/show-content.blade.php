@@ -28,19 +28,37 @@
             </div>
         </div>
 
+        @php
+            $displayUser = $targetUser ?? (auth()->check() ? auth()->user() : ($forecast->final_data->users[0] ?? null));
+            $displayName = is_object($displayUser) ? ($displayUser->name ?? null) : null;
+            $displayId = is_object($displayUser) ? ($displayUser->id ?? null) : null;
+            $isOwnPrediction = auth()->check() && $displayId && auth()->id() === $displayId;
+
+            if ($isOwnPrediction) {
+                $podiumTitle = 'Your Prediction Podium';
+                $podiumSubtitle = 'Select top 6 athletes before the race start deadline.';
+            } elseif (!empty($displayName)) {
+                $podiumTitle = $displayName . (str_ends_with(strtolower($displayName), 's') ? "'" : "'s") . ' Prediction Podium';
+                $podiumSubtitle = 'Predictions submitted by ' . $displayName . '.';
+            } else {
+                $podiumTitle = 'Prediction Podium';
+                $podiumSubtitle = 'Sign in to create your prediction podium.';
+            }
+        @endphp
+
         <!-- 6-Place Prediction Podium Cards Grid -->
         <div class="mb-8">
             <div class="flex items-center justify-between mb-4">
                 <div>
-                    <h2 class="text-lg font-extrabold text-slate-900 tracking-tight">Your Prediction Podium</h2>
-                    <p class="text-xs text-slate-500">Select top 6 athletes before the race start deadline.</p>
+                    <h2 class="text-lg font-extrabold text-slate-900 tracking-tight">{{ $podiumTitle }}</h2>
+                    <p class="text-xs text-slate-500">{{ $podiumSubtitle }}</p>
                 </div>
                 <div class="text-xs font-semibold px-3 py-1 rounded-xl bg-slate-100 text-slate-700">
                     Rule: {{ $forecast->type?->name === 'FORECAST_DAINIS_SCHEMA' ? 'Dainis Matrix (Delta)' : 'Classic Places' }}
                 </div>
             </div>
 
-            @include('forecasts.partials.user-selected-athletes')
+            @include('forecasts.partials.user-selected-athletes', ['displayUser' => $displayUser, 'displayName' => $displayName, 'isOwnPrediction' => $isOwnPrediction])
         </div>
 
         <!-- Bid Summary / Results Section -->

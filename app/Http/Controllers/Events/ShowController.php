@@ -19,7 +19,7 @@ class ShowController extends Controller
     {
         $this->linkHelper = $linkHelper;
 
-        $event = Event::query()->with('season')->where('event_remote_id', $id)->first();
+        $event = Event::query()->with('season')->where('event_remote_id', $id)->firstOrFail();
 
         $this->registerBread('Event:' . $event->short_description);
 
@@ -29,21 +29,23 @@ class ShowController extends Controller
 
         $title = [];
         $title[] = $event->description;
-        if($event->event_series_no){
-            $title[] = 'stage '.trim($event->event_series_no);
+        if ($event->event_series_no) {
+            $title[] = 'stage ' . trim($event->event_series_no);
         }
         $title[] = $event->organizer;
         $title[] = $event->nat_long;
-        $title[] = $this->getDates($event);
-        $title = array_map(function ($item){
+        if ($dateStr = $this->getDates($event)) {
+            $title[] = $dateStr;
+        }
+        $title = array_map(function ($item) {
             return str_replace(' ', '&nbsp;', $item);
-        }, $title);
+        }, array_filter($title));
         $title = implode(', ', $title);
 
         return GenericViewIndexHelper::instance()
             ->setTitle($title)
             ->setData($data)
-            ->setHeaders(['description', 'short', 'location', 'start', 'shootings', 'km'])
+            ->setHeaders(['Description', 'Short', 'Location', 'Start Time', 'Shootings', 'Distance'])
             ->setDataKeys([
                 function (EventCompetition $competition): string {
                     return $this->getLink($competition, $competition->description);
@@ -55,13 +57,13 @@ class ShowController extends Controller
                     return $this->getLink($competition, $competition->location);
                 },
                 function (EventCompetition $competition): string {
-                    return $this->getLink($competition, $competition->start_time->format('d.m.Y H:i:s'));
+                    return $this->getLink($competition, $competition->start_time?->format('d.m.Y H:i') ?? '-');
                 },
                 function (EventCompetition $competition): string {
-                    return $this->getLink($competition, $competition->nr_shootings);
+                    return $this->getLink($competition, (string)$competition->nr_shootings);
                 },
                 function (EventCompetition $competition): string {
-                    return $this->getLink($competition, $competition->km);
+                    return $this->getLink($competition, $competition->km ? $competition->km . ' km' : '-');
                 },
             ])
             ->render();
@@ -80,11 +82,21 @@ class ShowController extends Controller
         $start = $event->start_date;
         $end = $event->end_date;
 
-        if($start->format('m') == $end->format('m')){
+        if (!$start && !$end) {
+            return null;
+        }
+        if (!$start) {
+            return $end->format('d.m.Y');
+        }
+        if (!$end) {
+            return $start->format('d.m.Y');
+        }
+
+        if ($start->format('m') == $end->format('m')) {
             return sprintf('%s-%s', $start->format('d'), $end->format('d.m.Y'));
         }
 
-        if($start->format('Y') == $end->format('Y')){
+        if ($start->format('Y') == $end->format('Y')) {
             return sprintf('%s-%s', $start->format('d.m'), $end->format('d.m.Y'));
         }
 

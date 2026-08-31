@@ -11,67 +11,66 @@ use Illuminate\View\View;
 
 class IndexController extends Controller
 {
-
     protected LinkHelper $linkHelper;
+
     public function __invoke(Request $request, LinkHelper $linkHelper): View
     {
         $this->linkHelper = $linkHelper;
 
         $this->registerBread('Events');
 
-        $data = Event::query()->with('season')->where('level', 1)->orderBy('start_date', 'desc')->paginate(perPage: 20);
+        $data = Event::query()
+            ->with('season')
+            ->where('level', 1)
+            ->orderBy('start_date', 'desc')
+            ->paginate(perPage: 20);
 
         return GenericViewIndexHelper::instance()
-            ->setTitle('Events')
+            ->setTitle('Events & World Cup Calendar')
             ->setData($data)
-            ->setHeaders([ 'status','season','description', 'Organizer','country','start', 'level'])
+            ->setHeaders(['Status', 'Stage & Location', 'Season', 'Country', 'Start Date', 'Level'])
             ->setDataKeys([
                 function (Event $event): string {
-                    if($event->start_date->startOfDay() === now()->startOfDay()){
-                        $name = '<span style="color: red">today</span>';
-                    } else if($event->end_date->lt(now())){
-                        $name = '<span style="color: darkgrey">completed</span>';
-                    } else if($event->start_date->lt(now())){
-                        $name = '<span style="color: red">In progress</span>';
+                    if ($event->start_date?->isToday()) {
+                        $name = '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 text-xs font-bold border border-rose-200/60"><span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>Today</span>';
+                    } elseif ($event->end_date && $event->end_date->isPast()) {
+                        $name = '<span class="inline-flex items-center px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">Completed</span>';
+                    } elseif ($event->start_date && $event->start_date->isPast() && (!$event->end_date || $event->end_date->isFuture())) {
+                        $name = '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-bold border border-amber-200/60"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>In Progress</span>';
                     } else {
-                        $name = '<span style="color: darkgreen">upcoming</span>';
+                        $name = '<span class="inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200/60">Upcoming</span>';
                     }
 
                     return $this->getLink($event, $name);
                 },
                 function (Event $event): string {
-                    $name = $event->season->name;
-                    $first = substr($name, 0, 2);
-                    $second = substr($name, 2);
-
-                    return $this->getLink($event, sprintf('%s/%s', $first, $second));
+                    return $this->getLink($event, e($event->description));
                 },
                 function (Event $event): string {
-                    return $this->getLink($event, $event->description);
-                },
-                function (Event $event): string {
-                    return $this->getLink($event, $event->nat_long);
-                },
-
-                function (Event $event): string {
-
-                    $data = explode('/', $event->nat);
-
-                    $return = [];
-
-                    foreach ($data as $dataItem){
-                        $return[] = '<img src="https://info.blob.core.windows.net/resources/bt/flags/'.mb_convert_case($dataItem, MB_CASE_LOWER).'.png" style="height:20px;display:block;" />';
+                    $name = $event->season?->name ?? '';
+                    if (strlen($name) >= 4) {
+                        $first = substr($name, 0, 2);
+                        $second = substr($name, 2);
+                        return $this->getLink($event, sprintf('%s/%s', $first, $second));
                     }
-
-                    return $this->getLink($event, implode('', $return));
-
-                },
-
-                function (Event $event): string {
-                    return $this->getLink($event, $event->start_date?->setTimeZone('Europe/RIga')->format('d F Y, H:i'));
+                    return $this->getLink($event, $name ?: '-');
                 },
                 function (Event $event): string {
-                    return $this->getLink($event, $event->level);
+                    if (!$event->nat) {
+                        return e($event->nat_long ?: ($event->organizer ?: '-'));
+                    }
+                    $data = explode('/', $event->nat);
+                    $return = [];
+                    foreach ($data as $dataItem) {
+                        $return[] = '<img src="https://info.blob.core.windows.net/resources/bt/flags/' . mb_convert_case($dataItem, MB_CASE_LOWER) . '.png" class="h-3.5 inline-block rounded-xs shadow-2xs mr-1" alt="' . e($dataItem) . '" />';
+                    }
+                    return $this->getLink($event, implode('', $return) . ' ' . e($event->nat_long ?: $event->organizer));
+                },
+                function (Event $event): string {
+                    return $this->getLink($event, $event->start_date?->setTimeZone('Europe/Riga')->format('d M Y, H:i') ?? '-');
+                },
+                function (Event $event): string {
+                    return $this->getLink($event, '<span class="px-2 py-0.5 rounded-md bg-sky-50 text-sky-700 font-bold text-xs">World Cup</span>');
                 },
             ])
             ->render();
@@ -79,6 +78,6 @@ class IndexController extends Controller
 
     protected function getLink(Event $event, string $name): string
     {
-        return $this->linkHelper->getLink(route: route('events.show', $event->event_remote_id),name:  $name);
+        return $this->linkHelper->getLink(route: route('events.show', $event->event_remote_id), name: $name);
     }
 }

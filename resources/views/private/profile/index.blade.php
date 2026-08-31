@@ -1,75 +1,62 @@
-<x-layouts.app>
+@extends('layouts.admin', ['heading' => 'Account & Profile Settings'])
 
-        {{-- EXAMPLE: this section contains forms and routes not readily accesible upon intital installation. It is meant to be repalced --}}
-        <section class="grid grid-cols-2 gap-2 px-4 mx-auto">
-            @php
-            $views['profile.update-profile-information'] = config('fortify-ui.views.update-profile-information');
-            $views['profile.update-password'] = config('fortify-ui.views.update-password');
-            $views['profile.two-factor-authentication'] = config('fortify-ui.views.two-factor-authentication');
-            @endphp
+@section('content')
+    <div class="max-w-6xl mx-auto space-y-6">
+        <x-alerts.errors />
+        <x-alerts.status />
 
-            @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::updatePasswords()))
-            <div>
-                @include($views['profile.update-password'])
+        <!-- User Identity Hero Card -->
+        <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-sky-950 rounded-3xl p-6 sm:p-8 text-white shadow-md flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6">
+            <div class="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+                <!-- User Avatar / Initials -->
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-600 text-white font-black text-2xl flex items-center justify-center shadow-inner flex-shrink-0 border border-white/20">
+                    {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+                </div>
+                <div>
+                    <div class="flex items-center justify-center sm:justify-start gap-2">
+                        <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">{{ auth()->user()->name }}</h2>
+                        <span class="px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 text-[11px] font-bold">Player</span>
+                    </div>
+                    <p class="text-xs text-slate-300 mt-0.5">{{ auth()->user()->email }}</p>
+                    <div class="flex items-center justify-center sm:justify-start gap-4 mt-2 text-[11px] text-slate-400">
+                        <span>Member since {{ auth()->user()->created_at?->format('M Y') ?? '2026' }}</span>
+                    </div>
+                </div>
             </div>
-            @endif
 
-            @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::updateProfileInformation()))
-            <div>
-                @include($views['profile.update-profile-information'])
+            <!-- Quick Status Badges -->
+            <div class="flex items-center gap-3">
+                <div class="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/10 text-center">
+                    <span class="text-[10px] uppercase font-bold text-slate-300 block">Security</span>
+                    <span class="text-xs font-black text-amber-300">
+                        @if(auth()->user()->two_factor_secret)
+                            2FA Active
+                        @else
+                            Standard
+                        @endif
+                    </span>
+                </div>
             </div>
-            @endif
+        </div>
 
+        <!-- Settings Cards Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Update Profile Info Card -->
+            <div>
+                @include('private.profile.update-profile-information')
+            </div>
+
+            <!-- Update Password Card -->
+            <div>
+                @include('private.profile.update-password')
+            </div>
+
+            <!-- Two Factor Authentication Card -->
             @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::twoFactorAuthentication()))
-            <div class="px-6 py-4 border border-gray-300 rounded">
-                <h2 class="mb-4 font-semibold text-blue-400 uppercase">Two factor codes</h2>
-                @if (auth()->user()->two_factor_recovery_codes)
-                <div>
-                    <a href="{{ url('/user/two-factor-qr-code') }}"
-                        class="text-blue-600 transition duration-150 ease-in-out hover:text-blue-400 focus:outline-none focus:underline">
-                        {{ __('Two factor QR code') }}
-                    </a>
+                <div class="lg:col-span-2">
+                    @include('private.profile.two-factor-authentication')
                 </div>
-                <div>
-                    <a href="{{ url('/user/two-factor-recovery-codes') }}"
-                        class="text-blue-600 transition duration-150 ease-in-out hover:text-blue-400 focus:outline-none focus:underline">
-                        {{ __('Two factor recovery codes') }}
-                    </a>
-                </div>
-                @endif
-                <div>
-                    @include($views['profile.two-factor-authentication'])
-                </div>
-            </div>
             @endif
-
-            <div class="px-6 py-4 border border-gray-300 rounded">
-                <h2 class="mb-4 font-semibold text-blue-400 uppercase">Confirm and Verify</h2>
-                @if (Route::has('password.confirm'))
-                <div>
-                    <a href="{{ route('password.confirm') }}"
-                        class="text-blue-600 transition duration-150 ease-in-out hover:text-blue-400 focus:outline-none focus:underline">
-                        {{ __('Confirm your password?') }}
-                    </a>
-                </div>
-                @endif
-                @if (Route::has('password.confirmation'))
-                <div>
-                    <a href="{{ route('password.confirmation') }}"
-                        class="text-blue-600 transition duration-150 ease-in-out hover:text-blue-400 focus:outline-none focus:underline">
-                        {{ __('Password confirmation status') }}
-                    </a>
-                </div>
-                @endif
-                @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::emailVerification()))
-                <div>
-                    <a href="{{ route('verification.notice') }}"
-                        class="text-blue-600 transition duration-150 ease-in-out hover:text-blue-400 focus:outline-none focus:underline">
-                        {{ __('Email verification') }}
-                    </a>
-                </div>
-                @endif
-            </div>
-
-        </section>
-</x-layouts.app>
+        </div>
+    </div>
+@endsection

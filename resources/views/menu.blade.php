@@ -3,8 +3,8 @@
         <div class="flex justify-between items-center h-16">
             <!-- Brand Logo -->
             <a href="{{ route('home') }}" class="flex items-center gap-2.5 group">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 flex items-center justify-center text-white shadow-md shadow-sky-500/20 group-hover:scale-105 transition-transform">
-                    <span class="text-base font-black tracking-tighter">🎯</span>
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 flex items-center justify-center text-white shadow-md shadow-sky-500/20 group-hover:scale-105 transition-transform p-1.5">
+                    <img src="{{ asset('img.png') }}" alt="Biathlon" class="w-5 h-5 brightness-0 invert object-contain">
                 </div>
                 <div class="flex flex-col">
                     <div class="flex items-center gap-1.5">

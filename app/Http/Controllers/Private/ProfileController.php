@@ -14,6 +14,8 @@ class ProfileController extends Controller
 {
     public function __invoke(): Application|Factory|View|FoundationApplication|IlluminateView
     {
+        $this->registerBread('Profile');
+
         return view('private.profile.index');
     }
 }

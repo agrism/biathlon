@@ -52,17 +52,39 @@
     <!-- Athlete Content -->
     @if($athlete->name)
         <div class="flex flex-col items-center text-center">
-            <!-- Athlete Photo Frame -->
-            <div class="relative w-28 h-28 my-1 rounded-full p-1 bg-gradient-to-tr from-slate-100 to-slate-200 border border-slate-200 shadow-inner flex items-center justify-center overflow-hidden">
-                @if($athlete->getModel() && $athlete->getModel()->photo_uri)
-                    {!! \App\Helpers\RemoteImageRenderHelper::instance()->getImageTag(url: $athlete->getModel()->photo_uri, attributes: 'class="w-full h-full object-cover rounded-full" width="112" height="112"') !!}
-                @else
-                    <i class="fa-solid fa-person-skiing text-3xl text-slate-300"></i>
-                @endif
+            @php
+                $isTeam = ($athlete->getModel() && $athlete->getModel()->is_team)
+                    || (isset($forecast->competition) && \App\Enums\DisciplineEnum::tryFrom($forecast->competition->discipline_remote_id)?->isTeamDiscipline())
+                    || (isset($isTeamDiscipline) && $isTeamDiscipline);
+                $countryCode = $athlete->getModel()?->nat ?: ($athlete->tempId && strlen($athlete->tempId) === 3 ? $athlete->tempId : null);
+                $flagUrl = $athlete->flagUrl ?: ($athlete->getModel()?->flag_uri ?: ($countryCode ? 'https://info.blob.core.windows.net/resources/bt/flags/' . strtolower($countryCode) . '.png' : null));
+                $hasPhoto = $athlete->getModel() && !empty($athlete->getModel()->photo_uri);
+            @endphp
 
-                @if($athlete->flagUrl)
-                    <div class="absolute bottom-0 right-1 w-6 h-4 rounded shadow-xs overflow-hidden border border-white">
-                        <img src="{{ $athlete->flagUrl }}" alt="{{ $athlete->getModel()?->nat }}" class="w-full h-full object-cover">
+            <!-- Athlete / Team Photo Frame -->
+            <div class="relative my-1">
+                <!-- Circular Headshot Frame -->
+                <div class="w-28 h-28 rounded-full p-1 bg-gradient-to-tr from-slate-100 to-slate-200 border border-slate-200 shadow-inner flex items-center justify-center overflow-hidden">
+                    @if($isTeam && $flagUrl)
+                        <!-- Large Team Flag inside Circle -->
+                        <div class="w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-white p-2">
+                            <img src="{{ $flagUrl }}" alt="{{ $athlete->name }}" class="w-16 h-auto max-h-12 object-contain rounded-xs shadow-md">
+                        </div>
+                    @elseif($hasPhoto)
+                        {!! \App\Helpers\RemoteImageRenderHelper::instance()->getImageTag(url: $athlete->getModel()->photo_uri, attributes: 'class="w-full h-full object-cover rounded-full" width="112" height="112"') !!}
+                    @elseif($flagUrl)
+                        <div class="w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-white p-2">
+                            <img src="{{ $flagUrl }}" alt="{{ $athlete->name }}" class="w-16 h-auto max-h-12 object-contain rounded-xs shadow-md">
+                        </div>
+                    @else
+                        <i class="fa-solid fa-person-skiing text-3xl text-slate-300"></i>
+                    @endif
+                </div>
+
+                <!-- Unclipped Country Flag Badge -->
+                @if(!$isTeam && $flagUrl)
+                    <div class="absolute bottom-0 right-0 z-10 w-7 h-5 rounded-md shadow-md overflow-hidden border-2 border-white ring-1 ring-slate-200/80 bg-white">
+                        <img src="{{ $flagUrl }}" alt="{{ $athlete->getModel()?->nat }}" class="w-full h-full object-cover">
                     </div>
                 @endif
             </div>
@@ -75,8 +97,11 @@
                     @endif
                     {{ $athlete->name }}
                 </div>
-                <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mt-0.5">
-                    {{ trim($athlete->getModel()?->nat) }}
+                <div class="flex items-center justify-center gap-1.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider mt-1">
+                    @if($flagUrl)
+                        <img src="{{ $flagUrl }}" class="h-3 rounded-xs shadow-2xs inline-block">
+                    @endif
+                    <span>{{ trim($athlete->getModel()?->nat ?: $countryCode) }}</span>
                 </div>
             </div>
 

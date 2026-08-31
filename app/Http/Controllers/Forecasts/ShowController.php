@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Athlete;
 use App\Models\EventCompetitionResult;
 use App\Models\Forecast;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -27,15 +28,15 @@ class ShowController extends Controller
             ->where('id', $id)
             ->first();
 
+        if(!$forecast){
+            return redirect()->to(route('forecasts.index'));
+        }
+
         $isTeamDiscipline = DisciplineEnum::tryFrom($forecast->competition->discipline_remote_id)->isTeamDiscipline();
 
         $startingUserTempIds = $forecast->competition->results->map(function (EventCompetitionResult $result)use($isTeamDiscipline){
             return $result->athlete->attachTempId(isTeamDiscipline: $isTeamDiscipline)->temp_id;
         })->toArray();
-
-        if(!$forecast){
-            return redirect()->to(route('forecasts.index'));
-        }
 
         $favoriteAthleteIds = [];
 
@@ -43,10 +44,19 @@ class ShowController extends Controller
             $favoriteAthleteIds = FavoriteHelper::instance()->getUserFavoriteAthletesId($user);
         }
 
-        if($showContentOnly){
-            return view('forecasts.partials.show-content', compact('forecast', 'favoriteAthleteIds', 'startingUserTempIds', 'isTeamDiscipline'));
+        $targetUser = null;
+        if ($request->has('user_id')) {
+            $targetUser = User::find($request->get('user_id'));
         }
 
-        return view('forecasts.show', compact('forecast', 'favoriteAthleteIds', 'startingUserTempIds', 'isTeamDiscipline'));
+        if (!$targetUser && auth()->check()) {
+            $targetUser = auth()->user();
+        }
+
+        if($showContentOnly){
+            return view('forecasts.partials.show-content', compact('forecast', 'favoriteAthleteIds', 'startingUserTempIds', 'isTeamDiscipline', 'targetUser'));
+        }
+
+        return view('forecasts.show', compact('forecast', 'favoriteAthleteIds', 'startingUserTempIds', 'isTeamDiscipline', 'targetUser'));
     }
 }

@@ -14,41 +14,47 @@
         </p>
     </div>
 
-    <!-- Biathlon Story Carousel -->
+    <!-- Modern Editorial Biathlon Story Carousel -->
     <div
-        class="mb-10 max-w-4xl mx-auto overflow-hidden rounded-3xl border border-slate-200/90 shadow-md bg-slate-950 relative group select-none"
+        class="mb-12 w-full overflow-hidden rounded-3xl border border-slate-200/90 shadow-sm bg-slate-900 relative select-none"
         x-data="{
             active: 0,
             slides: [
                 {
                     src: '{{ asset('images/carousel/slide-1.jpg') }}',
+                    tag: 'Holmenkollen Stage',
                     title: 'BMW IBU World Cup Holmenkollen',
-                    subtitle: 'Celebrating the season crystal globe champions'
+                    subtitle: 'Celebrating the season crystal globe champions on the iconic Holmenkollen tracks.'
                 },
                 {
                     src: '{{ asset('images/carousel/slide-2.jpg') }}',
+                    tag: 'Sprint Speed',
                     title: 'BMW IBU World Cup Oslo',
-                    subtitle: 'Sprint speed & marksmanship on the tracks'
+                    subtitle: 'Sprint speed & marksmanship on the tracks as world cup battles intensify.'
                 },
                 {
                     src: '{{ asset('images/carousel/slide-3.jpg') }}',
+                    tag: 'Winter Games 2026',
                     title: 'Milano-Cortina 2026',
-                    subtitle: 'Olympic Winter Games biathlon individual battles'
+                    subtitle: 'Olympic Winter Games biathlon individual battles and podium chases.'
                 },
                 {
                     src: '{{ asset('images/carousel/slide-4.jpg') }}',
+                    tag: 'Ruhpolding Arena',
                     title: 'BMW IBU World Cup Ruhpolding',
-                    subtitle: 'Chiemgau Arena range focus and trackside preparations'
+                    subtitle: 'Chiemgau Arena range focus and trackside preparations in the Bavarian Alps.'
                 },
                 {
                     src: '{{ asset('images/carousel/slide-5.jpg') }}',
+                    tag: 'Podium Contenders',
                     title: 'BMW IBU World Cup Contenders',
-                    subtitle: 'Rising stars and podium contenders of the season'
+                    subtitle: 'Rising stars and podium contenders of the biathlon world cup season.'
                 },
                 {
                     src: '{{ asset('images/carousel/slide-6.jpg') }}',
+                    tag: 'Elite Women',
                     title: 'BMW IBU World Cup Elite Women',
-                    subtitle: 'Top athletes & crystal globe contenders'
+                    subtitle: 'Top athletes & crystal globe contenders battling down to the final shooting bout.'
                 }
             ],
             autoplay: true,
@@ -58,7 +64,7 @@
                     if (this.autoplay) {
                         this.next();
                     }
-                }, 5000);
+                }, 6000);
             },
             next() {
                 this.active = (this.active + 1) % this.slides.length;
@@ -73,71 +79,84 @@
         @mouseenter="autoplay = false"
         @mouseleave="autoplay = true"
     >
-        <!-- Slides Container -->
-        <div class="relative w-full h-72 sm:h-96 md:h-[480px] overflow-hidden">
-            <template x-for="(slide, index) in slides" :key="index">
-                <div
-                    x-show="active === index"
-                    x-transition:enter="transition ease-out duration-700"
-                    x-transition:enter-start="opacity-0 scale-105"
-                    x-transition:enter-end="opacity-100 scale-100"
-                    x-transition:leave="transition ease-in duration-500"
-                    x-transition:leave-start="opacity-100 scale-100"
-                    x-transition:leave-end="opacity-0 scale-95"
-                    class="absolute inset-0 w-full h-full"
-                >
-                    <img
-                        :src="slide.src"
-                        :alt="slide.title"
-                        class="w-full h-full object-cover object-center"
-                    >
-                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent flex flex-col justify-end p-6 sm:p-8">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/90 text-white text-xs font-black uppercase tracking-wider w-max mb-2 shadow-sm">
-                            ❄️ Biathlon Stories
-                        </span>
-                        <h3 class="text-lg sm:text-2xl font-black text-white drop-shadow-md" x-text="slide.title"></h3>
-                        <p class="text-xs sm:text-sm font-medium text-slate-200 mt-1 drop-shadow" x-text="slide.subtitle"></p>
+        <div class="grid grid-cols-1 lg:grid-cols-12 min-h-[360px] lg:min-h-[380px]">
+            <!-- Left Side: Editorial Content & Controls (5 cols on lg) -->
+            <div class="lg:col-span-5 p-6 sm:p-8 lg:p-10 flex flex-col justify-between bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 text-white z-10">
+                <!-- Top Tag & Counter -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-black uppercase tracking-wider">
+                        <i class="fa-solid fa-snowflake text-[10px]"></i>
+                        <span x-text="slides[active].tag"></span>
+                    </span>
+                    <span class="text-xs font-bold text-slate-400 bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700">
+                        <span class="text-white font-extrabold" x-text="active + 1"></span> / <span x-text="slides.length"></span>
+                    </span>
+                </div>
+
+                <!-- Middle Headline & Subtitle -->
+                <div class="my-auto py-2">
+                    <h2 class="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight leading-tight" x-text="slides[active].title"></h2>
+                    <p class="text-xs sm:text-sm text-slate-300 mt-2.5 leading-relaxed font-medium" x-text="slides[active].subtitle"></p>
+                </div>
+
+                <!-- Bottom Navigation Toolbar -->
+                <div class="flex items-center justify-between gap-4 pt-4 border-t border-slate-800/80 mt-4">
+                    <!-- Dots -->
+                    <div class="flex items-center gap-1.5">
+                        <template x-for="(slide, index) in slides" :key="index">
+                            <button
+                                type="button"
+                                @click="goTo(index)"
+                                class="h-2 rounded-full transition-all duration-300 cursor-pointer"
+                                :class="active === index ? 'w-6 bg-sky-400' : 'w-2 bg-slate-700 hover:bg-slate-500'"
+                                :aria-label="'Go to slide ' + (index + 1)"
+                            ></button>
+                        </template>
+                    </div>
+
+                    <!-- Arrows -->
+                    <div class="flex items-center gap-2">
+                        <button
+                            type="button"
+                            @click="prev()"
+                            class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white flex items-center justify-center border border-slate-700 transition-all cursor-pointer shadow-xs"
+                            aria-label="Previous Slide"
+                        >
+                            <i class="fa-solid fa-chevron-left text-xs"></i>
+                        </button>
+                        <button
+                            type="button"
+                            @click="next()"
+                            class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white flex items-center justify-center border border-slate-700 transition-all cursor-pointer shadow-xs"
+                            aria-label="Next Slide"
+                        >
+                            <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
                     </div>
                 </div>
-            </template>
-        </div>
+            </div>
 
-        <!-- Navigation Arrows -->
-        <button
-            type="button"
-            @click="prev()"
-            class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900/60 hover:bg-slate-900/90 backdrop-blur-md text-white flex items-center justify-center border border-white/20 transition-all hover:scale-110 cursor-pointer shadow-md z-20"
-            aria-label="Previous Slide"
-        >
-            <i class="fa-solid fa-chevron-left text-sm"></i>
-        </button>
-
-        <button
-            type="button"
-            @click="next()"
-            class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900/60 hover:bg-slate-900/90 backdrop-blur-md text-white flex items-center justify-center border border-white/20 transition-all hover:scale-110 cursor-pointer shadow-md z-20"
-            aria-label="Next Slide"
-        >
-            <i class="fa-solid fa-chevron-right text-sm"></i>
-        </button>
-
-        <!-- Slide Indicators & Counter -->
-        <div class="absolute bottom-4 right-6 z-20 flex items-center gap-3">
-            <!-- Counter -->
-            <span class="px-2.5 py-1 rounded-full bg-slate-900/70 backdrop-blur-md text-white text-[11px] font-bold border border-white/15">
-                <span x-text="active + 1"></span> / <span x-text="slides.length"></span>
-            </span>
-
-            <!-- Dots -->
-            <div class="flex items-center gap-1.5 bg-slate-900/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/15">
+            <!-- Right Side: High-Resolution Visual (7 cols on lg) -->
+            <div class="lg:col-span-7 relative bg-slate-950 overflow-hidden min-h-[260px] sm:min-h-[320px] lg:min-h-full">
                 <template x-for="(slide, index) in slides" :key="index">
-                    <button
-                        type="button"
-                        @click="goTo(index)"
-                        class="h-2 rounded-full transition-all duration-300 cursor-pointer"
-                        :class="active === index ? 'w-6 bg-sky-400' : 'w-2 bg-white/40 hover:bg-white/70'"
-                        :aria-label="'Go to slide ' + (index + 1)"
-                    ></button>
+                    <div
+                        x-show="active === index"
+                        x-transition:enter="transition ease-out duration-600"
+                        x-transition:enter-start="opacity-0 scale-102"
+                        x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-400"
+                        x-transition:leave-start="opacity-100 scale-100"
+                        x-transition:leave-end="opacity-0 scale-98"
+                        class="absolute inset-0 w-full h-full"
+                    >
+                        <img
+                            :src="slide.src"
+                            :alt="slide.title"
+                            class="w-full h-full object-cover object-center"
+                        >
+                        <!-- Left-edge subtle vignette connecting into card -->
+                        <div class="hidden lg:block absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-slate-900 to-transparent pointer-events-none"></div>
+                    </div>
                 </template>
             </div>
         </div>
