@@ -62,6 +62,31 @@
 </footer>
 
 <script>
+    function closeAthleteModal() {
+        const show = document.getElementById('show');
+        if (show) {
+            show.innerHTML = '';
+            show.classList.add('hidden');
+        }
+    }
+    window.closeAthleteModal = closeAthleteModal;
+
+    document.addEventListener('htmx:afterSwap', function (evt) {
+        if (evt.detail.target && evt.detail.target.id === 'show') {
+            if (evt.detail.target.innerHTML.trim() !== '') {
+                evt.detail.target.classList.remove('hidden');
+            } else {
+                evt.detail.target.classList.add('hidden');
+            }
+        }
+    });
+
+    document.addEventListener('keydown', function (evt) {
+        if (evt.key === 'Escape') {
+            closeAthleteModal();
+        }
+    });
+
     try {
         const menuToggle = document.getElementById('menu-toggle');
         const mobileMenu = document.getElementById('mobile-menu');

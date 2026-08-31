@@ -17,11 +17,23 @@ class ShowController extends Controller
             'results' => function (Relation $query) {
                 return $query->orderByDesc('start_time')->with('competition');
             }
-        ])->where('ibu_id', $id)->first();
+        ])->where(is_numeric($id) ? 'id' : 'ibu_id', $id)->first();
 
-        $this->registerBread('Athlete:'.$athlete->family_name);
+        if (!$athlete) {
+            $athlete = Athlete::query()->with([
+                'results' => function (Relation $query) {
+                    return $query->orderByDesc('start_time')->with('competition');
+                }
+            ])->where('ibu_id', $id)->orWhere('id', $id)->firstOrFail();
+        }
+
+        $this->registerBread('Athlete: ' . $athlete->getFullName());
 
         $linkHelper = app(LinkHelper::class);
+
+        if ($request->header('HX-Request') && !$request->header('HX-Boosted') && !$request->has('full_page')) {
+            return view('athletes.partials.show-modal', compact('athlete', 'linkHelper'));
+        }
 
         return view('athletes.show', compact('athlete', 'linkHelper'));
     }

@@ -23,10 +23,10 @@
                 @endforeach
 
                 <div class="flex items-center gap-1.5 ml-auto">
-                    <button type="submit" class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white shadow-xs transition-colors">
+                    <button type="submit" class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white shadow-xs transition-colors cursor-pointer">
                         Apply
                     </button>
-                    <button type="submit" name="clear" value="1" class="inline-flex items-center text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors">
+                    <button type="submit" name="clear" value="1" class="inline-flex items-center text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer">
                         Clear
                     </button>
                 </div>
@@ -41,7 +41,7 @@
         <div class="flex justify-end">
             <a href="{{ request()->url() . '?export=excel' }}">
                 <button
-                    class="inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 shadow-xs transition-colors"
+                    class="inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 shadow-xs transition-colors cursor-pointer"
                     type="button"
                     hx-target="#show"
                 >
@@ -85,7 +85,7 @@
                         @foreach($helper->dataKeys() as $key)
                             <td class="px-4 py-3 whitespace-nowrap text-slate-700 font-medium">
                                 @if(in_array($key, $helper->dataUrlKeys()))
-                                    <a href="{{ data_get($dataItem, $key) }}" target="_blank" class="text-sky-600 hover:underline font-semibold">Link</a>
+                                    <a href="{{ data_get($dataItem, $key) }}" target="_blank" class="text-sky-600 hover:underline font-semibold">{{ data_get($dataItem, $key) }}</a>
                                 @else
                                     @if(!is_string($key) && is_callable($key))
                                         {!! $key($dataItem) !!}
@@ -99,10 +99,11 @@
                         @if($routeName = $helper->showRouteName())
                             <td class="px-4 py-3 whitespace-nowrap text-right">
                                 <button
-                                    class="inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-slate-100 hover:bg-sky-50 text-slate-700 hover:text-sky-600 font-semibold text-xs border border-slate-200 hover:border-sky-200 transition-colors"
+                                    class="inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-slate-100 hover:bg-sky-50 text-slate-700 hover:text-sky-600 font-semibold text-xs border border-slate-200 hover:border-sky-200 transition-colors cursor-pointer"
                                     type="button"
                                     hx-get="{{ route($routeName, $dataItem->id) }}"
                                     hx-target="#show"
+                                    hx-boost="false"
                                 >
                                     <span>View</span>
                                     <i class="fa-solid fa-chevron-right text-[10px]"></i>
@@ -129,5 +130,9 @@
     </div>
 @endif
 
-<div id="show" class="fixed inset-x-4 top-4 z-50 bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 max-h-[90vh] overflow-y-auto hidden empty:hidden">
-</div>
+<!-- HTMX Modal Container -->
+<div
+    id="show"
+    class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs p-4 sm:p-6 lg:p-8 flex items-center justify-center"
+    onclick="if(event.target === this) closeAthleteModal();"
+></div>

@@ -17,8 +17,6 @@ use Illuminate\View\View;
 
 class IndexController extends Controller
 {
-    const TODO = '<span style="font-size: 0.5rem;color: lightgray">Coming..<span>';
-
     const FILTER_COUNTRY = 'filter_country';
     const FILTER_NAME = 'filter_name';
 
@@ -59,96 +57,72 @@ class IndexController extends Controller
                     return $athlete?->is_favorit;
                 });
 
-
             $currentPage = request()->input('page', 1);
 
             $athletes = new LengthAwarePaginator(
-                $athletes->forPage($currentPage, 30), // Slice the collection
-                $athletes->count(), // Total items
-                30, // Items per page
-                $currentPage, // Current page
-                ['path' => request()->url()] // Preserve the base URL
+                $athletes->forPage($currentPage, 30),
+                $athletes->count(),
+                30,
+                $currentPage,
+                ['path' => request()->url()]
             );
         } else {
-            $athletes = $athletes->paginate(30);
+            $athletes = $athletes->orderByDesc('stat_p_total')->paginate(30);
         }
 
         return GenericViewIndexHelper::instance()
             ->setTitle('Athletes')
             ->setData($athletes)
             ->setHeaders([
-                'Favourite <span style="color: lightgray">&uarr;</span><span style="color: black;">&darr;</span>',
-                'Add',
-                'WC points',
-                'Discipline points',
-                'Name ',
+                'Fav',
+                'Athlete',
                 'Country',
-                'Speed, %',
-                'Speed behind, k/h',
-                'Standing, %;',
-                'Prone, %',
-                'Gold medals',
-                'Silver medals',
-                'Bronze medals',
-                'Top 10'
+                'WC points',
+                'Ski Speed (s/km)',
+                'Prone %',
+                'Standing %',
             ])
             ->setDataKeys([
                 function (Athlete $athlete): string {
                     return $this->linkHelper->getLink(
                         route: route('favorites.toggle', $athlete->id),
-                        name: $athlete?->is_favorit ? FavoriteIconEnum::ENABLED->value : FavoriteIconEnum::DISABLED->value,
+                        name: $athlete?->is_favorit ? '<span class="text-amber-400">★</span>' : '<span class="text-slate-300">☆</span>',
                         hrefProp: 'hx-get',
-                        attributes: 'class="cursor-pointer"'
+                        attributes: 'class="cursor-pointer text-base hover:scale-125 transition-transform inline-block"'
                     );
                 },
                 function (Athlete $athlete): string {
-                    return 1;
-                },
-                function (Athlete $athlete): float {
-                    return floatval($athlete->stat_p_total);
-                },
-                function (Athlete $athlete): float {
-                    return 1;
+                    $route = route('athletes.show', $athlete->id);
+                    return '<button type="button" hx-get="' . $route . '" hx-target="#show" hx-boost="false" class="font-bold text-slate-900 hover:text-sky-600 hover:underline cursor-pointer text-left inline-flex items-center gap-1.5">' . $athlete->given_name . ' ' . $athlete->family_name . '</button>';
                 },
                 function (Athlete $athlete): string {
-                    return $athlete->given_name . ' ' . $athlete->family_name;
+                    $flag = $athlete->flag_uri ? '<img src="'.$athlete->flag_uri.'" class="h-3.5 rounded-2xs inline-block mr-1">' : '';
+                    return '<span class="inline-flex items-center text-xs font-semibold uppercase text-slate-600">'.$flag.$athlete->nat.'</span>';
                 },
                 function (Athlete $athlete): string {
-                    return $athlete->nat;
-                },
-                function (Athlete $athlete): string {
-                    if ($athlete->stat_skiing === null) {
-                        return '-';
-                    }
-                    return intval($athlete->stat_skiing);
+                    return $athlete->stat_p_total !== null ? '<span class="font-bold text-slate-800">'.floatval($athlete->stat_p_total).'</span>' : '<span class="text-slate-400">-</span>';
                 },
                 function (Athlete $athlete): string {
                     if ($athlete->stat_ski_kmb === null) {
-                        return '-';
+                        return '<span class="text-slate-400">-</span>';
                     }
-                    return floatval($athlete->stat_ski_kmb) * -1;
+                    return '<span class="font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded text-xs">-'.floatval($athlete->stat_ski_kmb).'s/km</span>';
                 },
                 function (Athlete $athlete): string {
-                    return floatval($athlete->stat_shooting_standing);
+                    if ($athlete->stat_shooting_prone === null) {
+                        return '<span class="text-slate-400">-</span>';
+                    }
+                    return '<span class="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-xs">'.floatval($athlete->stat_shooting_prone).'%</span>';
                 },
                 function (Athlete $athlete): string {
-                    return floatval($athlete->stat_shooting_prone);
-                },
-                function (Athlete $athlete): string {
-                    return self::TODO;
-                },
-                function (Athlete $athlete): string {
-                    return self::TODO;
-                },
-                function (Athlete $athlete): string {
-                    return self::TODO;
-                },
-                function (Athlete $athlete): string {
-                    return self::TODO;
+                    if ($athlete->stat_shooting_standing === null) {
+                        return '<span class="text-slate-400">-</span>';
+                    }
+                    return '<span class="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-xs">'.floatval($athlete->stat_shooting_standing).'%</span>';
                 },
             ])
+            ->setShowRouteName('athletes.show')
             ->useHtmx()
-//            ->doNotUseLayout()
             ->htmxTargetElement('body')
             ->setFilters([
                 new FilterValueObject(
@@ -165,13 +139,6 @@ class IndexController extends Controller
                     value: GenericViewIndexHelper::instance()->getFilterValue(self::FILTER_COUNTRY),
                     options: []
                 ),
-//                new FilterValueObject(
-//                    inputType: InputTypeEnum::SELECT,
-//                    key: self::FILTER_COUNTRY,
-//                    title: 'Country',
-//                    value: GenericViewIndexHelper::instance()->getFilterValue(self::FILTER_COUNTRY),
-//                    options: Athlete::query()->select('nat')->groupBy('nat')->orderBy('nat')->pluck('nat', 'nat')->all(),
-//                )
             ])
             ->setFilterHtmxFormAttributes(attr: 'hx-get="' . route('athletes.index') . '" hx-target="body"')
             ->render();
