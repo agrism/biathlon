@@ -2,29 +2,34 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Cron & Command Status Report</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1e293b; background-color: #f8fafc; margin: 0; padding: 24px; }
-        .container { max-width: 650px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; }
-        .header { background: #0f172a; color: #ffffff; padding: 24px 32px; }
-        .header h1 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
-        .header p { margin: 4px 0 0 0; font-size: 13px; color: #94a3b8; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.65; color: #0f172a; background-color: #f1f5f9; margin: 0; padding: 24px 12px; }
+        .container { max-width: 680px; margin: 0 auto; background: #ffffff; border-radius: 18px; border: 1px solid #cbd5e1; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); overflow: hidden; }
+        .header { background: #0f172a; color: #ffffff; padding: 28px 32px; border-bottom: 3px solid #16a34a; }
+        .header h1 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.3px; color: #ffffff; }
+        .header p { margin: 6px 0 0 0; font-size: 14px; color: #cbd5e1; }
         .content { padding: 32px; }
-        .section-title { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-top: 24px; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; }
-        .card { background: #f8fafc; border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid #e2e8f0; }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .cmd-name { font-weight: 700; font-size: 14px; color: #0f172a; font-family: monospace; }
-        .badge { display: inline-block; padding: 3px 8px; border-radius: 9999px; font-size: 11px; font-weight: 700; }
+        .section-title { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.75px; color: #475569; margin-top: 28px; margin-bottom: 14px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; }
+        .card { background: #f8fafc; border-radius: 14px; padding: 18px; margin-bottom: 14px; border: 1px solid #e2e8f0; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .cmd-name { font-weight: 800; font-size: 14.5px; color: #0f172a; font-family: monospace; }
+        .badge { display: inline-block; padding: 3px 9px; border-radius: 9999px; font-size: 12px; font-weight: 700; }
         .badge-green { background: #dcfce7; color: #166534; }
         .badge-blue { background: #e0f2fe; color: #0369a1; }
-        .badge-yellow { background: #fef9c3; color: #854d0e; }
-        .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
-        .stat-box { background: #f1f5f9; border-radius: 10px; padding: 12px; text-align: center; }
-        .stat-number { font-size: 20px; font-weight: 800; color: #0f172a; }
-        .stat-label { font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 600; }
-        .footer { background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px 32px; font-size: 12px; color: #94a3b8; text-align: center; }
-        ul { margin: 6px 0; padding-left: 20px; font-size: 13px; color: #334155; }
-        li { margin-bottom: 4px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 26px; }
+        .stat-box { background: #f8fafc; border-radius: 12px; padding: 16px 12px; text-align: center; border: 1px solid #e2e8f0; }
+        .stat-number { font-size: 26px; font-weight: 800; color: #0f172a; line-height: 1.2; margin-bottom: 4px; }
+        .stat-label { font-size: 12px; color: #475569; text-transform: uppercase; font-weight: 700; letter-spacing: 0.3px; }
+        .footer { background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px 32px; font-size: 13px; color: #64748b; text-align: center; }
+        ul { margin: 8px 0; padding-left: 22px; font-size: 14.5px; color: #334155; line-height: 1.7; }
+        li { margin-bottom: 6px; }
+        @media only screen and (max-width: 600px) {
+            .content { padding: 20px 16px !important; }
+            .header { padding: 20px 18px !important; }
+            .stat-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
+        }
     </style>
 </head>
 <body>
@@ -32,22 +37,22 @@
         <!-- Header -->
         <div class="header">
             <h1>🎯 Biathlon System & Cron Report</h1>
-            <p>Execution Summary for {{ $reportData['generated_at'] }} (Past 24 Hours)</p>
+            <p>Execution Summary for <strong>{{ $reportData['generated_at'] }}</strong> (Past 24 Hours)</p>
         </div>
 
         <div class="content">
             <!-- Platform Overview -->
             <div class="stat-grid">
                 <div class="stat-box">
-                    <div class="stat-number">{{ $reportData['stats']['total_tweets'] ?? 0 }}</div>
+                    <div class="stat-number" style="color: #0284c7;">{{ $reportData['stats']['total_tweets'] ?? 0 }}</div>
                     <div class="stat-label">Total Tweets</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-number">{{ $reportData['stats']['total_forecasts'] ?? 0 }}</div>
+                    <div class="stat-number" style="color: #16a34a;">{{ $reportData['stats']['total_forecasts'] ?? 0 }}</div>
                     <div class="stat-label">Contests</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-number">{{ $reportData['stats']['total_athletes'] ?? 0 }}</div>
+                    <div class="stat-number" style="color: #6366f1;">{{ $reportData['stats']['total_athletes'] ?? 0 }}</div>
                     <div class="stat-label">Athletes DB</div>
                 </div>
             </div>
@@ -63,8 +68,8 @@
                 </div>
                 <ul>
                     <li><strong>Status:</strong> Active & Running continuously</li>
-                    <li><strong>Completed Forecasts in 24h:</strong> {{ $reportData['forecasts_completed_today'] ?? 0 }}</li>
-                    <li><strong>Points / Awards Calculated:</strong> {{ $reportData['awards_calculated_today'] ?? 0 }}</li>
+                    <li><strong>Completed Forecasts in 24h:</strong> <strong style="color: #0f172a;">{{ $reportData['forecasts_completed_today'] ?? 0 }}</strong></li>
+                    <li><strong>Points / Awards Calculated:</strong> <strong style="color: #0f172a;">{{ $reportData['awards_calculated_today'] ?? 0 }}</strong></li>
                 </ul>
             </div>
 
@@ -76,7 +81,7 @@
                 </div>
                 <ul>
                     <li><strong>Status:</strong> Active (Syncing official IBU results & split times)</li>
-                    <li><strong>Race Results Recorded Today:</strong> {{ $reportData['results_handled_today'] ?? 0 }}</li>
+                    <li><strong>Race Results Recorded Today:</strong> <strong style="color: #0f172a;">{{ $reportData['results_handled_today'] ?? 0 }}</strong></li>
                 </ul>
             </div>
 
@@ -91,10 +96,12 @@
                 </div>
                 <ul>
                     <li><strong>Status:</strong> Multi-provider synchronization operational</li>
-                    <li><strong>New / Synced Posts in 24h:</strong> {{ $reportData['tweets_synced_today'] ?? 0 }}</li>
+                    <li><strong>New / Synced Posts in 24h:</strong> <strong style="color: #0f172a;">{{ $reportData['tweets_synced_today'] ?? 0 }}</strong></li>
                     <li><strong>Current Breakdown:</strong>
                         @foreach($reportData['tweet_handles'] ?? [] as $handle => $cnt)
-                            <span style="display:inline-block; margin-right:8px; font-weight:600;">{{ '@' . $handle }}: {{ $cnt }}</span>
+                            <span style="display:inline-block; margin-right: 12px; font-weight: 600;">
+                                <span style="color: #0284c7;">{{ '@' . $handle }}</span>: {{ $cnt }}
+                            </span>
                         @endforeach
                     </li>
                 </ul>
