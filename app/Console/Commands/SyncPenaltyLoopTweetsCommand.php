@@ -2,19 +2,17 @@
 
 namespace App\Console\Commands;
 
-use App\Services\PenaltyLoopTweetService;
+use App\Services\BiathlonTweetService;
 use Illuminate\Console\Command;
 
 class SyncPenaltyLoopTweetsCommand extends Command
 {
     protected $signature = 'app:sync-penaltyloop-tweets';
-    protected $description = 'Syncs latest biathlon tweets and insights from @penaltyloop into the database';
+    protected $description = 'Alias for app:sync-biathlon-tweets';
 
-    public function handle(PenaltyLoopTweetService $service): int
+    public function handle(BiathlonTweetService $service): int
     {
-        $this->info('Syncing Penalty Loop tweets...');
-        $count = $service->syncTweets();
-        $this->info("Successfully synced. Total tweets stored: {$count}");
+        $this->call('app:sync-biathlon-tweets');
 
         return self::SUCCESS;
     }

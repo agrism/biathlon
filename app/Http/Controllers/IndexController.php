@@ -5,13 +5,13 @@ namespace App\Http\Controllers;
 use App\Helpers\LinkHelper;
 use App\Models\Event;
 use App\Models\Season;
-use App\Services\PenaltyLoopTweetService;
+use App\Services\BiathlonTweetService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class IndexController extends Controller
 {
-    public function __invoke(Request $request, LinkHelper $linkHelper, PenaltyLoopTweetService $tweetService): View
+    public function __invoke(Request $request, LinkHelper $linkHelper, BiathlonTweetService $tweetService): View
     {
         $this->registerBread('Home');
 

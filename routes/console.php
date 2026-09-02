@@ -13,4 +13,4 @@ Schedule::command('app:read-competition-results')->everyFiveMinutes();
 Schedule::command('app:read-forecast-results-command')->everyMinute();
 Schedule::command('app:generate-missing-forecasts')->daily();
 Schedule::command('app:read-athletes')->daily();
-Schedule::command('app:sync-penaltyloop-tweets')->everyFourHours();
+Schedule::command('app:sync-biathlon-tweets')->everyFourHours();

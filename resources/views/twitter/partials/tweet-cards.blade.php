@@ -1,7 +1,7 @@
 @foreach($tweets as $tweet)
     <div class="py-4 sm:py-5 border-b border-slate-100 last:border-b-0 flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-6 transition-colors hover:bg-slate-50/60 -mx-3 px-3 rounded-xl">
-        <!-- Date on Left -->
-        <div class="sm:w-32 flex-shrink-0 flex items-center sm:items-start justify-between sm:justify-start">
+        <!-- Date & Provider Author on Left -->
+        <div class="sm:w-36 flex-shrink-0 flex items-center sm:items-start justify-between sm:justify-start sm:flex-col gap-1">
             @if($tweet->published_at)
                 @if($tweet->published_at->isToday())
                     <span class="text-xs font-black text-sky-600 uppercase tracking-wider">Today</span>
@@ -10,6 +10,15 @@
                 @endif
             @else
                 <span class="text-xs text-slate-400">-</span>
+            @endif
+
+            @if($tweet->author_handle)
+                <a href="{{ $tweet->tweet_url ?: ('https://x.com/' . $tweet->author_handle) }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 hover:text-sky-600 transition-colors">
+                    @if($tweet->author_avatar)
+                        <img src="{{ $tweet->author_avatar }}" alt="{{ $tweet->author_name }}" class="w-3.5 h-3.5 rounded-full object-cover">
+                    @endif
+                    <span>{{ '@' . $tweet->author_handle }}</span>
+                </a>
             @endif
         </div>
 

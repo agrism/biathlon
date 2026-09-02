@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Twitter;
 
 use App\Http\Controllers\Controller;
-use App\Services\PenaltyLoopTweetService;
+use App\Services\BiathlonTweetService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class TweetsController extends Controller
 {
-    public function __invoke(Request $request, PenaltyLoopTweetService $service): View
+    public function __invoke(Request $request, BiathlonTweetService $service): View
     {
         $tweets = $service->getPagedTweets();
 
