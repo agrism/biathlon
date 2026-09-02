@@ -27,6 +27,16 @@
             <p class="text-slate-800 text-xs sm:text-sm leading-relaxed font-normal">
                 {!! $tweet->getFormattedContent() !!}
             </p>
+
+            @if(!empty($tweet->media_urls) && is_array($tweet->media_urls))
+                <div class="mt-3 grid {{ count($tweet->media_urls) > 1 ? 'grid-cols-2 gap-2.5' : 'grid-cols-1' }} max-w-lg">
+                    @foreach($tweet->media_urls as $mediaUrl)
+                        <a href="{{ $mediaUrl }}" target="_blank" rel="noopener noreferrer" class="block overflow-hidden rounded-2xl border border-slate-200/80 group shadow-2xs hover:shadow-xs transition-shadow">
+                            <img src="{{ $mediaUrl }}" alt="Tweet media" class="w-full max-h-64 object-cover transition-transform duration-300 group-hover:scale-103" loading="lazy">
+                        </a>
+                    @endforeach
+                </div>
+            @endif
         </div>
     </div>
 @endforeach

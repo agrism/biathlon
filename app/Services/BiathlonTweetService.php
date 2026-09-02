@@ -177,6 +177,13 @@ class BiathlonTweetService
                                 }
                             }
                         }
+                        if (empty($mediaUrls) && isset($tweet['entities']['media'])) {
+                            foreach ($tweet['entities']['media'] as $media) {
+                                if (isset($media['media_url_https'])) {
+                                    $mediaUrls[] = $media['media_url_https'];
+                                }
+                            }
+                        }
 
                         Tweet::query()->updateOrCreate(
                             ['tweet_id' => 'tw_' . $idStr],
@@ -185,7 +192,7 @@ class BiathlonTweetService
                                 'author_handle' => $user['screen_name'] ?? $handle,
                                 'author_avatar' => $user['profile_image_url_https'] ?? null,
                                 'content' => $text,
-                                'media_urls' => $mediaUrls,
+                                'media_urls' => !empty($mediaUrls) ? $mediaUrls : null,
                                 'likes_count' => (int)($tweet['favorite_count'] ?? 0),
                                 'retweets_count' => (int)($tweet['retweet_count'] ?? 0),
                                 'tweet_url' => 'https://x.com/' . ($user['screen_name'] ?? $handle) . '/status/' . $idStr,
@@ -225,6 +232,11 @@ class BiathlonTweetService
                         $tweetId = 'rss_' . md5($guid);
                         $pubDate = (string)$item->pubDate ? Carbon::parse((string)$item->pubDate) : now();
 
+                        $mediaUrls = [];
+                        if (isset($item->enclosure) && !empty($item->enclosure['url'])) {
+                            $mediaUrls[] = (string)$item->enclosure['url'];
+                        }
+
                         Tweet::query()->updateOrCreate(
                             ['tweet_id' => $tweetId],
                             [
@@ -232,6 +244,7 @@ class BiathlonTweetService
                                 'author_handle' => 'biathlon',
                                 'author_avatar' => 'https://pbs.twimg.com/profile_images/2084999188614373376/QytLH4Fk_normal.jpg',
                                 'content' => $text,
+                                'media_urls' => !empty($mediaUrls) ? $mediaUrls : null,
                                 'likes_count' => 0,
                                 'retweets_count' => 0,
                                 'tweet_url' => trim((string)$item->link) ?: 'https://x.com',
@@ -268,6 +281,11 @@ class BiathlonTweetService
                         $tweetId = 'article_' . ($slug ?: md5($link));
                         $pubDate = (string)$item->pubDate ? Carbon::parse((string)$item->pubDate) : now();
 
+                        $mediaUrls = [];
+                        if (isset($item->enclosure) && !empty($item->enclosure['url'])) {
+                            $mediaUrls[] = (string)$item->enclosure['url'];
+                        }
+
                         Tweet::query()->updateOrCreate(
                             ['tweet_id' => $tweetId],
                             [
@@ -275,6 +293,7 @@ class BiathlonTweetService
                                 'author_handle' => 'penaltyloop',
                                 'author_avatar' => 'https://pbs.twimg.com/profile_images/2084999188614373376/QytLH4Fk_normal.jpg',
                                 'content' => $content,
+                                'media_urls' => !empty($mediaUrls) ? $mediaUrls : null,
                                 'likes_count' => 0,
                                 'retweets_count' => 0,
                                 'tweet_url' => $link ?: 'https://penaltyloop.com',
@@ -339,6 +358,30 @@ class BiathlonTweetService
                     }
                     $text = preg_replace('~https?://https?://~i', 'https://', $text);
 
+                    // Extract high-resolution media images
+                    $mediaUrls = [];
+                    if (!empty($post['embed']['images'])) {
+                        foreach ($post['embed']['images'] as $img) {
+                            if (!empty($img['fullsize'])) {
+                                $mediaUrls[] = $img['fullsize'];
+                            } elseif (!empty($img['thumb'])) {
+                                $mediaUrls[] = $img['thumb'];
+                            }
+                        }
+                    }
+                    if (!empty($post['embed']['media']['images'])) {
+                        foreach ($post['embed']['media']['images'] as $img) {
+                            if (!empty($img['fullsize'])) {
+                                $mediaUrls[] = $img['fullsize'];
+                            } elseif (!empty($img['thumb'])) {
+                                $mediaUrls[] = $img['thumb'];
+                            }
+                        }
+                    }
+                    if (empty($mediaUrls) && !empty($post['embed']['external']['thumb'])) {
+                        $mediaUrls[] = $post['embed']['external']['thumb'];
+                    }
+
                     $uri = $post['uri'] ?? '';
                     $parts = explode('/', $uri);
                     $rkey = end($parts);
@@ -350,6 +393,7 @@ class BiathlonTweetService
                             'author_handle' => 'penaltyloop',
                             'author_avatar' => $post['author']['avatar'] ?? 'https://pbs.twimg.com/profile_images/2084999188614373376/QytLH4Fk_normal.jpg',
                             'content' => $text,
+                            'media_urls' => !empty($mediaUrls) ? $mediaUrls : null,
                             'likes_count' => (int)($post['likeCount'] ?? 0),
                             'retweets_count' => (int)($post['repostCount'] ?? 0),
                             'tweet_url' => 'https://x.com/penaltyloop',
