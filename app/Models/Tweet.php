@@ -46,15 +46,23 @@ class Tweet extends Model
     {
         $content = $this->content;
 
-        // Strip words starting with #
-        $content = preg_replace('/(^|\s)#[^\s]+/u', '', $content);
+        // Clean double protocols if any
+        $content = preg_replace('~https?://https?://~i', 'https://', $content);
 
         $content = e(trim($content));
 
-        // Convert URLs to generic external links
-        $content = preg_replace(
-            '~(https?://[^\s<]+)~',
-            '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:underline font-semibold break-all">$1</a>',
+        // Convert URLs (both https?:// and domain paths like penaltyloop.com/..., www.example.com, etc.) to clickable links
+        $content = preg_replace_callback(
+            '~(https?://[^\s<]+|(?:www\.|[a-zA-Z0-9-]+\.(?:com|org|net|lv|no|de|fr|info|io|co|me|tv|social))(?:\/[^\s<]*)?)~i',
+            function ($matches) {
+                $url = $matches[1];
+                $cleanUrl = rtrim($url, '.,;:!?');
+                $href = (stripos($cleanUrl, 'http://') === 0 || stripos($cleanUrl, 'https://') === 0)
+                    ? $cleanUrl
+                    : 'https://' . $cleanUrl;
+
+                return '<a href="' . $href . '" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:underline font-semibold break-all">' . $url . '</a>';
+            },
             $content
         );
 
@@ -62,6 +70,13 @@ class Tweet extends Model
         $content = preg_replace(
             '/(^|\s)@([A-Za-z0-9_]+)/',
             '$1<span class="text-sky-600 font-bold">@$2</span>',
+            $content
+        );
+
+        // Format #hashtags as styled tags (keeping hashtags intact)
+        $content = preg_replace(
+            '/(^|\s)#([A-Za-z0-9_]+)/u',
+            '$1<span class="text-sky-600 font-semibold">#$2</span>',
             $content
         );
 

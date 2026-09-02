@@ -24,7 +24,7 @@ class IndexController extends Controller
             ->orderBy('start_date')
             ->first();
 
-        $tweets = $tweetService->getPagedTweets(perPage: 1);
+        $tweets = $tweetService->getPagedTweets(perPage: 4);
 
         return view('index', compact('tweets', 'season', 'event'));
     }
