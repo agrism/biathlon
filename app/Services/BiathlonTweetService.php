@@ -42,6 +42,64 @@ class BiathlonTweetService
     }
 
     /**
+     * Get the full list of configured providers and their details
+     */
+    public function getProviders(): array
+    {
+        $providers = [];
+
+        foreach ($this->twitterHandles as $handle) {
+            $providers[] = [
+                'type' => 'twitter',
+                'name' => "Twitter / X (@{$handle})",
+                'handle' => $handle,
+                'delay' => rand(10, 15),
+            ];
+        }
+
+        if ($customRssUrl = env('PENALTYLOOP_TWITTER_RSS_URL') ?: env('PENALTYLOOP_RSS_URL')) {
+            $providers[] = [
+                'type' => 'rss',
+                'name' => 'Custom PenaltyLoop RSS Bridge',
+                'url' => $customRssUrl,
+                'delay' => 0,
+            ];
+        }
+
+        if ($biathstatsRss = env('BIATHSTATS_RSS_URL')) {
+            $providers[] = [
+                'type' => 'rss',
+                'name' => 'Custom BiathStats RSS Bridge',
+                'url' => $biathstatsRss,
+                'delay' => 0,
+            ];
+        }
+
+        if ($biathlonworldRss = env('BIATHLONWORLD_RSS_URL')) {
+            $providers[] = [
+                'type' => 'rss',
+                'name' => 'Custom BiathlonWorld RSS Bridge',
+                'url' => $biathlonworldRss,
+                'delay' => 0,
+            ];
+        }
+
+        $providers[] = [
+            'type' => 'penaltyloop_rss',
+            'name' => 'PenaltyLoop.com Blog RSS Feed',
+            'delay' => 0,
+        ];
+
+        $providers[] = [
+            'type' => 'bluesky',
+            'name' => 'Bluesky Live Stream (@penaltyloop.bsky.social)',
+            'delay' => 0,
+        ];
+
+        return $providers;
+    }
+
+    /**
      * Get paginated tweets for infinite scroll
      */
     public function getPagedTweets(?int $perPage = null)
@@ -83,33 +141,68 @@ class BiathlonTweetService
     /**
      * Sync live standalone posts & articles from all supported biathlon providers
      */
-    public function syncTweets(): int
+    public function syncTweets(?callable $stepCallback = null): int
     {
-        // 1. Sync real-time tweets from Twitter/X syndication widget feeds for each handle
-        foreach ($this->twitterHandles as $index => $handle) {
-            if ($index > 0) {
-                // Short pause to avoid burst rate-limits from Twitter
-                sleep(2);
+        $providers = $this->getProviders();
+
+        foreach ($providers as $index => $provider) {
+            $delay = ($index > 0 && ($provider['delay'] ?? 0) > 0) ? (int)$provider['delay'] : 0;
+
+            if ($stepCallback) {
+                $stepCallback('waiting', [
+                    'index' => $index + 1,
+                    'total' => count($providers),
+                    'provider' => $provider,
+                    'delay' => $delay,
+                ]);
             }
-            $this->syncFromTwitterSyndication($handle);
-        }
 
-        // 2. Sync from Custom Twitter/X RSS Bridge (if set in env)
-        if ($customRssUrl = env('PENALTYLOOP_TWITTER_RSS_URL') ?: env('PENALTYLOOP_RSS_URL')) {
-            $this->syncFromRssFeed($customRssUrl);
-        }
-        if ($biathstatsRss = env('BIATHSTATS_RSS_URL')) {
-            $this->syncFromRssFeed($biathstatsRss);
-        }
-        if ($biathlonworldRss = env('BIATHLONWORLD_RSS_URL')) {
-            $this->syncFromRssFeed($biathlonworldRss);
-        }
+            if ($delay > 0) {
+                sleep($delay);
+            }
 
-        // 3. Sync from PenaltyLoop.com Official RSS Feed
-        $this->syncFromPenaltyLoopRss();
+            $beforeCount = Tweet::count();
+            $startTime = microtime(true);
 
-        // 4. Sync from Bluesky live stream
-        $this->syncFromBluesky();
+            if ($stepCallback) {
+                $stepCallback('starting', [
+                    'index' => $index + 1,
+                    'total' => count($providers),
+                    'provider' => $provider,
+                    'before_count' => $beforeCount,
+                ]);
+            }
+
+            // Sync according to provider type
+            $syncedCount = match ($provider['type']) {
+                'twitter' => $this->syncFromTwitterSyndication($provider['handle']),
+                'rss' => $this->syncFromRssFeed($provider['url']),
+                'penaltyloop_rss' => $this->syncFromPenaltyLoopRss(),
+                'bluesky' => $this->syncFromBluesky(),
+                default => 0,
+            };
+
+            $afterCount = Tweet::count();
+            $newlyAdded = max(0, $afterCount - $beforeCount);
+            $duration = round(microtime(true) - $startTime, 2);
+
+            $result = [
+                'provider' => $provider,
+                'before_count' => $beforeCount,
+                'after_count' => $afterCount,
+                'newly_added' => $newlyAdded,
+                'synced_items' => $syncedCount,
+                'duration' => $duration,
+            ];
+
+            if ($stepCallback) {
+                $stepCallback('finished', [
+                    'index' => $index + 1,
+                    'total' => count($providers),
+                    'result' => $result,
+                ]);
+            }
+        }
 
         Cache::forget('biathlon_latest_tweets_6');
         Cache::forget('biathlon_latest_tweets_12');
@@ -124,8 +217,10 @@ class BiathlonTweetService
     /**
      * Parse and sync real-time tweets from Twitter/X syndication widget endpoint for a given handle
      */
-    protected function syncFromTwitterSyndication(string $handle = 'penaltyloop'): void
+    protected function syncFromTwitterSyndication(string $handle = 'penaltyloop'): int
     {
+        $synced = 0;
+
         try {
             $ua = $this->userAgents[array_rand($this->userAgents)];
             $res = $this->client->get('https://syndication.twitter.com/srv/timeline-profile/screen-name/' . $handle, [
@@ -199,19 +294,25 @@ class BiathlonTweetService
                                 'published_at' => $createdAt,
                             ]
                         );
+
+                        $synced++;
                     }
                 }
             }
         } catch (\Exception $e) {
             Log::warning("Error syncing from Twitter syndication widget for @{$handle}: " . $e->getMessage());
         }
+
+        return $synced;
     }
 
     /**
      * Sync from an arbitrary RSS / Atom XML Feed (e.g. RSS.app, RSS-Bridge, Nitter)
      */
-    protected function syncFromRssFeed(string $url): void
+    protected function syncFromRssFeed(string $url): int
     {
+        $synced = 0;
+
         try {
             $res = $this->client->get($url);
             if ($res->getStatusCode() === 200) {
@@ -251,19 +352,25 @@ class BiathlonTweetService
                                 'published_at' => $pubDate,
                             ]
                         );
+
+                        $synced++;
                     }
                 }
             }
         } catch (\Exception $e) {
             Log::warning('Error syncing from custom RSS feed: ' . $e->getMessage());
         }
+
+        return $synced;
     }
 
     /**
      * Sync from PenaltyLoop.com official blog RSS
      */
-    protected function syncFromPenaltyLoopRss(): void
+    protected function syncFromPenaltyLoopRss(): int
     {
+        $synced = 0;
+
         try {
             $res = $this->client->get('https://penaltyloop.com/feed/');
             if ($res->getStatusCode() === 200) {
@@ -300,19 +407,25 @@ class BiathlonTweetService
                                 'published_at' => $pubDate,
                             ]
                         );
+
+                        $synced++;
                     }
                 }
             }
         } catch (\Exception $e) {
             Log::warning('Error syncing from PenaltyLoop.com RSS: ' . $e->getMessage());
         }
+
+        return $synced;
     }
 
     /**
      * Sync from Bluesky live stream
      */
-    protected function syncFromBluesky(): void
+    protected function syncFromBluesky(): int
     {
+        $synced = 0;
+
         try {
             $res = $this->client->get('https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?actor=penaltyloop.bsky.social&limit=50&filter=posts_no_replies');
             if ($res->getStatusCode() === 200) {
@@ -400,10 +513,14 @@ class BiathlonTweetService
                             'published_at' => Carbon::parse($record['createdAt']),
                         ]
                     );
+
+                    $synced++;
                 }
             }
         } catch (\Exception $e) {
             Log::warning('Error syncing live Bluesky feed: ' . $e->getMessage());
         }
+
+        return $synced;
     }
 }
