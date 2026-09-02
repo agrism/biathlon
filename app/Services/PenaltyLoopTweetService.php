@@ -25,11 +25,15 @@ class PenaltyLoopTweetService
         ]);
     }
 
+    public const PER_PAGE = 4;
+
     /**
      * Get paginated tweets for infinite scroll
      */
-    public function getPagedTweets(int $perPage = 3)
+    public function getPagedTweets(?int $perPage = null)
     {
+        $perPage = $perPage ?? self::PER_PAGE;
+
         if (Tweet::count() === 0) {
             $this->syncTweets();
         }

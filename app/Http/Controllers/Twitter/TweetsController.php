@@ -11,7 +11,7 @@ class TweetsController extends Controller
 {
     public function __invoke(Request $request, PenaltyLoopTweetService $service): View
     {
-        $tweets = $service->getPagedTweets(perPage: 1);
+        $tweets = $service->getPagedTweets();
 
         if (app()->bound('debugbar')) {
             app('debugbar')->disable();
