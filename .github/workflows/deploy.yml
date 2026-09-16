@@ -8,10 +8,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Deploy to Hetzner
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HETZNER_HOST }}
           username: ${{ secrets.HETZNER_USERNAME }}
@@ -22,9 +22,7 @@ jobs:
             composer install --no-dev --optimize-autoloader
             npm install
             npm run build
-            php artisan cache:clear
-            php artisan config:clear
-            php artisan view:clear
+            php artisan optimize:clear
             php artisan migrate --force
             php artisan config:cache
             php artisan route:cache
