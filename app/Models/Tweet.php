@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $likes_count
  * @property int $retweets_count
  * @property ?string $tweet_url
+ * @property bool $should_hide
  * @property Carbon $published_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
@@ -32,7 +33,12 @@ class Tweet extends Model
         'likes_count',
         'retweets_count',
         'tweet_url',
+        'should_hide',
         'published_at',
+    ];
+
+    protected $attributes = [
+        'should_hide' => false,
     ];
 
     protected $casts = [
@@ -40,6 +46,7 @@ class Tweet extends Model
         'published_at' => 'datetime',
         'likes_count' => 'integer',
         'retweets_count' => 'integer',
+        'should_hide' => 'boolean',
     ];
 
     public function getFormattedContent(): string

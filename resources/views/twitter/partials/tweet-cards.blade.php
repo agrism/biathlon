@@ -1,5 +1,5 @@
 @foreach($tweets as $tweet)
-    <div class="py-4 sm:py-5 border-b border-slate-100 last:border-b-0 flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-6 transition-colors hover:bg-slate-50/60 -mx-3 px-3 rounded-xl">
+    <div class="py-4 sm:py-5 border-b border-slate-100 last:border-b-0 flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-6 transition-colors hover:bg-slate-50/60 -mx-3 px-3 rounded-xl {{ $tweet->should_hide ? 'bg-rose-50/30 border-rose-100/60' : '' }}">
         <!-- Date & Provider Author on Left -->
         <div class="sm:w-36 flex-shrink-0 flex items-center sm:items-start justify-between sm:justify-start sm:flex-col gap-1">
             @if($tweet->published_at)
@@ -36,6 +36,10 @@
                         </a>
                     @endforeach
                 </div>
+            @endif
+
+            @if(auth()->check() && auth()->user()->email === '7924@inbox.lv')
+                @include('twitter.partials.hide-toggle', ['tweet' => $tweet])
             @endif
         </div>
     </div>

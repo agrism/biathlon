@@ -110,7 +110,14 @@ class BiathlonTweetService
             $this->syncTweets();
         }
 
-        return Tweet::query()
+        $query = Tweet::query();
+
+        // Only user 7924@inbox.lv can see hidden tweets
+        if (auth()->user()?->email !== '7924@inbox.lv') {
+            $query->where('should_hide', false);
+        }
+
+        return $query
             ->orderByDesc('published_at')
             ->paginate($perPage);
     }
@@ -120,15 +127,27 @@ class BiathlonTweetService
      */
     public function getLatestTweets(int $limit = 12): Collection
     {
-        return Cache::remember('biathlon_latest_tweets_' . $limit, 300, function () use ($limit) {
-            $tweets = Tweet::query()
+        $isAdmin = auth()->user()?->email === '7924@inbox.lv';
+        $cacheKey = 'biathlon_latest_tweets_' . $limit . ($isAdmin ? '_admin' : '');
+
+        return Cache::remember($cacheKey, 300, function () use ($limit, $isAdmin) {
+            $query = Tweet::query();
+            if (!$isAdmin) {
+                $query->where('should_hide', false);
+            }
+
+            $tweets = $query
                 ->orderByDesc('published_at')
                 ->take($limit)
                 ->get();
 
             if ($tweets->isEmpty()) {
                 $this->syncTweets();
-                $tweets = Tweet::query()
+                $query = Tweet::query();
+                if (!$isAdmin) {
+                    $query->where('should_hide', false);
+                }
+                $tweets = $query
                     ->orderByDesc('published_at')
                     ->take($limit)
                     ->get();
