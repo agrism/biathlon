@@ -38,7 +38,7 @@
                 </div>
             @endif
 
-            @if(auth()->check() && auth()->user()->email === '7924@inbox.lv')
+            @if(auth()->check() && strtolower(trim(auth()->user()->email)) === '7924@inbox.lv')
                 @include('twitter.partials.hide-toggle', ['tweet' => $tweet])
             @endif
         </div>
