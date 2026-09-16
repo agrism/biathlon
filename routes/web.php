@@ -23,6 +23,7 @@ Route::get('/forecasts/{id}/select-athlete/{place}/place',
     Contr\Forecasts\SelectAthleteController::class)->name('forecasts.select-athlete');
 
 Route::get('/tweets', Contr\Twitter\TweetsController::class)->name('tweets.index');
+Route::get('/tweets/sync', Contr\Twitter\FetchController::class)->name('tweets.sync');
 
 Route::group([
     'prefix' => 'private',
