@@ -215,12 +215,84 @@ class BiathlonTweetService
     }
 
     /**
+     * Run Puppeteer runner script for a given argument array
+     */
+    protected function runPuppeteerScraper(array $args): ?array
+    {
+        $scriptPath = base_path('scripts/fetch-tweets-puppeteer.js');
+        if (!file_exists($scriptPath)) {
+            return null;
+        }
+
+        try {
+            $nodeBinary = env('NODE_BINARY', 'node');
+            $command = array_merge([$nodeBinary, $scriptPath], $args);
+
+            $process = new \Symfony\Component\Process\Process(
+                $command,
+                base_path(),
+                [
+                    'PUPPETEER_WS_ENDPOINT' => env('PUPPETEER_WS_ENDPOINT', ''),
+                    'PUPPETEER_EXECUTABLE_PATH' => env('PUPPETEER_EXECUTABLE_PATH', ''),
+                    'PATH' => getenv('PATH') ?: '/usr/local/bin:/usr/bin:/bin',
+                ],
+                null,
+                45
+            );
+
+            $process->run();
+
+            if ($process->isSuccessful()) {
+                $output = $process->getOutput();
+                $data = json_decode($output, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    return $data;
+                }
+            } else {
+                Log::warning('Puppeteer scraper stderr: ' . substr($process->getErrorOutput(), 0, 300));
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Error running Puppeteer scraper: ' . $e->getMessage());
+        }
+
+        return null;
+    }
+
+    /**
      * Parse and sync real-time tweets from Twitter/X syndication widget endpoint for a given handle
      */
     protected function syncFromTwitterSyndication(string $handle = 'penaltyloop'): int
     {
         $synced = 0;
 
+        // 1. Try Headless Puppeteer with stealth headers first
+        $puppeteerResult = $this->runPuppeteerScraper(["--handle={$handle}"]);
+        if ($puppeteerResult && !empty($puppeteerResult['results'][$handle]['items'])) {
+            $items = $puppeteerResult['results'][$handle]['items'];
+            foreach ($items as $item) {
+                Tweet::query()->updateOrCreate(
+                    ['tweet_id' => $item['tweet_id']],
+                    [
+                        'author_name' => $item['author_name'] ?? ucfirst($handle),
+                        'author_handle' => $item['author_handle'] ?? $handle,
+                        'author_avatar' => $item['author_avatar'] ?? null,
+                        'content' => $item['content'],
+                        'media_urls' => $item['media_urls'] ?? null,
+                        'likes_count' => (int)($item['likes_count'] ?? 0),
+                        'retweets_count' => (int)($item['retweets_count'] ?? 0),
+                        'tweet_url' => $item['tweet_url'] ?? 'https://x.com/' . $handle,
+                        'published_at' => isset($item['published_at']) ? Carbon::parse($item['published_at']) : now(),
+                    ]
+                );
+                $synced++;
+            }
+
+            if ($synced > 0) {
+                return $synced;
+            }
+        }
+
+        // 2. Direct HTTP Fallback with Platform Referer Header
         try {
             $ua = $this->userAgents[array_rand($this->userAgents)];
             $res = $this->client->get('https://syndication.twitter.com/srv/timeline-profile/screen-name/' . $handle, [
@@ -228,6 +300,8 @@ class BiathlonTweetService
                     'User-Agent' => $ua,
                     'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                     'Accept-Language' => 'en-US,en;q=0.9',
+                    'Referer' => 'https://platform.twitter.com/',
+                    'Origin' => 'https://platform.twitter.com',
                 ]
             ]);
 
@@ -314,7 +388,13 @@ class BiathlonTweetService
         $synced = 0;
 
         try {
-            $res = $this->client->get($url);
+            $ua = $this->userAgents[array_rand($this->userAgents)];
+            $res = $this->client->get($url, [
+                'headers' => [
+                    'User-Agent' => $ua,
+                    'Accept' => 'application/rss+xml, application/xml, text/xml, */*',
+                ]
+            ]);
             if ($res->getStatusCode() === 200) {
                 $body = (string)$res->getBody();
                 $xml = @simplexml_load_string($body, 'SimpleXMLElement', LIBXML_NOCDATA);
@@ -365,14 +445,50 @@ class BiathlonTweetService
     }
 
     /**
-     * Sync from PenaltyLoop.com official blog RSS
+     * Sync from PenaltyLoop.com official blog RSS (with Puppeteer WAF bypass)
      */
     protected function syncFromPenaltyLoopRss(): int
     {
         $synced = 0;
+        $rssUrl = 'https://penaltyloop.com/feed/';
 
+        // 1. Try Puppeteer stealth scraper to easily pass Cloudflare/Wordfence
+        $puppeteerResult = $this->runPuppeteerScraper(["--rss={$rssUrl}"]);
+        if ($puppeteerResult && !empty($puppeteerResult['results']['rss']['items'])) {
+            $items = $puppeteerResult['results']['rss']['items'];
+            foreach ($items as $item) {
+                Tweet::query()->updateOrCreate(
+                    ['tweet_id' => $item['tweet_id']],
+                    [
+                        'author_name' => $item['author_name'] ?? 'Penalty Loop',
+                        'author_handle' => $item['author_handle'] ?? 'penaltyloop',
+                        'author_avatar' => $item['author_avatar'] ?? 'https://pbs.twimg.com/profile_images/2084999188614373376/QytLH4Fk_normal.jpg',
+                        'content' => $item['content'],
+                        'media_urls' => $item['media_urls'] ?? null,
+                        'likes_count' => 0,
+                        'retweets_count' => 0,
+                        'tweet_url' => $item['tweet_url'] ?? 'https://penaltyloop.com',
+                        'published_at' => isset($item['published_at']) ? Carbon::parse($item['published_at']) : now(),
+                    ]
+                );
+                $synced++;
+            }
+
+            if ($synced > 0) {
+                return $synced;
+            }
+        }
+
+        // 2. Direct HTTP Fallback
         try {
-            $res = $this->client->get('https://penaltyloop.com/feed/');
+            $ua = $this->userAgents[array_rand($this->userAgents)];
+            $res = $this->client->get($rssUrl, [
+                'headers' => [
+                    'User-Agent' => $ua,
+                    'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    'Accept-Language' => 'en-US,en;q=0.9',
+                ]
+            ]);
             if ($res->getStatusCode() === 200) {
                 $body = (string)$res->getBody();
                 $xml = @simplexml_load_string($body, 'SimpleXMLElement', LIBXML_NOCDATA);
