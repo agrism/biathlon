@@ -12,7 +12,7 @@ class ToggleHideController extends Controller
 {
     public function __invoke(Request $request, int|string $id): View
     {
-        if (!auth()->check() || strtolower(trim(auth()->user()->email)) !== '7924@inbox.lv') {
+        if (!auth()->check() || !auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized action.');
         }
 

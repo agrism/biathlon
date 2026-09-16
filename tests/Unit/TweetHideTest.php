@@ -40,9 +40,33 @@ class TweetHideTest extends TestCase
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->default('password');
+            $table->boolean('is_admin')->nullable()->default(false);
             $table->rememberToken();
             $table->timestamps();
         });
+    }
+
+    public function test_user_is_admin_helper(): void
+    {
+        $adminById = new User();
+        $adminById->id = 1;
+        $this->assertTrue($adminById->isAdmin());
+
+        $adminByFlag = new User();
+        $adminByFlag->id = 5;
+        $adminByFlag->is_admin = true;
+        $this->assertTrue($adminByFlag->isAdmin());
+
+        $adminByEmail = new User();
+        $adminByEmail->id = 10;
+        $adminByEmail->email = '7924@inbox.lv';
+        $this->assertTrue($adminByEmail->isAdmin());
+
+        $regularUser = new User();
+        $regularUser->id = 2;
+        $regularUser->email = 'regular@example.com';
+        $regularUser->is_admin = false;
+        $this->assertFalse($regularUser->isAdmin());
     }
 
     public function test_tweet_table_has_should_hide_column(): void

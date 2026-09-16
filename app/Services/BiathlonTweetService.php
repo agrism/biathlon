@@ -112,8 +112,8 @@ class BiathlonTweetService
 
         $query = Tweet::query();
 
-        $userEmail = strtolower(trim(auth()->user()?->email ?? ''));
-        if ($userEmail !== '7924@inbox.lv') {
+        $isAdmin = (bool) auth()->user()?->isAdmin();
+        if (!$isAdmin) {
             $query->where('should_hide', false);
         }
 
@@ -127,7 +127,7 @@ class BiathlonTweetService
      */
     public function getLatestTweets(int $limit = 12): Collection
     {
-        $isAdmin = strtolower(trim(auth()->user()?->email ?? '')) === '7924@inbox.lv';
+        $isAdmin = (bool) auth()->user()?->isAdmin();
         $cacheKey = 'biathlon_latest_tweets_' . $limit . ($isAdmin ? '_admin' : '');
 
         return Cache::remember($cacheKey, 300, function () use ($limit, $isAdmin) {
