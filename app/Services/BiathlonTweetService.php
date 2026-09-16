@@ -19,7 +19,6 @@ class BiathlonTweetService
      * Supported Twitter handles
      */
     protected array $twitterHandles = [
-        'penaltyloop',
         'biathstats',
         'biathlonworld',
     ];

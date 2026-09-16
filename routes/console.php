@@ -13,5 +13,5 @@ Schedule::command('app:read-competition-results')->everyFiveMinutes();
 Schedule::command('app:read-forecast-results-command')->everyMinute();
 Schedule::command('app:generate-missing-forecasts')->daily();
 Schedule::command('app:read-athletes')->daily();
-Schedule::command('app:sync-biathlon-tweets')->everyFourHours();
-Schedule::command('app:send-daily-cron-report')->dailyAt('23:00');
+Schedule::command('app:sync-biathlon-tweets')->cron('0 8,12,16,20 * * *')->timezone('Europe/Riga');
+Schedule::command('app:send-daily-cron-report')->dailyAt('23:00')->timezone('Europe/Riga');
