@@ -426,7 +426,7 @@ async function scrapeRssFeed(page, rssUrl, timeout = 25000) {
             let imgMatch;
             while ((imgMatch = imgRegex.exec(itemBlock)) !== null) {
                 const imgUrl = imgMatch[1].replace(/&#038;/g, '&');
-                if (imgUrl && !imgUrl.includes('pixel') && !imgUrl.includes('smilies') && !mediaUrls.includes(imgUrl)) {
+                if (imgUrl && !imgUrl.includes('pixel') && !imgUrl.includes('smilies') && !imgUrl.includes('s.w.org') && !imgUrl.includes('emoji') && !mediaUrls.includes(imgUrl)) {
                     mediaUrls.push(imgUrl);
                 }
             }

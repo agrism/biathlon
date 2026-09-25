@@ -832,7 +832,7 @@ class BiathlonTweetService
                             if (!empty($imgMatches[1])) {
                                 foreach ($imgMatches[1] as $imgUrl) {
                                     $imgUrl = html_entity_decode($imgUrl);
-                                    if (!str_contains($imgUrl, 'pixel') && !str_contains($imgUrl, 'smilies') && !in_array($imgUrl, $mediaUrls)) {
+                                    if (!str_contains($imgUrl, 'pixel') && !str_contains($imgUrl, 'smilies') && !str_contains($imgUrl, 's.w.org') && !str_contains($imgUrl, 'emoji') && !in_array($imgUrl, $mediaUrls)) {
                                         $mediaUrls[] = $imgUrl;
                                     }
                                 }
