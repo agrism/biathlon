@@ -1204,4 +1204,94 @@ class BiathlonTweetService
 
         return $synced;
     }
+
+    /**
+     * Cache and retrieve all biathlon athletes who have valid portrait photos
+     */
+    public function getAthletesWithPhotos(): Collection
+    {
+        return Cache::remember('athletes_with_photos_list', 3600 * 24, function () {
+            return \App\Models\Athlete::query()
+                ->whereNotNull('photo_uri')
+                ->where('photo_uri', '!=', '')
+                ->get(['id', 'given_name', 'family_name', 'nat', 'photo_uri', 'ibu_id']);
+        });
+    }
+
+    /**
+     * Find the first mentioned athlete in tweet content to render their official IBU / BiathlonWorld photo
+     */
+    public function findMentionedAthleteInText(?string $text): ?\App\Models\Athlete
+    {
+        if (empty($text)) {
+            return null;
+        }
+
+        $athletes = $this->getAthletesWithPhotos();
+        if ($athletes->isEmpty()) {
+            return null;
+        }
+
+        $cleanText = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $cleanText = html_entity_decode($cleanText, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        $norm = function (string $s): string {
+            $s = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $s) ?: strtolower($s);
+            $s = str_replace(['oe', 'ae', 'aa', 'ø', 'æ', 'å'], ['o', 'a', 'a', 'o', 'a', 'a'], $s);
+            return preg_replace('/[^a-z0-9]/', '', $s);
+        };
+
+        $textLower = mb_strtolower($cleanText);
+        $earliestPos = PHP_INT_MAX;
+        $bestMatch = null;
+
+        // 1. Initial patterns like J.T.Boe, S.H.Laegreid, E.Jacquelin, E.Perrot, T.Boe, Q.Fillon Maillet
+        if (preg_match_all('/(?:[A-Z]\.){1,3}\s*([A-Za-zÀ-ÿ\-]+(?:\s+[A-Za-zÀ-ÿ\-]+)?)/u', $cleanText, $matches, PREG_OFFSET_CAPTURE)) {
+            foreach ($matches[0] as $idx => $matchTuple) {
+                $fullPattern = $matchTuple[0];
+                $offset = $matchTuple[1];
+                $famName = $matches[1][$idx][0];
+                $famNorm = $norm($famName);
+
+                foreach ($athletes as $athlete) {
+                    $aFamNorm = $norm($athlete->family_name);
+                    if ($aFamNorm === $famNorm) {
+                        $initialsInPattern = preg_replace('/[^a-zA-Z]/', '', substr($fullPattern, 0, strpos($fullPattern, $famName)));
+                        $athleteGivenInitials = preg_replace('/[^a-zA-Z]/', '', implode('', array_map(fn($w) => substr($w, 0, 1), explode(' ', $athlete->given_name))));
+
+                        if (empty($initialsInPattern) || stripos($athleteGivenInitials, substr($initialsInPattern, 0, 1)) !== false) {
+                            if ($offset < $earliestPos) {
+                                $earliestPos = $offset;
+                                $bestMatch = $athlete;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. Full names and distinctive family names
+        foreach ($athletes as $athlete) {
+            $fullName = mb_strtolower($athlete->given_name . ' ' . $athlete->family_name);
+            $pos = mb_stripos($textLower, $fullName);
+            if ($pos !== false && $pos < $earliestPos) {
+                $earliestPos = $pos;
+                $bestMatch = $athlete;
+                continue;
+            }
+
+            $famName = mb_strtolower($athlete->family_name);
+            if (mb_strlen($famName) >= 5 || in_array($famName, ['boe', 'bø', 'simon', 'botn', 'voigt', 'preuss', 'claude', 'perrot'])) {
+                if (preg_match('/\b' . preg_quote($famName, '/') . '\b/ui', $cleanText, $m, PREG_OFFSET_CAPTURE)) {
+                    $p = $m[0][1];
+                    if ($p < $earliestPos) {
+                        $earliestPos = $p;
+                        $bestMatch = $athlete;
+                    }
+                }
+            }
+        }
+
+        return $bestMatch;
+    }
 }

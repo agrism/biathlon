@@ -5,8 +5,16 @@
         @if($tweet->hasTranslation()) x-data="{ showOriginal: false }" @endif
     >
         <div class="flex-1 flex flex-col">
-            <!-- Top Media Container (Image if available) -->
-            @if(!empty($tweet->media_urls) && is_array($tweet->media_urls) && count($tweet->media_urls) > 0)
+            @php
+                $hasMedia = !empty($tweet->media_urls) && is_array($tweet->media_urls) && count($tweet->media_urls) > 0;
+                $mentionedAthlete = null;
+                if (!$hasMedia) {
+                    $mentionedAthlete = $tweet->findFirstMentionedAthlete();
+                }
+            @endphp
+
+            @if($hasMedia)
+                <!-- Top Media Container (Image from tweet / web card) -->
                 <div class="w-full aspect-[16/10] sm:h-48 xl:h-52 2xl:h-56 overflow-hidden relative bg-slate-900 flex-shrink-0">
                     <a href="{{ $tweet->tweet_url ?: ('https://x.com/' . $tweet->author_handle) }}" target="_blank" rel="noopener noreferrer" class="block w-full h-full">
                         <img
@@ -50,8 +58,58 @@
                         </div>
                     @endif
                 </div>
+            @elseif($mentionedAthlete && !empty($mentionedAthlete->photo_uri))
+                <!-- Top Media Container (First Mentioned Athlete Portrait from BiathlonWorld / IBU) -->
+                <div class="w-full aspect-[16/10] sm:h-48 xl:h-52 2xl:h-56 overflow-hidden relative bg-gradient-to-tr from-slate-950 via-slate-900 to-sky-950 flex-shrink-0 group/athlete">
+                    <a href="{{ route('athlete.show', $mentionedAthlete->id) }}" class="block w-full h-full relative">
+                        <img
+                            src="{{ $mentionedAthlete->photo_uri }}"
+                            alt="{{ $mentionedAthlete->given_name }} {{ $mentionedAthlete->family_name }}"
+                            class="w-full h-full object-cover object-top transition-transform duration-500 group-hover/athlete:scale-105"
+                            loading="lazy"
+                        >
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/15 to-black/25 pointer-events-none"></div>
+                    </a>
+
+                    <!-- Top Left Author Pill Overlay -->
+                    <div class="absolute top-2.5 left-2.5">
+                        <a
+                            href="{{ $tweet->tweet_url ?: ('https://x.com/' . $tweet->author_handle) }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] bg-slate-900/85 backdrop-blur-xs text-white text-[11px] font-bold shadow-xs hover:bg-sky-600 transition-colors"
+                        >
+                            @if($tweet->author_avatar)
+                                <img src="{{ $tweet->author_avatar }}" alt="{{ $tweet->author_name }}" class="w-3.5 h-3.5 rounded-full object-cover">
+                            @else
+                                <i class="fa-brands fa-x-twitter text-[10px]"></i>
+                            @endif
+                            <span>{{ '@' . $tweet->author_handle }}</span>
+                        </a>
+                    </div>
+
+                    <!-- Top Right Date Badge Overlay -->
+                    <div class="absolute top-2.5 right-2.5">
+                        @if($tweet->published_at)
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-[4px] text-[10px] font-extrabold uppercase tracking-wider {{ $tweet->published_at->isToday() ? 'bg-sky-500 text-white shadow-xs' : 'bg-slate-900/80 backdrop-blur-xs text-slate-200' }}">
+                                {{ $tweet->published_at->isToday() ? 'Today' : $tweet->published_at->tz('Europe/Riga')->format('d M Y') }}
+                            </span>
+                        @endif
+                    </div>
+
+                    <!-- Bottom Athlete Badge Overlay -->
+                    <div class="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
+                        <a href="{{ route('athlete.show', $mentionedAthlete->id) }}" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[4px] bg-slate-900/90 backdrop-blur-xs text-white text-[11px] font-bold border border-white/10 shadow-xs pointer-events-auto hover:bg-sky-600 transition-colors">
+                            @if($mentionedAthlete->nat)
+                                <span class="font-black text-sky-400 text-[10px]">{{ $mentionedAthlete->nat }}</span>
+                                <span class="text-slate-500 text-[10px]">&bull;</span>
+                            @endif
+                            <span class="truncate max-w-[150px]">{{ $mentionedAthlete->given_name }} {{ $mentionedAthlete->family_name }}</span>
+                        </a>
+                    </div>
+                </div>
             @else
-                <!-- Thematic Author Brand Visual Header for text posts -->
+                <!-- Thematic Author Brand Visual Header for text posts without mentioned athlete -->
                 @php
                     $themeClasses = match(strtolower($tweet->author_handle)) {
                         'penaltyloop' => 'from-slate-950 via-slate-900 to-sky-950',
@@ -130,7 +188,7 @@
             <!-- Card Body / Content -->
             <div class="p-4 flex-1 flex flex-col justify-between">
                 <div>
-                    @if(!empty($tweet->media_urls) && count($tweet->media_urls) > 0)
+                    @if($hasMedia || $mentionedAthlete)
                         <div class="flex items-center justify-between gap-2 mb-1.5 text-[11px] text-slate-400">
                             <span class="font-semibold text-slate-600 truncate">{{ $tweet->author_name }}</span>
                             <span>{{ $tweet->published_at ? $tweet->published_at->tz('Europe/Riga')->format('H:i') : '' }}</span>

@@ -70,6 +70,14 @@ class Tweet extends Model
         return $this->formatText($this->translated_content ?: $this->content);
     }
 
+    /**
+     * Find first mentioned athlete in tweet content to render official IBU / BiathlonWorld photo
+     */
+    public function findFirstMentionedAthlete(): ?\App\Models\Athlete
+    {
+        return app(\App\Services\BiathlonTweetService::class)->findMentionedAthleteInText($this->content);
+    }
+
     protected function formatText(?string $raw): string
     {
         if (empty($raw)) {
