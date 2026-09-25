@@ -23,6 +23,7 @@ class BiathlonTweetService
         'biathstats',
         'biathlonworld',
         'ibu_newsroom',
+        'BiathlonLivefr',
     ];
 
     protected array $userAgents = [
@@ -90,6 +91,15 @@ class BiathlonTweetService
                 'type' => 'rss',
                 'name' => 'Custom IBU Newsroom RSS Bridge',
                 'url' => $ibuNewsroomRss,
+                'delay' => 0,
+            ];
+        }
+
+        if ($biathlonLiveFrRss = env('BIATHLONLIVEFR_RSS_URL')) {
+            $providers[] = [
+                'type' => 'rss',
+                'name' => 'Custom BiathlonLivefr RSS Bridge',
+                'url' => $biathlonLiveFrRss,
                 'delay' => 0,
             ];
         }
