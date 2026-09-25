@@ -85,11 +85,18 @@
             <div class="lg:col-span-4 xl:col-span-4 p-6 sm:p-8 lg:p-10 flex flex-col justify-between bg-slate-950 text-white z-20">
                 <!-- Top Tag & Counter -->
                 <div class="flex items-center justify-between gap-3 mb-4">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-none bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-black uppercase tracking-wider">
-                        <i class="fa-solid fa-snowflake text-[10px]"></i>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-[4px] bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-black uppercase tracking-wider">
+                        <svg class="w-3.5 h-3.5 text-sky-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <line x1="12" y1="2" x2="12" y2="22"></line>
+                            <path d="m20 16-4-4 4-4"></path>
+                            <path d="m4 8 4 4-4 4"></path>
+                            <path d="m16 4-4 4-4-4"></path>
+                            <path d="m8 20 4-4 4 4"></path>
+                        </svg>
                         <span x-text="slides[active].tag"></span>
                     </span>
-                    <span class="text-xs font-bold text-slate-400 bg-slate-800/80 px-2.5 py-1 rounded-none border border-slate-700">
+                    <span class="text-xs font-bold text-slate-400 bg-slate-800/80 px-2.5 py-1 rounded-[4px] border border-slate-700">
                         <span class="text-white font-extrabold" x-text="active + 1"></span> / <span x-text="slides.length"></span>
                     </span>
                 </div>
@@ -108,7 +115,7 @@
                             <button
                                 type="button"
                                 @click="goTo(index)"
-                                class="h-2 rounded-none transition-all duration-300 cursor-pointer"
+                                class="h-2 rounded-[2px] transition-all duration-300 cursor-pointer"
                                 :class="active === index ? 'w-7 bg-sky-400' : 'w-2 bg-slate-700 hover:bg-slate-500'"
                                 :aria-label="'Go to slide ' + (index + 1)"
                             ></button>
@@ -120,18 +127,22 @@
                         <button
                             type="button"
                             @click="prev()"
-                            class="w-9 h-9 rounded-none bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white flex items-center justify-center border border-slate-700 transition-all cursor-pointer shadow-xs"
+                            class="group w-9 h-9 rounded-[4px] bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white flex items-center justify-center border border-slate-700 transition-all cursor-pointer shadow-xs"
                             aria-label="Previous Slide"
                         >
-                            <i class="fa-solid fa-chevron-left text-xs"></i>
+                            <svg class="w-4 h-4 text-slate-300 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                            </svg>
                         </button>
                         <button
                             type="button"
                             @click="next()"
-                            class="w-9 h-9 rounded-none bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white flex items-center justify-center border border-slate-700 transition-all cursor-pointer shadow-xs"
+                            class="group w-9 h-9 rounded-[4px] bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white flex items-center justify-center border border-slate-700 transition-all cursor-pointer shadow-xs"
                             aria-label="Next Slide"
                         >
-                            <i class="fa-solid fa-chevron-right text-xs"></i>
+                            <svg class="w-4 h-4 text-slate-300 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                            </svg>
                         </button>
                     </div>
                 </div>
