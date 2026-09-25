@@ -24,18 +24,30 @@
                 </p>
             </div>
 
-            <!-- View Switcher Controls (Auto Wide, 3 Cards, List) -->
-            <div class="flex items-center gap-1.5 bg-slate-100/90 p-1 rounded-2xl self-start sm:self-auto border border-slate-200/60 shadow-inner">
-                <!-- Auto Fluid Grid (scales 4 to 5/6 on wider screens) -->
+            <!-- View Switcher Controls (Wide Auto, 4 Cards, 3 Cards, List) -->
+            <div class="flex items-center gap-1 bg-slate-100/90 p-1 rounded-2xl self-start sm:self-auto border border-slate-200/60 shadow-inner">
+                <!-- Auto Fluid Grid (scales from 1 up to 6/7 cards on wider monitors) -->
                 <button
                     type="button"
                     @click="setView('grid_auto')"
-                    :class="(viewMode === 'grid_auto' || viewMode === 'grid_4' || viewMode === 'grid_5') ? 'bg-white text-sky-600 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800 font-medium'"
+                    :class="(viewMode === 'grid_auto' || viewMode === 'grid_5' || !viewMode) ? 'bg-white text-sky-600 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800 font-medium'"
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs transition-all cursor-pointer"
-                    title="Wide Fluid Grid (auto scales up to 5-6 cards on wide monitors)"
+                    title="Wide Fluid Grid (auto scales up to 5-7 cards on wide/ultrawide monitors)"
                 >
                     <i class="fa-solid fa-table-cells text-xs"></i>
-                    <span class="hidden sm:inline">Wide Grid</span>
+                    <span class="hidden sm:inline">Wide Auto</span>
+                </button>
+
+                <!-- 4 Cards -->
+                <button
+                    type="button"
+                    @click="setView('grid_4')"
+                    :class="viewMode === 'grid_4' ? 'bg-white text-sky-600 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800 font-medium'"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs transition-all cursor-pointer"
+                    title="4 Cards per row"
+                >
+                    <i class="fa-solid fa-border-all text-xs"></i>
+                    <span class="hidden sm:inline">4 Cards</span>
                 </button>
 
                 <!-- 3 Cards (Comfortable) -->
@@ -69,7 +81,8 @@
             <div
                 id="tweets-grid"
                 :class="{
-                    'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 min-[1920px]:grid-cols-6 gap-4.5': (viewMode === 'grid_auto' || viewMode === 'grid_4' || viewMode === 'grid_5' || !viewMode),
+                    'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-7 gap-4.5': (viewMode === 'grid_auto' || viewMode === 'grid_5' || !viewMode),
+                    'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4.5': viewMode === 'grid_4',
                     'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6': viewMode === 'grid_3',
                     'flex flex-col gap-3.5 max-w-4xl mx-auto': viewMode === 'list'
                 }"
