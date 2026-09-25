@@ -1,4 +1,4 @@
-<div id="tweet-hide-toggle-{{ $tweet->id }}" class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-3 select-none">
+<div id="tweet-hide-toggle-{{ $tweet->id }}" class="flex items-center justify-between gap-3 select-none">
     <!-- Left: Status Badge & HTMX Loader Indicator -->
     <div class="flex items-center gap-2">
         @if($tweet->should_hide)

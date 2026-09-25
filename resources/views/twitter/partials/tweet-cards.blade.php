@@ -114,42 +114,12 @@
             </div>
         </div>
 
-        <!-- Card Footer -->
-        <div class="px-4 py-3 bg-slate-50/60 border-t border-slate-100 flex flex-col gap-2">
-            <div class="flex items-center justify-between gap-2">
-                <a
-                    href="{{ $tweet->tweet_url ?: ('https://x.com/' . $tweet->author_handle) }}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 hover:text-sky-600 transition-colors"
-                >
-                    <i class="fa-brands fa-x-twitter text-xs text-slate-400"></i>
-                    <span>Read on X</span>
-                    <i class="fa-solid fa-arrow-up-right-from-square text-[9px] ml-0.5 text-slate-400"></i>
-                </a>
-
-                @if($tweet->likes_count > 0 || $tweet->retweets_count > 0)
-                    <div class="flex items-center gap-2.5 text-[10px] text-slate-400 font-medium">
-                        @if($tweet->likes_count > 0)
-                            <span class="inline-flex items-center gap-1" title="Likes">
-                                <i class="fa-solid fa-heart text-rose-400 text-[9px]"></i>
-                                <span>{{ $tweet->likes_count }}</span>
-                            </span>
-                        @endif
-                        @if($tweet->retweets_count > 0)
-                            <span class="inline-flex items-center gap-1" title="Reposts">
-                                <i class="fa-solid fa-retweet text-emerald-500 text-[9px]"></i>
-                                <span>{{ $tweet->retweets_count }}</span>
-                            </span>
-                        @endif
-                    </div>
-                @endif
-            </div>
-
-            @if(auth()->check() && auth()->user()->isAdmin())
+        <!-- Card Admin Footer (Only for Admins) -->
+        @if(auth()->check() && auth()->user()->isAdmin())
+            <div class="px-4 py-2.5 bg-slate-50/75 border-t border-slate-100">
                 @include('twitter.partials.hide-toggle', ['tweet' => $tweet])
-            @endif
-        </div>
+            </div>
+        @endif
     </div>
 @endforeach
 
