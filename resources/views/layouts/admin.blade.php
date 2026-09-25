@@ -33,7 +33,7 @@
 
 @include('menu', ['ignoreHome' => true])
 
-<main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+<main class="flex-1 w-full px-4 sm:px-6 lg:px-8 2xl:px-12 py-4">
     <div class="mb-4">
         {!! \App\Helpers\BreadCrumbHelper::instance()->render() !!}
     </div>
@@ -50,7 +50,7 @@
 </main>
 
 <footer class="w-full border-t border-slate-200/80 bg-white/60 backdrop-blur-sm py-4 mt-12 text-center text-xs text-slate-400">
-    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+    <div class="w-full px-4 sm:px-6 lg:px-8 2xl:px-12 flex flex-col sm:flex-row items-center justify-between gap-2">
         <div class="flex items-center gap-2">
             <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
             <span>IBU World Cup Live Sync Active</span>
