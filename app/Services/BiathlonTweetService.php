@@ -807,6 +807,38 @@ class BiathlonTweetService
                             $mediaUrls[] = (string)$item->enclosure['url'];
                         }
 
+                        // Check media:content and media:thumbnail
+                        $mediaNs = $item->children('http://search.yahoo.com/mrss/');
+                        if (isset($mediaNs->content)) {
+                            foreach ($mediaNs->content as $mc) {
+                                if (isset($mc->attributes()->url)) {
+                                    $mediaUrls[] = (string)$mc->attributes()->url;
+                                }
+                            }
+                        }
+                        if (isset($mediaNs->thumbnail)) {
+                            foreach ($mediaNs->thumbnail as $mt) {
+                                if (isset($mt->attributes()->url)) {
+                                    $mediaUrls[] = (string)$mt->attributes()->url;
+                                }
+                            }
+                        }
+
+                        // Check content:encoded for embedded <img> tags
+                        $contentNs = $item->children('http://purl.org/rss/1.0/modules/content/');
+                        $encodedContent = isset($contentNs->encoded) ? (string)$contentNs->encoded : (string)$item->description;
+                        if (!empty($encodedContent)) {
+                            preg_match_all('/<img[^>]+(?:src|data-orig-file)=["\']([^"\']+)["\']/i', $encodedContent, $imgMatches);
+                            if (!empty($imgMatches[1])) {
+                                foreach ($imgMatches[1] as $imgUrl) {
+                                    $imgUrl = html_entity_decode($imgUrl);
+                                    if (!str_contains($imgUrl, 'pixel') && !str_contains($imgUrl, 'smilies') && !in_array($imgUrl, $mediaUrls)) {
+                                        $mediaUrls[] = $imgUrl;
+                                    }
+                                }
+                            }
+                        }
+
                         $translationData = $this->getTranslationAttributes($tweetId, $content);
 
                         Tweet::query()->updateOrCreate(

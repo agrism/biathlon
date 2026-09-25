@@ -407,11 +407,29 @@ async function scrapeRssFeed(page, rssUrl, timeout = 25000) {
             const linkMatch = /<link>(?:<!\[CDATA\[(.*?)\]\]>|(.*?))<\/link>/is.exec(itemBlock);
             const link = (linkMatch ? (linkMatch[1] || linkMatch[2]) : '').trim();
 
-            const pubDateMatch = /<pubDate>(?:<!\[CDATA\[(.*?)\]\]>|(.*?))<\/pubDate>/is.exec(itemBlock);
-            const pubDate = (pubDateMatch ? (pubDateMatch[1] || pubDateMatch[2]) : '').trim();
-
+            // Extract media/images from multiple possible RSS fields
+            const mediaUrls = [];
             const enclosureMatch = /<enclosure[^>]+url=["']([^"']+)["']/i.exec(itemBlock);
-            const mediaUrl = enclosureMatch ? enclosureMatch[1] : null;
+            if (enclosureMatch && enclosureMatch[1]) {
+                mediaUrls.push(enclosureMatch[1]);
+            }
+            const mediaContentMatch = /<media:content[^>]+url=["']([^"']+)["']/i.exec(itemBlock);
+            if (mediaContentMatch && mediaContentMatch[1] && !mediaUrls.includes(mediaContentMatch[1])) {
+                mediaUrls.push(mediaContentMatch[1]);
+            }
+            const mediaThumbMatch = /<media:thumbnail[^>]+url=["']([^"']+)["']/i.exec(itemBlock);
+            if (mediaThumbMatch && mediaThumbMatch[1] && !mediaUrls.includes(mediaThumbMatch[1])) {
+                mediaUrls.push(mediaThumbMatch[1]);
+            }
+            // Extract images embedded in <content:encoded> or <description>
+            const imgRegex = /<img[^>]+(?:src|data-orig-file)=["']([^"']+)["']/gi;
+            let imgMatch;
+            while ((imgMatch = imgRegex.exec(itemBlock)) !== null) {
+                const imgUrl = imgMatch[1].replace(/&#038;/g, '&');
+                if (imgUrl && !imgUrl.includes('pixel') && !imgUrl.includes('smilies') && !mediaUrls.includes(imgUrl)) {
+                    mediaUrls.push(imgUrl);
+                }
+            }
 
             if (title || desc) {
                 const textContent = `📝 ${title}${desc ? "\n" + desc.substring(0, 240) + '...' : ''}`;
@@ -424,7 +442,7 @@ async function scrapeRssFeed(page, rssUrl, timeout = 25000) {
                     author_handle: 'penaltyloop',
                     author_avatar: 'https://pbs.twimg.com/profile_images/2084999188614373376/QytLH4Fk_normal.jpg',
                     content: textContent,
-                    media_urls: mediaUrl ? [mediaUrl] : null,
+                    media_urls: mediaUrls.length > 0 ? mediaUrls : null,
                     likes_count: 0,
                     retweets_count: 0,
                     tweet_url: link || 'https://penaltyloop.com',
