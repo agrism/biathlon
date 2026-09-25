@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 class BiathlonTweetService
 {
-    public const PER_PAGE = 12;
+    public const PER_PAGE = 24;
 
     protected Client $client;
     protected TranslationService $translationService;

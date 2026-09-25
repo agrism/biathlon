@@ -1,6 +1,6 @@
 <!-- Biathlon News & Telemetry Stream -->
 <div class="mb-12 w-full mx-auto" x-data="{
-    viewMode: localStorage.getItem('biathlon_tweets_view_mode') || 'grid_4',
+    viewMode: localStorage.getItem('biathlon_tweets_view_mode') || 'grid_auto',
     setView(mode) {
         this.viewMode = mode;
         localStorage.setItem('biathlon_tweets_view_mode', mode);
@@ -24,18 +24,18 @@
                 </p>
             </div>
 
-            <!-- View Switcher Controls (4 cards, 3 cards, list) -->
+            <!-- View Switcher Controls (Auto Wide, 3 Cards, List) -->
             <div class="flex items-center gap-1.5 bg-slate-100/90 p-1 rounded-2xl self-start sm:self-auto border border-slate-200/60 shadow-inner">
-                <!-- 4 Cards (Wide Grid) -->
+                <!-- Auto Fluid Grid (scales 4 to 5/6 on wider screens) -->
                 <button
                     type="button"
-                    @click="setView('grid_4')"
-                    :class="viewMode === 'grid_4' ? 'bg-white text-sky-600 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800 font-medium'"
+                    @click="setView('grid_auto')"
+                    :class="(viewMode === 'grid_auto' || viewMode === 'grid_4' || viewMode === 'grid_5') ? 'bg-white text-sky-600 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800 font-medium'"
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs transition-all cursor-pointer"
-                    title="4 Cards per row on wide screens"
+                    title="Wide Fluid Grid (auto scales up to 5-6 cards on wide monitors)"
                 >
                     <i class="fa-solid fa-table-cells text-xs"></i>
-                    <span class="hidden md:inline">4 Cards</span>
+                    <span class="hidden sm:inline">Wide Grid</span>
                 </button>
 
                 <!-- 3 Cards (Comfortable) -->
@@ -47,7 +47,7 @@
                     title="3 Cards per row"
                 >
                     <i class="fa-solid fa-table-cells-large text-xs"></i>
-                    <span class="hidden md:inline">3 Cards</span>
+                    <span class="hidden sm:inline">3 Cards</span>
                 </button>
 
                 <!-- 1 Column List -->
@@ -59,7 +59,7 @@
                     title="Compact single column list"
                 >
                     <i class="fa-solid fa-bars-staggered text-xs"></i>
-                    <span class="hidden md:inline">List</span>
+                    <span class="hidden sm:inline">List</span>
                 </button>
             </div>
         </div>
@@ -69,9 +69,9 @@
             <div
                 id="tweets-grid"
                 :class="{
-                    'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5': viewMode === 'grid_4' || (!viewMode || viewMode === 'grid_5'),
-                    'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6': viewMode === 'grid_3',
-                    'flex flex-col gap-3.5 max-w-3xl mx-auto': viewMode === 'list'
+                    'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 min-[1920px]:grid-cols-6 gap-4.5': (viewMode === 'grid_auto' || viewMode === 'grid_4' || viewMode === 'grid_5' || !viewMode),
+                    'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6': viewMode === 'grid_3',
+                    'flex flex-col gap-3.5 max-w-4xl mx-auto': viewMode === 'list'
                 }"
                 class="transition-all duration-300"
             >
