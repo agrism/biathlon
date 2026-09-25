@@ -1,7 +1,7 @@
 @foreach($tweets as $tweet)
     <div
         id="tweet-card-{{ $tweet->id }}"
-        class="bg-white rounded-xl border border-slate-200 hover:border-sky-400 shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between overflow-hidden group {{ $tweet->should_hide ? 'bg-rose-50/40 border-rose-300 ring-1 ring-rose-300' : '' }}"
+        class="bg-white rounded-md border border-slate-200 hover:border-sky-400 shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between overflow-hidden group {{ $tweet->should_hide ? 'bg-rose-50/40 border-rose-300 ring-1 ring-rose-300' : '' }}"
         @if($tweet->hasTranslation()) x-data="{ showOriginal: false }" @endif
     >
         <div class="flex-1 flex flex-col">
