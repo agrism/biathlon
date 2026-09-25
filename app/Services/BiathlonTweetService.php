@@ -1230,7 +1230,7 @@ class BiathlonTweetService
      */
     public function getAthletesNameIndex(): array
     {
-        return Cache::remember('athletes_name_index_v3', 3600 * 24, function () {
+        return Cache::remember('athletes_name_index_v4', 3600 * 24, function () {
             $athletes = $this->getAthletesWithPhotos();
 
             $fullNames = [];
@@ -1249,7 +1249,19 @@ class BiathlonTweetService
                 'young', 'king', 'fast', 'white', 'black', 'brown', 'green', 'rose', 'hall',
                 'gross', 'horn', 'brand', 'cross', 'post', 'wolf', 'graf', 'clarke', 'williams',
                 'smith', 'miller', 'jones', 'page', 'today', 'news', 'press', 'podcast', 'story',
-                'action', 'round', 'look', 'good', 'great', 'open', 'championship', 'national'
+                'action', 'round', 'look', 'good', 'great', 'open', 'championship', 'national',
+                // Common conversational English & French words that should never match surnames standalone
+                'hope', 'love', 'loves', 'meet', 'meets', 'daughter', 'son', 'kids', 'kid',
+                'child', 'children', 'coach', 'coaches', 'woman', 'girl', 'girls', 'boy', 'boys',
+                'protest', 'friend', 'friends', 'father', 'mother', 'parent', 'parents', 'role',
+                'model', 'models', 'day', 'days', 'hour', 'hours', 'year', 'years', 'said',
+                'says', 'talk', 'talks', 'tell', 'tells', 'word', 'words', 'down', 'here',
+                'there', 'even', 'more', 'much', 'many', 'most', 'some', 'any', 'all', 'every',
+                'other', 'another', 'same', 'such', 'just', 'over', 'under', 'into', 'with',
+                'from', 'this', 'that', 'these', 'those', 'they', 'them', 'their', 'have',
+                'been', 'were', 'will', 'would', 'could', 'should', 'know', 'think', 'want',
+                'need', 'make', 'take', 'give', 'come', 'went', 'well', 'also', 'back', 'first',
+                'last', 'next', 'help', 'keep', 'show', 'mean', 'home', 'away', 'line', 'loop'
             ];
 
             foreach ($athletes as $athlete) {
@@ -1298,6 +1310,136 @@ class BiathlonTweetService
     {
         $index = $this->getAthletesNameIndex();
         return $index['by_id'][$id] ?? \App\Models\Athlete::find($id);
+    }
+
+    /**
+     * Search and match an athlete by admin query string (name, surname, full name, or ID)
+     */
+    public function findAthleteByAdminQuery(?string $query): ?\App\Models\Athlete
+    {
+        if ($query === null) {
+            return null;
+        }
+
+        $query = trim($query);
+        if ($query === '' || in_array(strtolower($query), ['none', 'clear', 'remove', 'null', '0', '-1'])) {
+            return null;
+        }
+
+        // Check if query is an ID directly (e.g. "5996" or "#5996" or "id:5996")
+        if (preg_match('/^(?:#|id:)?\s*(\d+)$/i', $query, $m)) {
+            $athlete = $this->getAthleteById((int)$m[1]);
+            if ($athlete) {
+                return $athlete;
+            }
+        }
+
+        // Extract country hint if provided like "Lou JEANMONNOT (FRA)"
+        $countryHint = null;
+        if (preg_match('/\(([A-Z]{3})\)$/i', $query, $cm)) {
+            $countryHint = strtoupper($cm[1]);
+            $query = trim(preg_replace('/\s*\([A-Z]{3}\)$/i', '', $query));
+        }
+
+        $normQuery = $this->normalizeAthleteLookupKey($query);
+        if (empty($normQuery)) {
+            return null;
+        }
+
+        $index = $this->getAthletesNameIndex();
+        $fullNames = $index['full_names'];
+        $initialNames = $index['initial_names'];
+        $surnames = $index['surnames'];
+        $byId = $index['by_id'];
+
+        // 1. Direct match in full names (e.g. "Lou Jeanmonnot" or "Jeanmonnot Lou")
+        if (isset($fullNames[$normQuery]) && isset($byId[$fullNames[$normQuery]])) {
+            return $byId[$fullNames[$normQuery]];
+        }
+
+        // 2. Direct match in initialed names (e.g. "J.T. Boe" -> "jtboe")
+        if (isset($initialNames[$normQuery]) && isset($byId[$initialNames[$normQuery]])) {
+            return $byId[$initialNames[$normQuery]];
+        }
+
+        // 3. Direct match in surnames (e.g. "Jeanmonnot")
+        if (isset($surnames[$normQuery]) && isset($byId[$surnames[$normQuery]])) {
+            return $byId[$surnames[$normQuery]];
+        }
+
+        // 4. In-memory fuzzy match over all athletes with photos
+        $athletes = $this->getAthletesWithPhotos();
+        $bestAthlete = null;
+        $bestScore = -1;
+
+        $queryWords = array_values(array_filter(explode(' ', strtolower($query))));
+        $normWords = array_map(fn($w) => $this->normalizeAthleteLookupKey($w), $queryWords);
+        $normWords = array_filter($normWords, fn($w) => strlen($w) >= 2);
+
+        foreach ($athletes as $athlete) {
+            $given = (string)$athlete->given_name;
+            $family = (string)$athlete->family_name;
+
+            $givenNorm = $this->normalizeAthleteLookupKey($given);
+            $familyNorm = $this->normalizeAthleteLookupKey($family);
+
+            $score = 0;
+
+            if ($givenNorm . $familyNorm === $normQuery || $familyNorm . $givenNorm === $normQuery) {
+                $score = 100;
+            } elseif ($familyNorm === $normQuery) {
+                $score = 85;
+            } elseif (count($normWords) >= 2) {
+                $allMatched = true;
+                foreach ($normWords as $nw) {
+                    if (!str_contains($givenNorm, $nw) && !str_contains($familyNorm, $nw)) {
+                        $allMatched = false;
+                        break;
+                    }
+                }
+                if ($allMatched) {
+                    $score = 75;
+                }
+            }
+
+            if ($score === 0) {
+                if (str_contains($familyNorm, $normQuery) || str_contains($normQuery, $familyNorm)) {
+                    $score = 55;
+                } elseif ($givenNorm === $normQuery) {
+                    $score = 45;
+                } elseif (str_contains($givenNorm . $familyNorm, $normQuery) || str_contains($familyNorm . $givenNorm, $normQuery)) {
+                    $score = 35;
+                }
+            }
+
+            if ($score > 0) {
+                if ($countryHint && strtoupper((string)$athlete->nat) === $countryHint) {
+                    $score += 15;
+                }
+                if ($score > $bestScore) {
+                    $bestScore = $score;
+                    $bestAthlete = $athlete;
+                }
+            }
+        }
+
+        if ($bestAthlete) {
+            return $bestAthlete;
+        }
+
+        // 5. Fallback: Query database
+        return \App\Models\Athlete::query()
+            ->where(function ($q) use ($query, $normWords) {
+                $q->whereRaw("CONCAT(given_name, ' ', family_name) LIKE ?", ["%{$query}%"])
+                  ->orWhereRaw("CONCAT(family_name, ' ', given_name) LIKE ?", ["%{$query}%"])
+                  ->orWhere('family_name', 'LIKE', "%{$query}%");
+                foreach ($normWords as $nw) {
+                    $q->orWhere('family_name', 'LIKE', "%{$nw}%")
+                      ->orWhere('given_name', 'LIKE', "%{$nw}%");
+                }
+            })
+            ->orderByRaw('CASE WHEN photo_uri IS NOT NULL AND photo_uri != "" THEN 0 ELSE 1 END')
+            ->first();
     }
 
     /**

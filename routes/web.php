@@ -25,6 +25,7 @@ Route::get('/forecasts/{id}/select-athlete/{place}/place',
 Route::get('/tweets', Contr\Twitter\TweetsController::class)->name('tweets.index');
 Route::get('/tweets/sync', Contr\Twitter\FetchController::class)->name('tweets.sync');
 Route::post('/tweets/{id}/toggle-hide', Contr\Twitter\ToggleHideController::class)->name('tweets.toggle-hide');
+Route::post('/tweets/{id}/set-athlete', Contr\Twitter\SetAthleteController::class)->name('tweets.set-athlete');
 
 Route::group([
     'prefix' => 'private',

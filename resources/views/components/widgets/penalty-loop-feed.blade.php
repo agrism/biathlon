@@ -95,4 +95,12 @@
             No updates available right now.
         </div>
     @endif
+
+    @if(auth()->check() && auth()->user()->isAdmin())
+        <datalist id="admin-athletes-datalist">
+            @foreach(app(\App\Services\BiathlonTweetService::class)->getAthletesWithPhotos() as $ath)
+                <option value="{{ $ath->given_name }} {{ $ath->family_name }} ({{ $ath->nat }})">{{ $ath->given_name }} {{ $ath->family_name }}</option>
+            @endforeach
+        </datalist>
+    @endif
 </div>

@@ -18,6 +18,18 @@ class TweetHideTest extends TestCase
         config(['database.default' => 'sqlite']);
         config(['database.connections.sqlite.database' => ':memory:']);
 
+        Schema::create('athletes', function (Blueprint $table) {
+            $table->id();
+            $table->string('ibu_id')->nullable();
+            $table->string('given_name')->nullable();
+            $table->string('family_name')->nullable();
+            $table->string('nat')->nullable();
+            $table->string('photo_uri')->nullable();
+            $table->string('functions')->nullable();
+            $table->text('details')->nullable();
+            $table->timestamps();
+        });
+
         Schema::create('tweets', function (Blueprint $table) {
             $table->id();
             $table->string('tweet_id')->unique();
@@ -28,6 +40,7 @@ class TweetHideTest extends TestCase
             $table->text('translated_content')->nullable();
             $table->string('source_language')->nullable();
             $table->json('media_urls')->nullable();
+            $table->unsignedBigInteger('mentioned_athlete_id')->nullable();
             $table->integer('likes_count')->default(0);
             $table->integer('retweets_count')->default(0);
             $table->string('tweet_url')->nullable();
@@ -211,5 +224,92 @@ class TweetHideTest extends TestCase
 
         $tweet->refresh();
         $this->assertFalse($tweet->should_hide);
+    }
+
+    public function test_admin_can_set_and_clear_tweet_athlete(): void
+    {
+        $athlete = new \App\Models\Athlete();
+        $athlete->id = 5996;
+        $athlete->given_name = 'Lou';
+        $athlete->family_name = 'JEANMONNOT';
+        $athlete->nat = 'FRA';
+        $athlete->photo_uri = 'https://ibu.blob.core.windows.net/docs/athletes/BTFRA22810199801.png';
+        $athlete->save();
+
+        $tweet = Tweet::create([
+            'tweet_id' => 'test_set_athlete_1',
+            'content' => 'Lou asked coaches not to protest. I hope she inspires kids.',
+            'published_at' => now(),
+            'should_hide' => false,
+        ]);
+
+        $admin = new User();
+        $admin->email = '7924@inbox.lv';
+        $this->actingAs($admin);
+
+        // Submit athlete name by admin
+        $response = $this->post(route('tweets.set-athlete', $tweet->id), [
+            'athlete_name' => 'Lou Jeanmonnot',
+        ]);
+        $response->assertStatus(200);
+        $response->assertSee('Lou');
+        $response->assertSee('JEANMONNOT');
+
+        $tweet->refresh();
+        $this->assertEquals(5996, $tweet->mentioned_athlete_id);
+        $this->assertNotNull($tweet->findFirstMentionedAthlete());
+        $this->assertEquals('Lou', $tweet->findFirstMentionedAthlete()->given_name);
+
+        // Clear athlete by submitting empty name
+        $responseClear = $this->post(route('tweets.set-athlete', $tweet->id), [
+            'athlete_name' => '',
+        ]);
+        $responseClear->assertStatus(200);
+
+        $tweet->refresh();
+        $this->assertEquals(0, $tweet->mentioned_athlete_id);
+        $this->assertNull($tweet->findFirstMentionedAthlete());
+
+        // Set by surname only
+        $responseSurname = $this->post(route('tweets.set-athlete', $tweet->id), [
+            'athlete_name' => 'Jeanmonnot',
+        ]);
+        $responseSurname->assertStatus(200);
+        $tweet->refresh();
+        $this->assertEquals(5996, $tweet->mentioned_athlete_id);
+
+        // Set by datalist formatted string: "Lou JEANMONNOT (FRA)"
+        $responseDatalist = $this->post(route('tweets.set-athlete', $tweet->id), [
+            'athlete_name' => 'Lou JEANMONNOT (FRA)',
+        ]);
+        $responseDatalist->assertStatus(200);
+        $tweet->refresh();
+        $this->assertEquals(5996, $tweet->mentioned_athlete_id);
+    }
+
+    public function test_unauthorized_user_cannot_set_tweet_athlete(): void
+    {
+        $tweet = Tweet::create([
+            'tweet_id' => 'test_unauth_athlete',
+            'content' => 'Sample tweet',
+            'published_at' => now(),
+            'should_hide' => false,
+        ]);
+
+        // Guest
+        $response = $this->post(route('tweets.set-athlete', $tweet->id), [
+            'athlete_name' => 'Lou Jeanmonnot',
+        ]);
+        $response->assertStatus(403);
+
+        // Non-admin user
+        $user = new User();
+        $user->email = 'regular@example.com';
+        $this->actingAs($user);
+
+        $response2 = $this->post(route('tweets.set-athlete', $tweet->id), [
+            'athlete_name' => 'Lou Jeanmonnot',
+        ]);
+        $response2->assertStatus(403);
     }
 }

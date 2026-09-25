@@ -63,7 +63,7 @@ class Tweet extends Model
     protected static function booted(): void
     {
         static::saving(function (Tweet $tweet) {
-            if (empty($tweet->media_urls) && empty($tweet->mentioned_athlete_id) && !empty($tweet->content)) {
+            if (empty($tweet->media_urls) && $tweet->mentioned_athlete_id === null && !empty($tweet->content)) {
                 try {
                     $athlete = app(\App\Services\BiathlonTweetService::class)->findMentionedAthleteInText($tweet->content);
                     if ($athlete) {
@@ -101,8 +101,13 @@ class Tweet extends Model
      */
     public function findFirstMentionedAthlete(): ?\App\Models\Athlete
     {
-        if ($this->relationLoaded('mentionedAthlete') && $this->mentionedAthlete) {
-            return $this->mentionedAthlete;
+        if ($this->mentioned_athlete_id !== null) {
+            if ($this->mentioned_athlete_id <= 0) {
+                return null;
+            }
+            return $this->relationLoaded('mentionedAthlete') && $this->mentionedAthlete
+                ? $this->mentionedAthlete
+                : \App\Models\Athlete::find($this->mentioned_athlete_id);
         }
 
         if ($this->mentionedAthleteChecked) {
@@ -110,11 +115,6 @@ class Tweet extends Model
         }
 
         $this->mentionedAthleteChecked = true;
-
-        if ($this->mentioned_athlete_id) {
-            $this->cachedMentionedAthlete = $this->mentionedAthlete;
-            return $this->cachedMentionedAthlete;
-        }
 
         $athlete = app(\App\Services\BiathlonTweetService::class)->findMentionedAthleteInText($this->content);
         $this->cachedMentionedAthlete = $athlete;
