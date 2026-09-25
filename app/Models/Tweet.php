@@ -70,12 +70,20 @@ class Tweet extends Model
         return $this->formatText($this->translated_content ?: $this->content);
     }
 
+    protected ?\App\Models\Athlete $cachedMentionedAthlete = null;
+    protected bool $mentionedAthleteChecked = false;
+
     /**
      * Find first mentioned athlete in tweet content to render official IBU / BiathlonWorld photo
      */
     public function findFirstMentionedAthlete(): ?\App\Models\Athlete
     {
-        return app(\App\Services\BiathlonTweetService::class)->findMentionedAthleteInText($this->content);
+        if (!$this->mentionedAthleteChecked) {
+            $this->mentionedAthleteChecked = true;
+            $this->cachedMentionedAthlete = app(\App\Services\BiathlonTweetService::class)->findMentionedAthleteInText($this->content);
+        }
+
+        return $this->cachedMentionedAthlete;
     }
 
     protected function formatText(?string $raw): string
