@@ -61,7 +61,7 @@
             @elseif($mentionedAthlete && !empty($mentionedAthlete->photo_uri))
                 <!-- Top Media Container (First Mentioned Athlete Portrait from BiathlonWorld / IBU) -->
                 <div class="w-full aspect-[16/10] sm:h-48 xl:h-52 2xl:h-56 overflow-hidden relative bg-gradient-to-tr from-slate-950 via-slate-900 to-sky-950 flex-shrink-0 group/athlete">
-                    <a href="{{ route('athlete.show', $mentionedAthlete->id) }}" class="block w-full h-full relative">
+                    <a href="{{ route('athletes.show', $mentionedAthlete->id) }}" class="block w-full h-full relative">
                         <img
                             src="{{ $mentionedAthlete->photo_uri }}"
                             alt="{{ $mentionedAthlete->given_name }} {{ $mentionedAthlete->family_name }}"
@@ -99,7 +99,7 @@
 
                     <!-- Bottom Athlete Badge Overlay -->
                     <div class="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
-                        <a href="{{ route('athlete.show', $mentionedAthlete->id) }}" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[4px] bg-slate-900/90 backdrop-blur-xs text-white text-[11px] font-bold border border-white/10 shadow-xs pointer-events-auto hover:bg-sky-600 transition-colors">
+                        <a href="{{ route('athletes.show', $mentionedAthlete->id) }}" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[4px] bg-slate-900/90 backdrop-blur-xs text-white text-[11px] font-bold border border-white/10 shadow-xs pointer-events-auto hover:bg-sky-600 transition-colors">
                             @if($mentionedAthlete->nat)
                                 <span class="font-black text-sky-400 text-[10px]">{{ $mentionedAthlete->nat }}</span>
                                 <span class="text-slate-500 text-[10px]">&bull;</span>
