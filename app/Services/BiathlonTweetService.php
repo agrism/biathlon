@@ -1205,6 +1205,13 @@ class BiathlonTweetService
         return $synced;
     }
 
+    public function normalizeAthleteLookupKey(string $s): string
+    {
+        $s = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $s) ?: strtolower($s);
+        $s = str_replace(['oe', 'ae', 'aa', 'ø', 'æ', 'å'], ['o', 'a', 'a', 'o', 'a', 'a'], $s);
+        return preg_replace('/[^a-z0-9]/', '', $s);
+    }
+
     /**
      * Cache and retrieve all biathlon athletes who have valid portrait photos
      */
@@ -1219,6 +1226,81 @@ class BiathlonTweetService
     }
 
     /**
+     * Build and cache a high-speed O(1) hash map index for instantaneous athlete matching
+     */
+    public function getAthletesNameIndex(): array
+    {
+        return Cache::remember('athletes_name_index_v3', 3600 * 24, function () {
+            $athletes = $this->getAthletesWithPhotos();
+
+            $fullNames = [];
+            $initialNames = [];
+            $surnames = [];
+            $byId = [];
+
+            $stopWords = [
+                'french', 'france', 'german', 'germany', 'norwegian', 'norway', 'swedish', 'sweden',
+                'italian', 'italy', 'finnish', 'finland', 'czech', 'polish', 'austrian', 'austria',
+                'swiss', 'switzerland', 'estonian', 'estonia', 'latvian', 'latvia', 'ukrainian', 'ukraine',
+                'canadian', 'canada', 'american', 'usa', 'cup', 'summer', 'winter', 'world',
+                'sprint', 'pursuit', 'individual', 'mass', 'relay', 'stage', 'season', 'race',
+                'globe', 'men', 'women', 'team', 'junior', 'best', 'gold', 'silver', 'bronze',
+                'start', 'finish', 'point', 'total', 'rank', 'time', 'shot', 'short', 'long',
+                'young', 'king', 'fast', 'white', 'black', 'brown', 'green', 'rose', 'hall',
+                'gross', 'horn', 'brand', 'cross', 'post', 'wolf', 'graf', 'clarke', 'williams',
+                'smith', 'miller', 'jones', 'page', 'today', 'news', 'press', 'podcast', 'story',
+                'action', 'round', 'look', 'good', 'great', 'open', 'championship', 'national'
+            ];
+
+            foreach ($athletes as $athlete) {
+                $byId[$athlete->id] = $athlete;
+
+                $given = trim((string)$athlete->given_name);
+                $family = trim((string)$athlete->family_name);
+
+                $givenNorm = $this->normalizeAthleteLookupKey($given);
+                $familyNorm = $this->normalizeAthleteLookupKey($family);
+
+                if (strlen($givenNorm) >= 2 && strlen($familyNorm) >= 2) {
+                    // Given + Family (e.g. "ericperrot")
+                    $fullNames[$givenNorm . $familyNorm] = $athlete->id;
+
+                    // Family + Given (e.g. "perroteric")
+                    $fullNames[$familyNorm . $givenNorm] = $athlete->id;
+
+                    // Initials (e.g. "jtboe", "eperrot")
+                    $givenParts = explode(' ', strtolower($given));
+                    $initialsAll = preg_replace('/[^a-z]/', '', implode('', array_map(fn($w) => substr($w, 0, 1), $givenParts)));
+                    if (!empty($initialsAll)) {
+                        $initialNames[$initialsAll . $familyNorm] = $athlete->id;
+                        $initialNames[substr($initialsAll, 0, 1) . $familyNorm] = $athlete->id;
+                    }
+                }
+
+                // Standalone Surnames
+                if ((strlen($familyNorm) >= 4 || in_array($familyNorm, ['boe', 'botn'])) && !in_array($familyNorm, $stopWords)) {
+                    if (!isset($surnames[$familyNorm])) {
+                        $surnames[$familyNorm] = $athlete->id;
+                    }
+                }
+            }
+
+            return [
+                'full_names' => $fullNames,
+                'initial_names' => $initialNames,
+                'surnames' => $surnames,
+                'by_id' => $byId,
+            ];
+        });
+    }
+
+    public function getAthleteById(int $id): ?\App\Models\Athlete
+    {
+        $index = $this->getAthletesNameIndex();
+        return $index['by_id'][$id] ?? \App\Models\Athlete::find($id);
+    }
+
+    /**
      * Find the first mentioned athlete in tweet content to render their official IBU / BiathlonWorld photo
      */
     public function findMentionedAthleteInText(?string $text): ?\App\Models\Athlete
@@ -1227,127 +1309,107 @@ class BiathlonTweetService
             return null;
         }
 
-        $athletes = $this->getAthletesWithPhotos();
-        if ($athletes->isEmpty()) {
-            return null;
-        }
+        $index = $this->getAthletesNameIndex();
+        $fullNames = $index['full_names'];
+        $initialNames = $index['initial_names'];
+        $surnames = $index['surnames'];
+        $byId = $index['by_id'];
 
         $cleanText = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $cleanText = html_entity_decode($cleanText, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-        $norm = function (string $s): string {
-            $s = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $s) ?: strtolower($s);
-            $s = str_replace(['oe', 'ae', 'aa', 'ø', 'æ', 'å'], ['o', 'a', 'a', 'o', 'a', 'a'], $s);
-            return preg_replace('/[^a-z0-9]/', '', $s);
-        };
+        if (!preg_match_all('/[\p{L}\p{N}\-]+/u', $cleanText, $matches, PREG_OFFSET_CAPTURE)) {
+            return null;
+        }
 
-        // Words that must NEVER be treated as standalone athlete family names
-        $stopWords = [
-            'french', 'france', 'german', 'germany', 'norwegian', 'norway', 'swedish', 'sweden',
-            'italian', 'italy', 'finnish', 'finland', 'czech', 'polish', 'austrian', 'austria',
-            'swiss', 'switzerland', 'estonian', 'estonia', 'latvian', 'latvia', 'ukrainian', 'ukraine',
-            'canadian', 'canada', 'american', 'usa', 'cup', 'summer', 'winter', 'world',
-            'sprint', 'pursuit', 'individual', 'mass', 'relay', 'stage', 'season', 'race',
-            'globe', 'men', 'women', 'team', 'junior', 'best', 'gold', 'silver', 'bronze',
-            'start', 'finish', 'point', 'total', 'rank', 'time', 'shot', 'short', 'long',
-            'young', 'king', 'fast', 'white', 'black', 'brown', 'green', 'rose', 'hall',
-            'gross', 'horn', 'brand', 'cross', 'post', 'wolf', 'graf', 'clarke', 'williams',
-            'smith', 'miller', 'jones', 'page', 'today', 'news', 'press', 'podcast', 'story',
-            'action', 'round', 'look', 'good', 'great', 'open', 'championship', 'national'
-        ];
+        $tokens = [];
+        foreach ($matches[0] as $match) {
+            $tokens[] = [
+                'norm' => $this->normalizeAthleteLookupKey($match[0]),
+                'offset' => $match[1],
+            ];
+        }
+        $count = count($tokens);
 
-        // TIER 1: Full Names (Given + Family or Family + Given)
-        $tier1Match = null;
+        // TIER 1: Full Names (3-gram or 2-gram combinations)
+        $tier1MatchId = null;
         $tier1Pos = PHP_INT_MAX;
 
-        foreach ($athletes as $athlete) {
-            $givenLower = mb_strtolower(trim((string)$athlete->given_name));
-            $familyLower = mb_strtolower(trim((string)$athlete->family_name));
-
-            if (mb_strlen($givenLower) < 2 || mb_strlen($familyLower) < 2) {
-                continue;
-            }
-
-            // Given + Family (e.g. "Eric Perrot")
-            $pattern1 = '/\b' . preg_quote($givenLower, '/') . '\s+' . preg_quote($familyLower, '/') . '\b/ui';
-            if (preg_match($pattern1, $cleanText, $m, PREG_OFFSET_CAPTURE)) {
-                if ($m[0][1] < $tier1Pos) {
-                    $tier1Pos = $m[0][1];
-                    $tier1Match = $athlete;
+        for ($i = 0; $i < $count; $i++) {
+            // 3-word n-gram (e.g. Quentin Fillon Maillet)
+            if ($i + 2 < $count) {
+                $k3 = $tokens[$i]['norm'] . $tokens[$i+1]['norm'] . $tokens[$i+2]['norm'];
+                if (isset($fullNames[$k3])) {
+                    $pos = $tokens[$i]['offset'];
+                    if ($pos < $tier1Pos) {
+                        $tier1Pos = $pos;
+                        $tier1MatchId = $fullNames[$k3];
+                    }
                 }
             }
 
-            // Family + Given (e.g. "Perrot Eric")
-            $pattern2 = '/\b' . preg_quote($familyLower, '/') . '\s+' . preg_quote($givenLower, '/') . '\b/ui';
-            if (preg_match($pattern2, $cleanText, $m, PREG_OFFSET_CAPTURE)) {
-                if ($m[0][1] < $tier1Pos) {
-                    $tier1Pos = $m[0][1];
-                    $tier1Match = $athlete;
-                }
-            }
-        }
-
-        if ($tier1Match !== null) {
-            return $tier1Match;
-        }
-
-        // TIER 2: Initialed Names (e.g. "J.T.Boe", "S.H.Laegreid", "E.Perrot", "Q.Fillon Maillet")
-        $tier2Match = null;
-        $tier2Pos = PHP_INT_MAX;
-
-        if (preg_match_all('/(?:[A-Z]\.){1,3}\s*([A-Za-zÀ-ÿ\-]+(?:\s+[A-Za-zÀ-ÿ\-]+)?)/u', $cleanText, $matches, PREG_OFFSET_CAPTURE)) {
-            foreach ($matches[0] as $idx => $matchTuple) {
-                $fullPattern = $matchTuple[0];
-                $offset = $matchTuple[1];
-                $famName = $matches[1][$idx][0];
-                $famNorm = $norm($famName);
-
-                if (in_array(strtolower($famName), $stopWords)) {
-                    continue;
-                }
-
-                foreach ($athletes as $athlete) {
-                    $aFamNorm = $norm((string)$athlete->family_name);
-                    if ($aFamNorm === $famNorm) {
-                        $initialsInPattern = preg_replace('/[^a-zA-Z]/', '', substr($fullPattern, 0, strpos($fullPattern, $famName)));
-                        $athleteGivenInitials = preg_replace('/[^a-zA-Z]/', '', implode('', array_map(fn($w) => substr($w, 0, 1), explode(' ', (string)$athlete->given_name))));
-
-                        if (empty($initialsInPattern) || stripos($athleteGivenInitials, substr($initialsInPattern, 0, 1)) !== false) {
-                            if ($offset < $tier2Pos) {
-                                $tier2Pos = $offset;
-                                $tier2Match = $athlete;
-                            }
-                        }
+            // 2-word n-gram (e.g. Eric Perrot)
+            if ($i + 1 < $count) {
+                $k2 = $tokens[$i]['norm'] . $tokens[$i+1]['norm'];
+                if (isset($fullNames[$k2])) {
+                    $pos = $tokens[$i]['offset'];
+                    if ($pos < $tier1Pos) {
+                        $tier1Pos = $pos;
+                        $tier1MatchId = $fullNames[$k2];
                     }
                 }
             }
         }
 
-        if ($tier2Match !== null) {
-            return $tier2Match;
+        if ($tier1MatchId !== null && isset($byId[$tier1MatchId])) {
+            return $byId[$tier1MatchId];
         }
 
-        // TIER 3: Standalone Distinctive Family Names (excluding stop words)
-        $tier3Match = null;
-        $tier3Pos = PHP_INT_MAX;
+        // TIER 2: Initialed Names (e.g. J.T.Boe, S.H.Laegreid, E.Perrot)
+        $tier2MatchId = null;
+        $tier2Pos = PHP_INT_MAX;
 
-        foreach ($athletes as $athlete) {
-            $famLower = mb_strtolower(trim((string)$athlete->family_name));
-            if (mb_strlen($famLower) < 4 && !in_array($famLower, ['boe', 'bø', 'botn'])) {
-                continue;
-            }
-            if (in_array($famLower, $stopWords)) {
-                continue;
-            }
+        if (preg_match_all('/(?:[A-Z]\.){1,3}\s*([A-Za-zÀ-ÿ\-]+)/u', $cleanText, $initMatches, PREG_OFFSET_CAPTURE)) {
+            foreach ($initMatches[0] as $idx => $matchTuple) {
+                $fullPattern = $matchTuple[0];
+                $offset = $matchTuple[1];
+                $famRaw = $initMatches[1][$idx][0];
+                $famNorm = $this->normalizeAthleteLookupKey($famRaw);
+                $initials = preg_replace('/[^a-z]/', '', strtolower(substr($fullPattern, 0, strpos($fullPattern, $famRaw))));
 
-            if (preg_match('/\b' . preg_quote($famLower, '/') . '\b/ui', $cleanText, $m, PREG_OFFSET_CAPTURE)) {
-                if ($m[0][1] < $tier3Pos) {
-                    $tier3Pos = $m[0][1];
-                    $tier3Match = $athlete;
+                $candKey = $initials . $famNorm;
+                if (isset($initialNames[$candKey])) {
+                    if ($offset < $tier2Pos) {
+                        $tier2Pos = $offset;
+                        $tier2MatchId = $initialNames[$candKey];
+                    }
                 }
             }
         }
 
-        return $tier3Match;
+        if ($tier2MatchId !== null && isset($byId[$tier2MatchId])) {
+            return $byId[$tier2MatchId];
+        }
+
+        // TIER 3: Distinctive Surnames (1-word tokens)
+        $tier3MatchId = null;
+        $tier3Pos = PHP_INT_MAX;
+
+        for ($i = 0; $i < $count; $i++) {
+            $wordNorm = $tokens[$i]['norm'];
+            if (isset($surnames[$wordNorm])) {
+                $pos = $tokens[$i]['offset'];
+                if ($pos < $tier3Pos) {
+                    $tier3Pos = $pos;
+                    $tier3MatchId = $surnames[$wordNorm];
+                }
+            }
+        }
+
+        if ($tier3MatchId !== null && isset($byId[$tier3MatchId])) {
+            return $byId[$tier3MatchId];
+        }
+
+        return null;
     }
 }

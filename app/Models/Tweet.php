@@ -78,8 +78,23 @@ class Tweet extends Model
      */
     public function findFirstMentionedAthlete(): ?\App\Models\Athlete
     {
-        if (!$this->mentionedAthleteChecked) {
-            $this->mentionedAthleteChecked = true;
+        if ($this->mentionedAthleteChecked) {
+            return $this->cachedMentionedAthlete;
+        }
+
+        $this->mentionedAthleteChecked = true;
+
+        if ($this->id) {
+            $athleteId = \Illuminate\Support\Facades\Cache::remember(
+                "tweet_athlete_id_v3_{$this->id}",
+                86400 * 7,
+                fn() => app(\App\Services\BiathlonTweetService::class)->findMentionedAthleteInText($this->content)?->id
+            );
+
+            if ($athleteId) {
+                $this->cachedMentionedAthlete = app(\App\Services\BiathlonTweetService::class)->getAthleteById($athleteId);
+            }
+        } else {
             $this->cachedMentionedAthlete = app(\App\Services\BiathlonTweetService::class)->findMentionedAthleteInText($this->content);
         }
 
