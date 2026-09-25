@@ -23,10 +23,30 @@
         </div>
 
         <!-- News Content on Right -->
-        <div class="flex-1 min-w-0">
-            <p class="text-slate-800 text-xs sm:text-sm leading-relaxed font-normal">
-                {!! $tweet->getFormattedContent() !!}
-            </p>
+        <div class="flex-1 min-w-0" @if($tweet->hasTranslation()) x-data="{ showOriginal: false }" @endif>
+            @if($tweet->hasTranslation())
+                <p class="text-slate-800 text-xs sm:text-sm leading-relaxed font-normal" x-show="!showOriginal">
+                    {!! $tweet->getFormattedTranslatedContent() !!}
+                </p>
+                <p class="text-slate-800 text-xs sm:text-sm leading-relaxed font-normal" x-show="showOriginal" x-cloak>
+                    {!! $tweet->getFormattedContent() !!}
+                </p>
+                <div class="mt-1.5 flex items-center gap-2">
+                    <button
+                        type="button"
+                        @click="showOriginal = !showOriginal"
+                        class="inline-flex items-center gap-1.5 text-[11px] font-medium text-sky-600 hover:text-sky-700 transition-colors cursor-pointer py-0.5"
+                    >
+                        <i class="fa-solid fa-language text-xs"></i>
+                        <span x-show="!showOriginal">Translated from {{ strtoupper($tweet->source_language) }} &bull; <span class="underline underline-offset-2">Show original</span></span>
+                        <span x-show="showOriginal" x-cloak class="underline underline-offset-2">Show translation</span>
+                    </button>
+                </div>
+            @else
+                <p class="text-slate-800 text-xs sm:text-sm leading-relaxed font-normal">
+                    {!! $tweet->getFormattedContent() !!}
+                </p>
+            @endif
 
             @if(!empty($tweet->media_urls) && is_array($tweet->media_urls))
                 <div class="mt-3 grid {{ count($tweet->media_urls) > 1 ? 'grid-cols-2 gap-2.5' : 'grid-cols-1' }} max-w-lg">

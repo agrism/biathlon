@@ -14,6 +14,7 @@ class BiathlonTweetService
     public const PER_PAGE = 4;
 
     protected Client $client;
+    protected TranslationService $translationService;
 
     /**
      * Supported Twitter handles (scraped first)
@@ -24,6 +25,7 @@ class BiathlonTweetService
         'biathlonworld',
         'ibu_newsroom',
         'BiathlonLivefr',
+        'NordicMag',
     ];
 
     protected array $userAgents = [
@@ -32,8 +34,9 @@ class BiathlonTweetService
         'Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0',
     ];
 
-    public function __construct()
+    public function __construct(?TranslationService $translationService = null)
     {
+        $this->translationService = $translationService ?? app(TranslationService::class);
         $this->client = new Client([
             'timeout' => 15,
             'headers' => [
@@ -41,6 +44,72 @@ class BiathlonTweetService
                 'Accept-Language' => 'en-US,en;q=0.9',
             ]
         ]);
+    }
+
+    /**
+     * Prepare translation data for a tweet content if non-English
+     *
+     * @param string $content
+     * @return array{translated_content: ?string, source_language: ?string}
+     */
+    public function detectAndTranslate(string $content): array
+    {
+        $translation = $this->translationService->translateToEnglish($content);
+        if ($translation) {
+            return [
+                'translated_content' => $translation['translated_text'],
+                'source_language' => $translation['source_language'],
+            ];
+        }
+
+        return [
+            'translated_content' => null,
+            'source_language' => 'en',
+        ];
+    }
+
+    /**
+     * Get or calculate translation attributes for a tweet
+     *
+     * @param string $tweetId
+     * @param string $content
+     * @return array{translated_content: ?string, source_language: ?string}
+     */
+    public function getTranslationAttributes(string $tweetId, string $content): array
+    {
+        $existing = Tweet::query()->where('tweet_id', $tweetId)->first(['translated_content', 'source_language']);
+        if ($existing && $existing->source_language !== null) {
+            return [
+                'translated_content' => $existing->translated_content,
+                'source_language' => $existing->source_language,
+            ];
+        }
+
+        return $this->detectAndTranslate($content);
+    }
+
+    /**
+     * Translate any existing tweets in the database that have not been checked for translation yet
+     */
+    public function translateUntranslatedTweets(int $limit = 50): int
+    {
+        $tweets = Tweet::query()
+            ->whereNull('source_language')
+            ->orderByDesc('published_at')
+            ->take($limit)
+            ->get();
+
+        $count = 0;
+        foreach ($tweets as $tweet) {
+            $trans = $this->detectAndTranslate($tweet->content);
+            $tweet->update([
+                'translated_content' => $trans['translated_content'],
+                'source_language' => $trans['source_language'],
+            ]);
+            $count++;
+        }
+
+        return $count;
     }
 
     /**
@@ -100,6 +169,15 @@ class BiathlonTweetService
                 'type' => 'rss',
                 'name' => 'Custom BiathlonLivefr RSS Bridge',
                 'url' => $biathlonLiveFrRss,
+                'delay' => 0,
+            ];
+        }
+
+        if ($nordicMagRss = env('NORDICMAG_RSS_URL')) {
+            $providers[] = [
+                'type' => 'rss',
+                'name' => 'Custom NordicMag RSS Bridge',
+                'url' => $nordicMagRss,
                 'delay' => 0,
             ];
         }
@@ -243,6 +321,9 @@ class BiathlonTweetService
             }
         }
 
+        // Backfill / translate any remaining untranslated tweets in DB
+        $this->translateUntranslatedTweets(50);
+
         Cache::forget('biathlon_latest_tweets_6');
         Cache::forget('biathlon_latest_tweets_12');
         Cache::forget('biathlon_latest_tweets_3');
@@ -309,6 +390,8 @@ class BiathlonTweetService
         if ($puppeteerResult && !empty($puppeteerResult['results'][$handle]['items'])) {
             $items = $puppeteerResult['results'][$handle]['items'];
             foreach ($items as $item) {
+                $translationData = $this->getTranslationAttributes($item['tweet_id'], $item['content']);
+
                 Tweet::query()->updateOrCreate(
                     ['tweet_id' => $item['tweet_id']],
                     [
@@ -316,6 +399,8 @@ class BiathlonTweetService
                         'author_handle' => $item['author_handle'] ?? $handle,
                         'author_avatar' => $item['author_avatar'] ?? null,
                         'content' => $item['content'],
+                        'translated_content' => $translationData['translated_content'],
+                        'source_language' => $translationData['source_language'],
                         'media_urls' => $item['media_urls'] ?? null,
                         'likes_count' => (int)($item['likes_count'] ?? 0),
                         'retweets_count' => (int)($item['retweets_count'] ?? 0),
@@ -393,13 +478,18 @@ class BiathlonTweetService
                             }
                         }
 
+                        $tweetId = 'tw_' . $idStr;
+                        $translationData = $this->getTranslationAttributes($tweetId, $text);
+
                         Tweet::query()->updateOrCreate(
-                            ['tweet_id' => 'tw_' . $idStr],
+                            ['tweet_id' => $tweetId],
                             [
                                 'author_name' => $user['name'] ?? ucfirst($handle),
                                 'author_handle' => $user['screen_name'] ?? $handle,
                                 'author_avatar' => $user['profile_image_url_https'] ?? null,
                                 'content' => $text,
+                                'translated_content' => $translationData['translated_content'],
+                                'source_language' => $translationData['source_language'],
                                 'media_urls' => !empty($mediaUrls) ? $mediaUrls : null,
                                 'likes_count' => (int)($tweet['favorite_count'] ?? 0),
                                 'retweets_count' => (int)($tweet['retweet_count'] ?? 0),
@@ -457,6 +547,8 @@ class BiathlonTweetService
                             $mediaUrls[] = (string)$item->enclosure['url'];
                         }
 
+                        $translationData = $this->getTranslationAttributes($tweetId, $text);
+
                         Tweet::query()->updateOrCreate(
                             ['tweet_id' => $tweetId],
                             [
@@ -464,6 +556,8 @@ class BiathlonTweetService
                                 'author_handle' => 'biathlon',
                                 'author_avatar' => 'https://pbs.twimg.com/profile_images/2084999188614373376/QytLH4Fk_normal.jpg',
                                 'content' => $text,
+                                'translated_content' => $translationData['translated_content'],
+                                'source_language' => $translationData['source_language'],
                                 'media_urls' => !empty($mediaUrls) ? $mediaUrls : null,
                                 'likes_count' => 0,
                                 'retweets_count' => 0,
@@ -562,6 +656,8 @@ class BiathlonTweetService
                     continue;
                 }
 
+                $translationData = $this->getTranslationAttributes($tweetId, $item['content']);
+
                 Tweet::query()->updateOrCreate(
                     ['tweet_id' => $tweetId],
                     [
@@ -569,6 +665,8 @@ class BiathlonTweetService
                         'author_handle' => $item['author_handle'] ?? 'penaltyloop',
                         'author_avatar' => $item['author_avatar'] ?? 'https://pbs.twimg.com/profile_images/2084999188614373376/QytLH4Fk_normal.jpg',
                         'content' => $item['content'],
+                        'translated_content' => $translationData['translated_content'],
+                        'source_language' => $translationData['source_language'],
                         'media_urls' => $item['media_urls'] ?? null,
                         'likes_count' => 0,
                         'retweets_count' => 0,
@@ -618,6 +716,8 @@ class BiathlonTweetService
                             $mediaUrls[] = (string)$item->enclosure['url'];
                         }
 
+                        $translationData = $this->getTranslationAttributes($tweetId, $content);
+
                         Tweet::query()->updateOrCreate(
                             ['tweet_id' => $tweetId],
                             [
@@ -625,6 +725,8 @@ class BiathlonTweetService
                                 'author_handle' => 'penaltyloop',
                                 'author_avatar' => 'https://pbs.twimg.com/profile_images/2084999188614373376/QytLH4Fk_normal.jpg',
                                 'content' => $content,
+                                'translated_content' => $translationData['translated_content'],
+                                'source_language' => $translationData['source_language'],
                                 'media_urls' => !empty($mediaUrls) ? $mediaUrls : null,
                                 'likes_count' => 0,
                                 'retweets_count' => 0,
@@ -731,6 +833,8 @@ class BiathlonTweetService
                         $mediaUrls[] = $post['embed']['external']['thumb'];
                     }
 
+                    $translationData = $this->getTranslationAttributes($tweetId, $text);
+
                     Tweet::query()->updateOrCreate(
                         ['tweet_id' => $tweetId],
                         [
@@ -738,6 +842,8 @@ class BiathlonTweetService
                             'author_handle' => 'penaltyloop',
                             'author_avatar' => $post['author']['avatar'] ?? 'https://pbs.twimg.com/profile_images/2084999188614373376/QytLH4Fk_normal.jpg',
                             'content' => $text,
+                            'translated_content' => $translationData['translated_content'],
+                            'source_language' => $translationData['source_language'],
                             'media_urls' => !empty($mediaUrls) ? $mediaUrls : null,
                             'likes_count' => (int)($post['likeCount'] ?? 0),
                             'retweets_count' => (int)($post['repostCount'] ?? 0),

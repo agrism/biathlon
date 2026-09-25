@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $author_handle
  * @property ?string $author_avatar
  * @property string $content
+ * @property ?string $translated_content
+ * @property ?string $source_language
  * @property ?array $media_urls
  * @property int $likes_count
  * @property int $retweets_count
@@ -29,6 +31,8 @@ class Tweet extends Model
         'author_handle',
         'author_avatar',
         'content',
+        'translated_content',
+        'source_language',
         'media_urls',
         'likes_count',
         'retweets_count',
@@ -49,12 +53,31 @@ class Tweet extends Model
         'should_hide' => 'boolean',
     ];
 
+    public function hasTranslation(): bool
+    {
+        return !empty($this->translated_content)
+            && !empty($this->source_language)
+            && strtolower($this->source_language) !== 'en';
+    }
+
     public function getFormattedContent(): string
     {
-        $content = $this->content;
+        return $this->formatText($this->content);
+    }
+
+    public function getFormattedTranslatedContent(): string
+    {
+        return $this->formatText($this->translated_content ?: $this->content);
+    }
+
+    protected function formatText(?string $raw): string
+    {
+        if (empty($raw)) {
+            return '';
+        }
 
         // Clean double protocols if any
-        $content = preg_replace('~https?://https?://~i', 'https://', $content);
+        $content = preg_replace('~https?://https?://~i', 'https://', $raw);
 
         $content = e(trim($content));
 
