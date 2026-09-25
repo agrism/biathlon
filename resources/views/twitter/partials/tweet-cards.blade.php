@@ -39,7 +39,7 @@
                     <div class="absolute top-2.5 right-2.5">
                         @if($tweet->published_at)
                             <span class="inline-flex items-center px-2 py-0.5 rounded-none text-[10px] font-extrabold uppercase tracking-wider {{ $tweet->published_at->isToday() ? 'bg-sky-500 text-white shadow-xs' : 'bg-slate-900/80 backdrop-blur-xs text-slate-200' }}">
-                                {{ $tweet->published_at->isToday() ? 'Today' : $tweet->published_at->tz('Europe/Riga')->format('d M') }}
+                                {{ $tweet->published_at->isToday() ? 'Today' : $tweet->published_at->tz('Europe/Riga')->format('d M Y') }}
                             </span>
                         @endif
                     </div>
