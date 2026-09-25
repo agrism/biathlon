@@ -16,9 +16,10 @@ class BiathlonTweetService
     protected Client $client;
 
     /**
-     * Supported Twitter handles
+     * Supported Twitter handles (scraped first)
      */
     protected array $twitterHandles = [
+        'penaltyloop',
         'biathstats',
         'biathlonworld',
         'ibu_newsroom',
@@ -473,6 +474,65 @@ class BiathlonTweetService
     }
 
     /**
+     * Check if a tweet/post with matching or substantially identical content already exists
+     */
+    protected function isDuplicateContent(string $content, ?string $authorHandle = null, ?Carbon $publishedAt = null, ?string $excludeTweetId = null): bool
+    {
+        $normalizedIncoming = $this->normalizeContentForComparison($content);
+        if (mb_strlen($normalizedIncoming) < 10) {
+            return false;
+        }
+
+        $query = Tweet::query();
+        if ($excludeTweetId) {
+            $query->where('tweet_id', '!=', $excludeTweetId);
+        }
+        if ($authorHandle) {
+            $query->where('author_handle', $authorHandle);
+        }
+        if ($publishedAt) {
+            $query->whereBetween('published_at', [
+                $publishedAt->copy()->subDays(4),
+                $publishedAt->copy()->addDays(4),
+            ]);
+        } else {
+            $query->orderByDesc('published_at')->take(50);
+        }
+
+        $candidates = $query->get(['tweet_id', 'content']);
+
+        foreach ($candidates as $candidate) {
+            $normalizedCandidate = $this->normalizeContentForComparison($candidate->content);
+            if ($normalizedIncoming === $normalizedCandidate) {
+                return true;
+            }
+
+            // Fuzzy similarity check for cross-posted content with minor formatting differences
+            similar_text($normalizedIncoming, $normalizedCandidate, $percent);
+            if ($percent >= 85.0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Normalize text for robust cross-platform duplicate detection
+     */
+    protected function normalizeContentForComparison(string $text): string
+    {
+        // Replace smart quotes and special typographical symbols
+        $text = str_replace(["’", "‘", "`", "“", "”", "„"], ["'", "'", "'", '"', '"', '"'], $text);
+        // Strip URLs
+        $text = preg_replace('~https?://\S+~i', '', $text);
+        // Normalize whitespace and newlines
+        $text = preg_replace('/\s+/', ' ', trim($text));
+        // Lowercase
+        return mb_strtolower($text, 'UTF-8');
+    }
+
+    /**
      * Sync from PenaltyLoop.com official blog RSS (with Puppeteer WAF bypass)
      */
     protected function syncFromPenaltyLoopRss(): int
@@ -485,8 +545,15 @@ class BiathlonTweetService
         if ($puppeteerResult && !empty($puppeteerResult['results']['rss']['items'])) {
             $items = $puppeteerResult['results']['rss']['items'];
             foreach ($items as $item) {
+                $pubDate = isset($item['published_at']) ? Carbon::parse($item['published_at']) : now();
+                $tweetId = $item['tweet_id'];
+
+                if ($this->isDuplicateContent($item['content'], 'penaltyloop', $pubDate, $tweetId)) {
+                    continue;
+                }
+
                 Tweet::query()->updateOrCreate(
-                    ['tweet_id' => $item['tweet_id']],
+                    ['tweet_id' => $tweetId],
                     [
                         'author_name' => $item['author_name'] ?? 'Penalty Loop',
                         'author_handle' => $item['author_handle'] ?? 'penaltyloop',
@@ -496,7 +563,7 @@ class BiathlonTweetService
                         'likes_count' => 0,
                         'retweets_count' => 0,
                         'tweet_url' => $item['tweet_url'] ?? 'https://penaltyloop.com',
-                        'published_at' => isset($item['published_at']) ? Carbon::parse($item['published_at']) : now(),
+                        'published_at' => $pubDate,
                     ]
                 );
                 $synced++;
@@ -531,6 +598,10 @@ class BiathlonTweetService
                         $slug = basename(parse_url($link, PHP_URL_PATH));
                         $tweetId = 'article_' . ($slug ?: md5($link));
                         $pubDate = (string)$item->pubDate ? Carbon::parse((string)$item->pubDate) : now();
+
+                        if ($this->isDuplicateContent($content, 'penaltyloop', $pubDate, $tweetId)) {
+                            continue;
+                        }
 
                         $mediaUrls = [];
                         if (isset($item->enclosure) && !empty($item->enclosure['url'])) {
@@ -615,6 +686,17 @@ class BiathlonTweetService
                     }
                     $text = preg_replace('~https?://https?://~i', 'https://', $text);
 
+                    $uri = $post['uri'] ?? '';
+                    $parts = explode('/', $uri);
+                    $rkey = end($parts);
+                    $tweetId = 'post_' . $rkey;
+                    $createdAt = Carbon::parse($record['createdAt']);
+
+                    // Deduplication check: skip if matching content was already imported from X.com
+                    if ($this->isDuplicateContent($text, 'penaltyloop', $createdAt, $tweetId)) {
+                        continue;
+                    }
+
                     // Extract high-resolution media images
                     $mediaUrls = [];
                     if (!empty($post['embed']['images'])) {
@@ -639,12 +721,8 @@ class BiathlonTweetService
                         $mediaUrls[] = $post['embed']['external']['thumb'];
                     }
 
-                    $uri = $post['uri'] ?? '';
-                    $parts = explode('/', $uri);
-                    $rkey = end($parts);
-
                     Tweet::query()->updateOrCreate(
-                        ['tweet_id' => 'post_' . $rkey],
+                        ['tweet_id' => $tweetId],
                         [
                             'author_name' => $post['author']['displayName'] ?? 'Penalty Loop',
                             'author_handle' => 'penaltyloop',
@@ -654,7 +732,7 @@ class BiathlonTweetService
                             'likes_count' => (int)($post['likeCount'] ?? 0),
                             'retweets_count' => (int)($post['repostCount'] ?? 0),
                             'tweet_url' => 'https://x.com/penaltyloop',
-                            'published_at' => Carbon::parse($record['createdAt']),
+                            'published_at' => $createdAt,
                         ]
                     );
 
