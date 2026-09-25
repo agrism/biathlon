@@ -33,24 +33,26 @@
 
 @include('menu', ['ignoreHome' => true])
 
-<main class="flex-1 w-full px-2 sm:px-4 py-3">
-    <div class="mb-4">
+<main class="flex-1 w-full p-0">
+    <div class="px-4 sm:px-6 lg:px-8 mb-4">
         {!! \App\Helpers\BreadCrumbHelper::instance()->render() !!}
     </div>
 
     @isset($heading)
-    <div class="mb-6 text-center">
-        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">{!! $heading !!}</h1>
-    </div>
+        @if($heading)
+            <div class="px-4 sm:px-6 lg:px-8 mb-6 text-center">
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">{!! $heading !!}</h1>
+            </div>
+        @endif
     @endif
 
-    <div class="cont" style="opacity: 1;">
+    <div class="cont w-full" style="opacity: 1;">
         @yield('content')
     </div>
 </main>
 
 <footer class="w-full border-t border-slate-200/80 bg-white/60 backdrop-blur-sm py-4 mt-12 text-center text-xs text-slate-400">
-    <div class="w-full px-2 sm:px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+    <div class="w-full px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
         <div class="flex items-center gap-2">
             <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
             <span>IBU World Cup Live Sync Active</span>

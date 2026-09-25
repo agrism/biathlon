@@ -1,5 +1,5 @@
 <!-- Biathlon News & Telemetry Stream -->
-<div class="mb-12 w-full mx-auto" x-data="{
+<div class="mb-12 w-full px-3 sm:px-6 lg:px-8 mx-auto" x-data="{
     viewMode: localStorage.getItem('biathlon_tweets_view_mode') || 'grid_auto',
     setView(mode) {
         this.viewMode = mode;

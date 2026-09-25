@@ -2,7 +2,7 @@
 
 @section('content')
     <!-- Home Hero Banner -->
-    <div class="mb-8 text-center">
+    <div class="mb-8 pt-6 px-4 text-center">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100/90 text-sky-900 text-xs font-bold uppercase tracking-wider mb-3">
             ❄️ Trackside Lounge & News
         </div>
@@ -14,9 +14,9 @@
         </p>
     </div>
 
-    <!-- Modern Editorial Biathlon Story Carousel (Full Width with Centered Content & Soft Edge Gradients) -->
+    <!-- Modern Editorial Biathlon Story Carousel (100% Full Bleed, 0px Padding, No Rounding) -->
     <div
-        class="mb-12 w-full overflow-hidden rounded-md border border-slate-800/90 shadow-md bg-slate-950 relative select-none"
+        class="mb-12 w-full overflow-hidden rounded-none border-y border-slate-800/90 shadow-md bg-slate-950 relative select-none"
         x-data="{
             active: 0,
             slides: [
@@ -170,7 +170,7 @@
 
     @if(isset($event) && $event->first_competition_date)
         <!-- Upcoming Stage Countdown Banner (Full Width with Centered Content) -->
-        <div class="mb-10 w-full rounded-md bg-gradient-to-r from-slate-950 via-slate-900 to-sky-950 text-white shadow-md relative overflow-hidden border border-slate-800/80">
+        <div class="mb-10 w-full rounded-none bg-gradient-to-r from-slate-950 via-slate-900 to-sky-950 text-white shadow-md relative overflow-hidden border-y border-slate-800/80">
             <div class="max-w-7xl mx-auto p-6 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
                 <div>
                     <span class="px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-300 text-xs font-bold uppercase tracking-wider">
