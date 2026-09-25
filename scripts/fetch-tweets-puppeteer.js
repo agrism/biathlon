@@ -8,6 +8,7 @@
  *   node scripts/fetch-tweets-puppeteer.js --all
  */
 
+import fs from 'node:fs';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 
@@ -44,7 +45,22 @@ function parseArgs() {
 // Launch browser with lightweight flags and resource interception
 async function createBrowser() {
     const wsEndpoint = process.env.PUPPETEER_WS_ENDPOINT;
-    const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+    let executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+
+    if (!executablePath) {
+        const possiblePaths = [
+            '/usr/bin/chromium',
+            '/usr/bin/chromium-browser',
+            '/usr/bin/google-chrome',
+            '/usr/bin/google-chrome-stable',
+        ];
+        for (const p of possiblePaths) {
+            if (fs.existsSync(p)) {
+                executablePath = p;
+                break;
+            }
+        }
+    }
 
     const launchArgs = [
         '--no-sandbox',
@@ -89,18 +105,14 @@ async function setupOptimizedPage(browser) {
 
     await page.setExtraHTTPHeaders({
         'Accept-Language': 'en-US,en;q=0.9',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Referer': 'https://platform.twitter.com/',
-        'Origin': 'https://platform.twitter.com',
-        'Sec-Fetch-Dest': 'iframe',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'cross-site',
     });
 
     await page.setRequestInterception(true);
     page.on('request', (req) => {
         const resourceType = req.resourceType();
-        if (['image', 'font', 'media', 'stylesheet'].includes(resourceType)) {
+        if (['image', 'font', 'media'].includes(resourceType)) {
             req.abort();
         } else {
             req.continue();
@@ -110,63 +122,200 @@ async function setupOptimizedPage(browser) {
     return page;
 }
 
-// Scrape Twitter syndication timeline for a single handle
-async function scrapeTwitterHandle(page, handle, timeout = 25000) {
-    const url = `https://syndication.twitter.com/srv/timeline-profile/screen-name/${handle}`;
-    const results = [];
-
+// Helper: Fetch rich tweet metadata by status ID
+async function fetchTweetById(id, fallbackHandle = '') {
     try {
-        const response = await page.goto(url, {
+        const res = await fetch(`https://cdn.syndication.twimg.com/tweet-result?id=${id}&token=1`, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+                'Accept': 'application/json, text/plain, */*',
+                'Referer': 'https://platform.twitter.com/',
+                'Origin': 'https://platform.twitter.com',
+            }
+        });
+
+        if (!res.ok) {
+            return null;
+        }
+
+        const tweet = await res.json();
+        if (!tweet || !tweet.id_str) {
+            return null;
+        }
+
+        let text = tweet.text || '';
+        // Expand t.co links
+        const urls = tweet.entities?.urls || [];
+        for (const urlEntity of urls) {
+            if (urlEntity.url && urlEntity.expanded_url) {
+                text = text.replaceAll(urlEntity.url, urlEntity.expanded_url);
+            }
+        }
+
+        const mediaUrls = [];
+        if (Array.isArray(tweet.photos)) {
+            for (const p of tweet.photos) {
+                if (p.url) mediaUrls.push(p.url);
+            }
+        }
+        if (Array.isArray(tweet.mediaDetails)) {
+            for (const m of tweet.mediaDetails) {
+                if (m.media_url_https && !mediaUrls.includes(m.media_url_https)) {
+                    mediaUrls.push(m.media_url_https);
+                }
+            }
+        }
+
+        const authorHandle = tweet.user?.screen_name || fallbackHandle;
+        const idStr = tweet.id_str || id;
+
+        return {
+            tweet_id: `tw_${idStr}`,
+            author_name: tweet.user?.name || authorHandle,
+            author_handle: authorHandle,
+            author_avatar: tweet.user?.profile_image_url_https || null,
+            content: text,
+            media_urls: mediaUrls.length > 0 ? mediaUrls : null,
+            likes_count: tweet.favorite_count || 0,
+            retweets_count: tweet.retweet_count || 0,
+            tweet_url: `https://x.com/${authorHandle}/status/${idStr}`,
+            published_at: tweet.created_at || new Date().toISOString(),
+        };
+    } catch (e) {
+        return null;
+    }
+}
+
+// Scrape Twitter timeline for a single handle
+async function scrapeTwitterHandle(page, handle, timeout = 25000) {
+    const results = [];
+    const tweetIds = new Set();
+    const domItems = new Map();
+
+    // Strategy 1: Direct x.com profile scraping
+    try {
+        const profileUrl = `https://x.com/${handle}`;
+        await page.goto(profileUrl, {
+            waitUntil: 'networkidle2',
+            timeout: timeout,
+        }).catch(() => {});
+
+        // Wait up to 6 seconds for tweets/articles to appear
+        await page.waitForSelector('article, a[href*="/status/"]', { timeout: 6000 }).catch(() => {});
+
+        const extracted = await page.evaluate((targetHandle) => {
+            const found = [];
+            const articles = document.querySelectorAll('article');
+
+            articles.forEach((art) => {
+                const link = art.querySelector('a[href*="/status/"]');
+                const href = link ? link.getAttribute('href') : '';
+                const match = href.match(/\/([a-zA-Z0-9_]+)\/status\/(\d+)/);
+                if (match) {
+                    const id = match[2];
+                    const textEl = art.querySelector('[data-testid="tweetText"]');
+                    const timeEl = art.querySelector('time');
+                    const imgEls = art.querySelectorAll('[data-testid="tweetPhoto"] img, img[src*="pbs.twimg.com/media"]');
+                    const media = Array.from(imgEls).map(img => img.src).filter(Boolean);
+
+                    found.push({
+                        id: id,
+                        author_handle: match[1] || targetHandle,
+                        text: textEl ? textEl.innerText : art.innerText.substring(0, 200),
+                        published_at: timeEl ? timeEl.getAttribute('datetime') : null,
+                        media_urls: media.length > 0 ? media : null,
+                    });
+                }
+            });
+
+            // Fallback for any status links in the DOM
+            const links = document.querySelectorAll('a[href*="/status/"]');
+            links.forEach((l) => {
+                const href = l.getAttribute('href') || '';
+                const match = href.match(/\/([a-zA-Z0-9_]+)\/status\/(\d+)/);
+                if (match && !found.some(f => f.id === match[2])) {
+                    found.push({
+                        id: match[2],
+                        author_handle: match[1] || targetHandle,
+                        text: '',
+                        published_at: null,
+                        media_urls: null,
+                    });
+                }
+            });
+
+            return found;
+        }, handle);
+
+        for (const item of extracted) {
+            tweetIds.add(item.id);
+            if (item.text) {
+                domItems.set(item.id, item);
+            }
+        }
+    } catch (e) {
+        // Strategy 1 navigation or evaluation error
+    }
+
+    // For all tweet IDs discovered, fetch rich official data from tweet-result endpoint
+    for (const id of Array.from(tweetIds).slice(0, 15)) {
+        const enriched = await fetchTweetById(id, handle);
+        if (enriched) {
+            results.push(enriched);
+        } else if (domItems.has(id)) {
+            const dom = domItems.get(id);
+            results.push({
+                tweet_id: `tw_${id}`,
+                author_name: dom.author_handle || handle,
+                author_handle: dom.author_handle || handle,
+                author_avatar: null,
+                content: dom.text || '',
+                media_urls: dom.media_urls,
+                likes_count: 0,
+                retweets_count: 0,
+                tweet_url: `https://x.com/${dom.author_handle || handle}/status/${id}`,
+                published_at: dom.published_at || new Date().toISOString(),
+            });
+        }
+    }
+
+    if (results.length > 0) {
+        return {
+            success: true,
+            handle: handle,
+            count: results.length,
+            items: results,
+        };
+    }
+
+    // Strategy 2: Legacy syndication widget fallback
+    try {
+        const syndicationUrl = `https://syndication.twitter.com/srv/timeline-profile/screen-name/${handle}`;
+        const response = await page.goto(syndicationUrl, {
             waitUntil: 'domcontentloaded',
             timeout: timeout,
             referer: 'https://platform.twitter.com/',
         });
 
-        const status = response ? response.status() : 0;
-        if (status === 429) {
-            return {
-                success: false,
-                handle: handle,
-                error: 'HTTP 429 Too Many Requests from Twitter syndication',
-                items: [],
-            };
-        }
-
-        const data = await page.evaluate(() => {
-            // Attempt 1: Extract from __NEXT_DATA__
-            const scriptTag = document.getElementById('__NEXT_DATA__');
-            if (scriptTag && scriptTag.textContent) {
-                try {
-                    const parsed = JSON.parse(scriptTag.textContent);
-                    const entries = parsed?.props?.pageProps?.timeline?.entries || [];
-                    return { type: 'next_data', entries };
-                } catch (e) {
-                    // Ignore JSON parse error
+        if (response && response.status() === 200) {
+            const data = await page.evaluate(() => {
+                const scriptTag = document.getElementById('__NEXT_DATA__');
+                if (scriptTag && scriptTag.textContent) {
+                    try {
+                        const parsed = JSON.parse(scriptTag.textContent);
+                        return parsed?.props?.pageProps?.timeline?.entries || [];
+                    } catch (e) {}
                 }
-            }
-
-            // Attempt 2: DOM scraping fallback
-            const tweetElements = document.querySelectorAll('article, [data-tweet-id]');
-            const domTweets = [];
-            tweetElements.forEach((el) => {
-                const text = el.innerText || '';
-                if (text.trim()) {
-                    domTweets.push({ text });
-                }
+                return [];
             });
 
-            return { type: 'dom', entries: domTweets };
-        });
-
-        if (data.type === 'next_data' && Array.isArray(data.entries)) {
-            for (const entry of data.entries) {
+            for (const entry of data) {
                 const tweet = entry.content?.tweet;
                 if (!tweet) continue;
 
                 let text = tweet.full_text || tweet.text || '';
                 if (!text.trim()) continue;
 
-                // Expand t.co links with full expanded URLs
                 const urls = tweet.entities?.urls || [];
                 for (const urlEntity of urls) {
                     if (urlEntity.url && urlEntity.expanded_url) {
@@ -202,21 +351,15 @@ async function scrapeTwitterHandle(page, handle, timeout = 25000) {
                 });
             }
         }
+    } catch (e) {}
 
-        return {
-            success: true,
-            handle: handle,
-            count: results.length,
-            items: results,
-        };
-    } catch (err) {
-        return {
-            success: false,
-            handle: handle,
-            error: err.message || 'Unknown error while scraping Twitter handle',
-            items: [],
-        };
-    }
+    return {
+        success: results.length > 0,
+        handle: handle,
+        count: results.length,
+        error: results.length === 0 ? `Could not fetch tweets for @${handle}` : null,
+        items: results,
+    };
 }
 
 // Scrape / Fetch WAF-protected RSS Feed
@@ -313,28 +456,28 @@ async function main() {
         if (opts.handle) {
             const res = await scrapeTwitterHandle(page, opts.handle, opts.timeout);
             output.results[opts.handle] = res;
-            if (!res.success) output.errors.push(res.error);
+            if (!res.success && res.error) output.errors.push(res.error);
         } else if (opts.rss) {
             const res = await scrapeRssFeed(page, opts.rss, opts.timeout);
             output.results['rss'] = res;
-            if (!res.success) output.errors.push(res.error);
+            if (!res.success && res.error) output.errors.push(res.error);
         } else if (opts.all) {
             // Scrape all handles
             for (const handle of DEFAULT_HANDLES) {
                 const res = await scrapeTwitterHandle(page, handle, opts.timeout);
                 output.results[handle] = res;
-                if (!res.success) output.errors.push(`${handle}: ${res.error}`);
+                if (!res.success && res.error) output.errors.push(`${handle}: ${res.error}`);
             }
 
             // Scrape default RSS
             const rssRes = await scrapeRssFeed(page, DEFAULT_RSS, opts.timeout);
             output.results['penaltyloop_rss'] = rssRes;
-            if (!rssRes.success) output.errors.push(`RSS: ${rssRes.error}`);
+            if (!rssRes.success && rssRes.error) output.errors.push(`RSS: ${rssRes.error}`);
         } else {
             // Default: scrape single handle penaltyloop
             const res = await scrapeTwitterHandle(page, 'penaltyloop', opts.timeout);
             output.results['penaltyloop'] = res;
-            if (!res.success) output.errors.push(res.error);
+            if (!res.success && res.error) output.errors.push(res.error);
         }
     } catch (globalErr) {
         output.errors.push(`Global Puppeteer Error: ${globalErr.message}`);
@@ -349,3 +492,4 @@ async function main() {
 }
 
 main();
+
