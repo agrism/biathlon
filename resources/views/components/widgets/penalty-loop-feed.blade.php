@@ -81,10 +81,10 @@
             <div
                 id="tweets-grid"
                 :class="{
-                    'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-7 gap-4.5': (viewMode === 'grid_auto' || viewMode === 'grid_5' || !viewMode),
-                    'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4.5': viewMode === 'grid_4',
-                    'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6': viewMode === 'grid_3',
-                    'flex flex-col gap-3.5 max-w-4xl mx-auto': viewMode === 'list'
+                    'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-7 gap-6 sm:gap-6 lg:gap-7 xl:gap-8': (viewMode === 'grid_auto' || viewMode === 'grid_5' || !viewMode),
+                    'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-6 lg:gap-7 xl:gap-8': viewMode === 'grid_4',
+                    'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6 sm:gap-7 lg:gap-8': viewMode === 'grid_3',
+                    'flex flex-col gap-5 max-w-4xl mx-auto': viewMode === 'list'
                 }"
                 class="transition-all duration-300"
             >
