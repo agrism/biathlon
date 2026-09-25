@@ -62,6 +62,14 @@ class BiathlonTweetService
             ];
         }
 
+        $heuristic = $this->translationService->detectLanguageHeuristic($content);
+        if ($heuristic) {
+            return [
+                'translated_content' => null,
+                'source_language' => $heuristic,
+            ];
+        }
+
         return [
             'translated_content' => null,
             'source_language' => 'en',
@@ -1230,7 +1238,7 @@ class BiathlonTweetService
      */
     public function getAthletesNameIndex(): array
     {
-        return Cache::remember('athletes_name_index_v4', 3600 * 24, function () {
+        return Cache::remember('athletes_name_index_v5', 3600 * 24, function () {
             $athletes = $this->getAthletesWithPhotos();
 
             $fullNames = [];
@@ -1250,6 +1258,10 @@ class BiathlonTweetService
                 'gross', 'horn', 'brand', 'cross', 'post', 'wolf', 'graf', 'clarke', 'williams',
                 'smith', 'miller', 'jones', 'page', 'today', 'news', 'press', 'podcast', 'story',
                 'action', 'round', 'look', 'good', 'great', 'open', 'championship', 'national',
+                // Months and dates in English & French
+                'jan', 'feb', 'mar', 'mars', 'apr', 'may', 'mai', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
+                'janvier', 'fevrier', 'avril', 'juin', 'juillet', 'aout', 'septembre', 'octobre', 'novembre', 'decembre',
+                'januar', 'februar', 'marz', 'juni', 'juli', 'oktober', 'dezember',
                 // Common conversational English & French words that should never match surnames standalone
                 'hope', 'love', 'loves', 'meet', 'meets', 'daughter', 'son', 'kids', 'kid',
                 'child', 'children', 'coach', 'coaches', 'woman', 'girl', 'girls', 'boy', 'boys',
@@ -1261,7 +1273,9 @@ class BiathlonTweetService
                 'from', 'this', 'that', 'these', 'those', 'they', 'them', 'their', 'have',
                 'been', 'were', 'will', 'would', 'could', 'should', 'know', 'think', 'want',
                 'need', 'make', 'take', 'give', 'come', 'went', 'well', 'also', 'back', 'first',
-                'last', 'next', 'help', 'keep', 'show', 'mean', 'home', 'away', 'line', 'loop'
+                'last', 'next', 'help', 'keep', 'show', 'mean', 'home', 'away', 'line', 'loop',
+                'slip', 'bain', 'baie', 'demain', 'gagnent', 'jette', 'dans', 'avec', 'pour',
+                'cette', 'mais', 'nous', 'vous', 'elles', 'tres', 'apres', 'avant', 'monde'
             ];
 
             foreach ($athletes as $athlete) {
