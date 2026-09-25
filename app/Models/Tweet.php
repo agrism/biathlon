@@ -81,7 +81,7 @@ class Tweet extends Model
 
         $content = e(trim($content));
 
-        // Convert URLs (both https?:// and domain paths like penaltyloop.com/..., www.example.com, etc.) to clickable links
+        // Convert URLs (both https?:// and domain paths like penaltyloop.com/..., www.example.com, etc.) to clickable links with shortened visible text
         $content = preg_replace_callback(
             '~(https?://[^\s<]+|(?:www\.|[a-zA-Z0-9-]+\.(?:com|org|net|lv|no|de|fr|info|io|co|me|tv|social))(?:\/[^\s<]*)?)~i',
             function ($matches) {
@@ -91,7 +91,12 @@ class Tweet extends Model
                     ? $cleanUrl
                     : 'https://' . $cleanUrl;
 
-                return '<a href="' . $href . '" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:underline font-semibold break-all">' . $url . '</a>';
+                $displayUrl = preg_replace('~^https?://(?:www\.)?~i', '', $cleanUrl);
+                if (mb_strlen($displayUrl) > 34) {
+                    $displayUrl = mb_substr($displayUrl, 0, 31) . '…';
+                }
+
+                return '<a href="' . $href . '" target="_blank" rel="noopener noreferrer" title="' . $href . '" class="text-sky-600 hover:underline font-semibold">' . $displayUrl . '</a>';
             },
             $content
         );
