@@ -25,6 +25,8 @@ class TweetHideTest extends TestCase
             $table->string('author_handle')->default('penaltyloop');
             $table->string('author_avatar')->nullable();
             $table->text('content');
+            $table->text('translated_content')->nullable();
+            $table->string('source_language')->nullable();
             $table->json('media_urls')->nullable();
             $table->integer('likes_count')->default(0);
             $table->integer('retweets_count')->default(0);
