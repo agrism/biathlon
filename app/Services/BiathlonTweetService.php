@@ -188,11 +188,13 @@ class BiathlonTweetService
             'delay' => 0,
         ];
 
-        $providers[] = [
-            'type' => 'bluesky',
-            'name' => 'Bluesky Live Stream (@penaltyloop.bsky.social)',
-            'delay' => 0,
-        ];
+        if (filter_var(env('ENABLE_BLUESKY_FEED', false), FILTER_VALIDATE_BOOLEAN)) {
+            $providers[] = [
+                'type' => 'bluesky',
+                'name' => 'Bluesky Live Stream (@penaltyloop.bsky.social)',
+                'delay' => 0,
+            ];
+        }
 
         return $providers;
     }
