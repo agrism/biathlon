@@ -60,24 +60,29 @@
                 </div>
             @elseif($mentionedAthlete && !empty($mentionedAthlete->photo_uri))
                 <!-- Top Media Container (First Mentioned Athlete Portrait from BiathlonWorld / IBU) -->
-                <div class="w-full aspect-[16/10] sm:h-48 xl:h-52 2xl:h-56 overflow-hidden relative bg-gradient-to-tr from-slate-950 via-slate-900 to-sky-950 flex-shrink-0 group/athlete">
-                    <a href="{{ route('athletes.show', $mentionedAthlete->id) }}" class="block w-full h-full relative">
+                <div class="w-full aspect-[16/10] sm:h-48 xl:h-52 2xl:h-56 overflow-hidden relative bg-[radial-gradient(ellipse_at_50%_25%,#0284c7_0%,#1e3a8a_55%,#0f172a_100%)] flex-shrink-0 group/athlete">
+                    <!-- Subtle winter arena light aura & snowy grid pattern -->
+                    <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#ffffff_1.2px,transparent_1.2px)] [background-size:18px_18px] pointer-events-none"></div>
+                    <div class="absolute top-2 left-1/2 -translate-x-1/2 w-48 h-48 bg-sky-400/30 rounded-full blur-2xl pointer-events-none"></div>
+
+                    <a href="{{ route('athletes.show', $mentionedAthlete->id) }}" class="block w-full h-full relative z-10">
                         <img
                             src="{{ $mentionedAthlete->photo_uri }}"
                             alt="{{ $mentionedAthlete->given_name }} {{ $mentionedAthlete->family_name }}"
-                            class="w-full h-full object-cover object-top transition-transform duration-500 group-hover/athlete:scale-105"
+                            class="w-full h-full object-cover object-top transition-transform duration-500 group-hover/athlete:scale-105 drop-shadow-[0_8px_16px_rgba(0,0,0,0.3)]"
                             loading="lazy"
                         >
-                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/15 to-black/25 pointer-events-none"></div>
+                        <!-- Soft bottom shadow only for text readability -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent pointer-events-none"></div>
                     </a>
 
                     <!-- Top Left Author Pill Overlay -->
-                    <div class="absolute top-2.5 left-2.5">
+                    <div class="absolute top-2.5 left-2.5 z-20">
                         <a
                             href="{{ $tweet->tweet_url ?: ('https://x.com/' . $tweet->author_handle) }}"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] bg-slate-900/85 backdrop-blur-xs text-white text-[11px] font-bold shadow-xs hover:bg-sky-600 transition-colors"
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-bold border border-white/15 shadow-xs hover:bg-sky-600 transition-colors"
                         >
                             @if($tweet->author_avatar)
                                 <img src="{{ $tweet->author_avatar }}" alt="{{ $tweet->author_name }}" class="w-3.5 h-3.5 rounded-full object-cover">
@@ -89,22 +94,22 @@
                     </div>
 
                     <!-- Top Right Date Badge Overlay -->
-                    <div class="absolute top-2.5 right-2.5">
+                    <div class="absolute top-2.5 right-2.5 z-20">
                         @if($tweet->published_at)
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-[4px] text-[10px] font-extrabold uppercase tracking-wider {{ $tweet->published_at->isToday() ? 'bg-sky-500 text-white shadow-xs' : 'bg-slate-900/80 backdrop-blur-xs text-slate-200' }}">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-[4px] text-[10px] font-extrabold uppercase tracking-wider {{ $tweet->published_at->isToday() ? 'bg-sky-500 text-white shadow-xs' : 'bg-slate-900/80 backdrop-blur-md text-slate-200 border border-white/15' }}">
                                 {{ $tweet->published_at->isToday() ? 'Today' : $tweet->published_at->tz('Europe/Riga')->format('d M Y') }}
                             </span>
                         @endif
                     </div>
 
                     <!-- Bottom Athlete Badge Overlay -->
-                    <div class="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
-                        <a href="{{ route('athletes.show', $mentionedAthlete->id) }}" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[4px] bg-slate-900/90 backdrop-blur-xs text-white text-[11px] font-bold border border-white/10 shadow-xs pointer-events-auto hover:bg-sky-600 transition-colors">
+                    <div class="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none z-20">
+                        <a href="{{ route('athletes.show', $mentionedAthlete->id) }}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] bg-slate-900/85 backdrop-blur-md text-white text-[11px] font-bold border border-white/20 shadow-md pointer-events-auto hover:bg-sky-600 transition-colors">
                             @if($mentionedAthlete->nat)
-                                <span class="font-black text-sky-400 text-[10px]">{{ $mentionedAthlete->nat }}</span>
-                                <span class="text-slate-500 text-[10px]">&bull;</span>
+                                <span class="px-1.5 py-0.2 rounded-[2px] bg-sky-500/30 text-sky-300 font-black text-[10px] border border-sky-400/40">{{ $mentionedAthlete->nat }}</span>
+                                <span class="text-slate-400 text-[10px]">&bull;</span>
                             @endif
-                            <span class="truncate max-w-[150px]">{{ $mentionedAthlete->given_name }} {{ $mentionedAthlete->family_name }}</span>
+                            <span class="truncate max-w-[160px]">{{ $mentionedAthlete->given_name }} {{ $mentionedAthlete->family_name }}</span>
                         </a>
                     </div>
                 </div>
@@ -112,12 +117,12 @@
                 <!-- Thematic Author Brand Visual Header for text posts without mentioned athlete -->
                 @php
                     $themeClasses = match(strtolower($tweet->author_handle)) {
-                        'penaltyloop' => 'from-slate-950 via-slate-900 to-sky-950',
-                        'biathstats' => 'from-slate-950 via-slate-900 to-emerald-950',
-                        'biathlonworld', 'ibu_newsroom' => 'from-slate-950 via-slate-900 to-blue-950',
-                        'nordicmag' => 'from-slate-950 via-slate-900 to-cyan-950',
-                        'biathlonlivefr' => 'from-slate-950 via-slate-900 to-indigo-950',
-                        default => 'from-slate-950 via-slate-900 to-sky-950',
+                        'penaltyloop' => 'from-sky-800 via-blue-900 to-slate-900',
+                        'biathstats' => 'from-emerald-800 via-teal-900 to-slate-900',
+                        'biathlonworld', 'ibu_newsroom' => 'from-blue-800 via-indigo-900 to-slate-900',
+                        'nordicmag' => 'from-cyan-800 via-sky-900 to-slate-900',
+                        'biathlonlivefr' => 'from-indigo-800 via-violet-900 to-slate-900',
+                        default => 'from-sky-800 via-blue-900 to-slate-900',
                     };
                     $tagline = match(strtolower($tweet->author_handle)) {
                         'penaltyloop' => 'Penalty Loop &bull; Biathlon Insights',
@@ -131,7 +136,8 @@
                 @endphp
                 <div class="w-full aspect-[16/10] sm:h-48 xl:h-52 2xl:h-56 overflow-hidden relative bg-gradient-to-tr {{ $themeClasses }} flex flex-col justify-between p-3.5 flex-shrink-0 select-none">
                     <!-- Subtle dot matrix pattern -->
-                    <div class="absolute inset-0 opacity-15 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
+                    <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#ffffff_1.2px,transparent_1.2px)] [background-size:18px_18px] pointer-events-none"></div>
+                    <div class="absolute top-0 right-0 w-36 h-36 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
 
                     <!-- Top Bar: Author Pill & Date Badge -->
                     <div class="flex items-center justify-between gap-2 relative z-10">
