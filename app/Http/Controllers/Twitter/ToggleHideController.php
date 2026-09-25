@@ -7,16 +7,21 @@ use App\Models\Tweet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class ToggleHideController extends Controller
 {
-    public function __invoke(Request $request, int|string $id): View
+    public function __invoke(Request $request, int|string $id): View|Response
     {
         if (!auth()->check() || !auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized action.');
         }
 
-        $tweet = Tweet::query()->findOrFail($id);
+        $tweet = Tweet::query()->find($id);
+        if (!$tweet) {
+            return response('<div class="text-xs text-slate-400 italic py-1">Post already removed</div>', 200);
+        }
+
         $tweet->should_hide = !$tweet->should_hide;
         $tweet->save();
 
