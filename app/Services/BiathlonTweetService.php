@@ -21,6 +21,7 @@ class BiathlonTweetService
     protected array $twitterHandles = [
         'biathstats',
         'biathlonworld',
+        'ibu_newsroom',
     ];
 
     protected array $userAgents = [
@@ -79,6 +80,15 @@ class BiathlonTweetService
                 'type' => 'rss',
                 'name' => 'Custom BiathlonWorld RSS Bridge',
                 'url' => $biathlonworldRss,
+                'delay' => 0,
+            ];
+        }
+
+        if ($ibuNewsroomRss = env('IBU_NEWSROOM_RSS_URL')) {
+            $providers[] = [
+                'type' => 'rss',
+                'name' => 'Custom IBU Newsroom RSS Bridge',
+                'url' => $ibuNewsroomRss,
                 'delay' => 0,
             ];
         }

@@ -14,7 +14,7 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 
 puppeteer.use(StealthPlugin());
 
-const DEFAULT_HANDLES = ['penaltyloop', 'biathstats', 'biathlonworld'];
+const DEFAULT_HANDLES = ['penaltyloop', 'biathstats', 'biathlonworld', 'ibu_newsroom'];
 const DEFAULT_RSS = 'https://penaltyloop.com/feed/';
 
 // Parse command line arguments
