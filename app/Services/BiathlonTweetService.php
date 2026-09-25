@@ -1241,17 +1241,70 @@ class BiathlonTweetService
             return preg_replace('/[^a-z0-9]/', '', $s);
         };
 
-        $textLower = mb_strtolower($cleanText);
-        $earliestPos = PHP_INT_MAX;
-        $bestMatch = null;
+        // Words that must NEVER be treated as standalone athlete family names
+        $stopWords = [
+            'french', 'france', 'german', 'germany', 'norwegian', 'norway', 'swedish', 'sweden',
+            'italian', 'italy', 'finnish', 'finland', 'czech', 'polish', 'austrian', 'austria',
+            'swiss', 'switzerland', 'estonian', 'estonia', 'latvian', 'latvia', 'ukrainian', 'ukraine',
+            'canadian', 'canada', 'american', 'usa', 'cup', 'summer', 'winter', 'world',
+            'sprint', 'pursuit', 'individual', 'mass', 'relay', 'stage', 'season', 'race',
+            'globe', 'men', 'women', 'team', 'junior', 'best', 'gold', 'silver', 'bronze',
+            'start', 'finish', 'point', 'total', 'rank', 'time', 'shot', 'short', 'long',
+            'young', 'king', 'fast', 'white', 'black', 'brown', 'green', 'rose', 'hall',
+            'gross', 'horn', 'brand', 'cross', 'post', 'wolf', 'graf', 'clarke', 'williams',
+            'smith', 'miller', 'jones', 'page', 'today', 'news', 'press', 'podcast', 'story',
+            'action', 'round', 'look', 'good', 'great', 'open', 'championship', 'national'
+        ];
 
-        // 1. Initial patterns like J.T.Boe, S.H.Laegreid, E.Jacquelin, E.Perrot, T.Boe, Q.Fillon Maillet
+        // TIER 1: Full Names (Given + Family or Family + Given)
+        $tier1Match = null;
+        $tier1Pos = PHP_INT_MAX;
+
+        foreach ($athletes as $athlete) {
+            $givenLower = mb_strtolower(trim($athlete->given_name));
+            $familyLower = mb_strtolower(trim($athlete->family_name));
+
+            if (mb_strlen($givenLower) < 2 || mb_strlen($familyLower) < 2) {
+                continue;
+            }
+
+            // Given + Family (e.g. "Eric Perrot")
+            $pattern1 = '/\b' . preg_quote($givenLower, '/') . '\s+' . preg_quote($familyLower, '/') . '\b/ui';
+            if (preg_match($pattern1, $cleanText, $m, PREG_OFFSET_CAPTURE)) {
+                if ($m[0][1] < $tier1Pos) {
+                    $tier1Pos = $m[0][1];
+                    $tier1Match = $athlete;
+                }
+            }
+
+            // Family + Given (e.g. "Perrot Eric")
+            $pattern2 = '/\b' . preg_quote($familyLower, '/') . '\s+' . preg_quote($givenLower, '/') . '\b/ui';
+            if (preg_match($pattern2, $cleanText, $m, PREG_OFFSET_CAPTURE)) {
+                if ($m[0][1] < $tier1Pos) {
+                    $tier1Pos = $m[0][1];
+                    $tier1Match = $athlete;
+                }
+            }
+        }
+
+        if ($tier1Match !== null) {
+            return $tier1Match;
+        }
+
+        // TIER 2: Initialed Names (e.g. "J.T.Boe", "S.H.Laegreid", "E.Perrot", "Q.Fillon Maillet")
+        $tier2Match = null;
+        $tier2Pos = PHP_INT_MAX;
+
         if (preg_match_all('/(?:[A-Z]\.){1,3}\s*([A-Za-zÀ-ÿ\-]+(?:\s+[A-Za-zÀ-ÿ\-]+)?)/u', $cleanText, $matches, PREG_OFFSET_CAPTURE)) {
             foreach ($matches[0] as $idx => $matchTuple) {
                 $fullPattern = $matchTuple[0];
                 $offset = $matchTuple[1];
                 $famName = $matches[1][$idx][0];
                 $famNorm = $norm($famName);
+
+                if (in_array(strtolower($famName), $stopWords)) {
+                    continue;
+                }
 
                 foreach ($athletes as $athlete) {
                     $aFamNorm = $norm($athlete->family_name);
@@ -1260,9 +1313,9 @@ class BiathlonTweetService
                         $athleteGivenInitials = preg_replace('/[^a-zA-Z]/', '', implode('', array_map(fn($w) => substr($w, 0, 1), explode(' ', $athlete->given_name))));
 
                         if (empty($initialsInPattern) || stripos($athleteGivenInitials, substr($initialsInPattern, 0, 1)) !== false) {
-                            if ($offset < $earliestPos) {
-                                $earliestPos = $offset;
-                                $bestMatch = $athlete;
+                            if ($offset < $tier2Pos) {
+                                $tier2Pos = $offset;
+                                $tier2Match = $athlete;
                             }
                         }
                     }
@@ -1270,28 +1323,31 @@ class BiathlonTweetService
             }
         }
 
-        // 2. Full names and distinctive family names
+        if ($tier2Match !== null) {
+            return $tier2Match;
+        }
+
+        // TIER 3: Standalone Distinctive Family Names (excluding stop words)
+        $tier3Match = null;
+        $tier3Pos = PHP_INT_MAX;
+
         foreach ($athletes as $athlete) {
-            $fullName = mb_strtolower($athlete->given_name . ' ' . $athlete->family_name);
-            $pos = mb_stripos($textLower, $fullName);
-            if ($pos !== false && $pos < $earliestPos) {
-                $earliestPos = $pos;
-                $bestMatch = $athlete;
+            $famLower = mb_strtolower(trim($athlete->family_name));
+            if (mb_strlen($famLower) < 4 && !in_array($famLower, ['boe', 'bø', 'botn'])) {
+                continue;
+            }
+            if (in_array($famLower, $stopWords)) {
                 continue;
             }
 
-            $famName = mb_strtolower($athlete->family_name);
-            if (mb_strlen($famName) >= 5 || in_array($famName, ['boe', 'bø', 'simon', 'botn', 'voigt', 'preuss', 'claude', 'perrot'])) {
-                if (preg_match('/\b' . preg_quote($famName, '/') . '\b/ui', $cleanText, $m, PREG_OFFSET_CAPTURE)) {
-                    $p = $m[0][1];
-                    if ($p < $earliestPos) {
-                        $earliestPos = $p;
-                        $bestMatch = $athlete;
-                    }
+            if (preg_match('/\b' . preg_quote($famLower, '/') . '\b/ui', $cleanText, $m, PREG_OFFSET_CAPTURE)) {
+                if ($m[0][1] < $tier3Pos) {
+                    $tier3Pos = $m[0][1];
+                    $tier3Match = $athlete;
                 }
             }
         }
 
-        return $bestMatch;
+        return $tier3Match;
     }
 }
