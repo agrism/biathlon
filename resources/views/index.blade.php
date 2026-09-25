@@ -79,10 +79,10 @@
         @mouseenter="autoplay = false"
         @mouseleave="autoplay = true"
     >
-        <!-- Centered Core Content Grid (Golden Proportions) -->
+        <!-- Centered Core Content Grid (Generous Visual Width) -->
         <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 min-h-[380px] sm:min-h-[420px] lg:min-h-[460px] xl:min-h-[480px]">
-            <!-- Left Side: Editorial Content & Controls (5 cols on lg) -->
-            <div class="lg:col-span-5 p-6 sm:p-8 lg:p-10 flex flex-col justify-between bg-slate-950 text-white z-20">
+            <!-- Left Side: Editorial Content & Controls (4 cols on lg/xl) -->
+            <div class="lg:col-span-4 xl:col-span-4 p-6 sm:p-8 lg:p-10 flex flex-col justify-between bg-slate-950 text-white z-20">
                 <!-- Top Tag & Counter -->
                 <div class="flex items-center justify-between gap-3 mb-4">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-black uppercase tracking-wider">
@@ -137,8 +137,8 @@
                 </div>
             </div>
 
-            <!-- Right Side: Centered Visual with Smooth Left & Right Gradient Blend -->
-            <div class="lg:col-span-7 relative bg-slate-950 overflow-hidden min-h-[280px] sm:min-h-[340px] lg:min-h-full flex items-center justify-center">
+            <!-- Right Side: Centered Visual with Wide Clear View (8 cols on lg/xl) -->
+            <div class="lg:col-span-8 xl:col-span-8 relative bg-slate-950 overflow-hidden min-h-[280px] sm:min-h-[340px] lg:min-h-full flex items-center justify-center">
                 <template x-for="(slide, index) in slides" :key="index">
                     <div
                         x-show="active === index"
@@ -150,22 +150,18 @@
                         x-transition:leave-end="opacity-0 scale-98"
                         class="absolute inset-0 w-full h-full flex items-center justify-center"
                     >
-                        <!-- Foreground crisp photo -->
+                        <!-- Foreground crisp photo in full brightness -->
                         <img
                             :src="slide.src"
                             :alt="slide.title"
                             class="relative h-full w-full object-cover lg:object-contain object-center z-10"
                         >
 
-                        <!-- Left-edge smooth gradient blend into dark background (no strict line) -->
-                        <div class="hidden lg:block absolute inset-y-0 left-0 w-36 xl:w-48 bg-gradient-to-r from-slate-950 via-slate-950/75 to-transparent pointer-events-none z-20"></div>
+                        <!-- Left-edge subtle vignette connecting smoothly to text block without obscuring people -->
+                        <div class="hidden lg:block absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-slate-950 to-transparent pointer-events-none z-20"></div>
 
-                        <!-- Right-edge smooth gradient blend into dark background (no strict line) -->
-                        <div class="hidden lg:block absolute inset-y-0 right-0 w-32 xl:w-44 bg-gradient-to-l from-slate-950 via-slate-950/75 to-transparent pointer-events-none z-20"></div>
-
-                        <!-- Top & Bottom subtle edge fades -->
-                        <div class="absolute inset-x-0 top-0 h-8 bg-gradient-to-b from-slate-950/50 to-transparent pointer-events-none z-20"></div>
-                        <div class="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-slate-950/50 to-transparent pointer-events-none z-20"></div>
+                        <!-- Right-edge subtle vignette -->
+                        <div class="hidden lg:block absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-slate-950 to-transparent pointer-events-none z-20"></div>
                     </div>
                 </template>
             </div>
