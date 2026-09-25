@@ -1,5 +1,5 @@
 <nav class="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-sm transition-all">
-    <div class="w-full px-4 sm:px-6 lg:px-8 2xl:px-12">
+    <div class="w-full px-2 sm:px-4">
         <div class="flex justify-between items-center h-16">
             <!-- Brand Logo -->
             <a href="{{ route('home') }}" class="flex items-center gap-2.5 group">
