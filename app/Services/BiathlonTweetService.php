@@ -1261,8 +1261,8 @@ class BiathlonTweetService
         $tier1Pos = PHP_INT_MAX;
 
         foreach ($athletes as $athlete) {
-            $givenLower = mb_strtolower(trim($athlete->given_name));
-            $familyLower = mb_strtolower(trim($athlete->family_name));
+            $givenLower = mb_strtolower(trim((string)$athlete->given_name));
+            $familyLower = mb_strtolower(trim((string)$athlete->family_name));
 
             if (mb_strlen($givenLower) < 2 || mb_strlen($familyLower) < 2) {
                 continue;
@@ -1307,10 +1307,10 @@ class BiathlonTweetService
                 }
 
                 foreach ($athletes as $athlete) {
-                    $aFamNorm = $norm($athlete->family_name);
+                    $aFamNorm = $norm((string)$athlete->family_name);
                     if ($aFamNorm === $famNorm) {
                         $initialsInPattern = preg_replace('/[^a-zA-Z]/', '', substr($fullPattern, 0, strpos($fullPattern, $famName)));
-                        $athleteGivenInitials = preg_replace('/[^a-zA-Z]/', '', implode('', array_map(fn($w) => substr($w, 0, 1), explode(' ', $athlete->given_name))));
+                        $athleteGivenInitials = preg_replace('/[^a-zA-Z]/', '', implode('', array_map(fn($w) => substr($w, 0, 1), explode(' ', (string)$athlete->given_name))));
 
                         if (empty($initialsInPattern) || stripos($athleteGivenInitials, substr($initialsInPattern, 0, 1)) !== false) {
                             if ($offset < $tier2Pos) {
@@ -1332,7 +1332,7 @@ class BiathlonTweetService
         $tier3Pos = PHP_INT_MAX;
 
         foreach ($athletes as $athlete) {
-            $famLower = mb_strtolower(trim($athlete->family_name));
+            $famLower = mb_strtolower(trim((string)$athlete->family_name));
             if (mb_strlen($famLower) < 4 && !in_array($famLower, ['boe', 'bø', 'botn'])) {
                 continue;
             }
