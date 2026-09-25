@@ -59,21 +59,30 @@
                     @endif
                 </div>
             @elseif($mentionedAthlete && !empty($mentionedAthlete->photo_uri))
-                <!-- Top Media Container (First Mentioned Athlete Portrait from BiathlonWorld / IBU) -->
-                <div class="w-full aspect-[16/10] sm:h-48 xl:h-52 2xl:h-56 overflow-hidden relative bg-[radial-gradient(ellipse_at_50%_25%,#0284c7_0%,#1e3a8a_55%,#0f172a_100%)] flex-shrink-0 group/athlete">
-                    <!-- Subtle winter arena light aura & snowy grid pattern -->
-                    <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#ffffff_1.2px,transparent_1.2px)] [background-size:18px_18px] pointer-events-none"></div>
-                    <div class="absolute top-2 left-1/2 -translate-x-1/2 w-48 h-48 bg-sky-400/30 rounded-full blur-2xl pointer-events-none"></div>
+                <!-- Top Media Container (First Mentioned Athlete Portrait - Crisp Light Winter Snow Theme) -->
+                <div class="w-full aspect-[16/10] sm:h-48 xl:h-52 2xl:h-56 overflow-hidden relative bg-gradient-to-b from-sky-200 via-sky-100 to-slate-100 flex-shrink-0 group/athlete">
+                    <!-- Crisp Alpine Snowy Mountain Silhouettes -->
+                    <div class="absolute inset-0 pointer-events-none opacity-35">
+                        <svg class="w-full h-full" viewBox="0 0 400 240" preserveAspectRatio="none" fill="none">
+                            <path d="M0,170 L75,105 L145,145 L235,75 L315,135 L400,85 L400,240 L0,240 Z" fill="#38bdf8" opacity="0.35"/>
+                            <path d="M0,185 L55,145 L135,175 L215,125 L295,165 L400,130 L400,240 L0,240 Z" fill="#7dd3fc" opacity="0.45"/>
+                            <path d="M0,205 L95,175 L195,195 L295,170 L400,185 L400,240 L0,240 Z" fill="#ffffff" opacity="0.9"/>
+                        </svg>
+                    </div>
+
+                    <!-- Subtle Snowflakes / Frost Sparkle Texture -->
+                    <div class="absolute inset-0 opacity-25 bg-[radial-gradient(#0284c7_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none"></div>
+                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-32 bg-sky-300/30 rounded-full blur-2xl pointer-events-none"></div>
 
                     <a href="{{ route('athletes.show', $mentionedAthlete->id) }}" class="block w-full h-full relative z-10">
                         <img
                             src="{{ $mentionedAthlete->photo_uri }}"
                             alt="{{ $mentionedAthlete->given_name }} {{ $mentionedAthlete->family_name }}"
-                            class="w-full h-full object-cover object-top transition-transform duration-500 group-hover/athlete:scale-105 drop-shadow-[0_8px_16px_rgba(0,0,0,0.3)]"
+                            class="w-full h-full object-cover object-top transition-transform duration-500 group-hover/athlete:scale-105 drop-shadow-[0_10px_20px_rgba(15,23,42,0.18)]"
                             loading="lazy"
                         >
-                        <!-- Soft bottom shadow only for text readability -->
-                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent pointer-events-none"></div>
+                        <!-- Soft subtle vignette at bottom for badge contrast -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent pointer-events-none"></div>
                     </a>
 
                     <!-- Top Left Author Pill Overlay -->
@@ -82,7 +91,7 @@
                             href="{{ $tweet->tweet_url ?: ('https://x.com/' . $tweet->author_handle) }}"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-bold border border-white/15 shadow-xs hover:bg-sky-600 transition-colors"
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-bold border border-white/20 shadow-xs hover:bg-sky-600 transition-colors"
                         >
                             @if($tweet->author_avatar)
                                 <img src="{{ $tweet->author_avatar }}" alt="{{ $tweet->author_name }}" class="w-3.5 h-3.5 rounded-full object-cover">
@@ -96,7 +105,7 @@
                     <!-- Top Right Date Badge Overlay -->
                     <div class="absolute top-2.5 right-2.5 z-20">
                         @if($tweet->published_at)
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-[4px] text-[10px] font-extrabold uppercase tracking-wider {{ $tweet->published_at->isToday() ? 'bg-sky-500 text-white shadow-xs' : 'bg-slate-900/80 backdrop-blur-md text-slate-200 border border-white/15' }}">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-[4px] text-[10px] font-extrabold uppercase tracking-wider {{ $tweet->published_at->isToday() ? 'bg-sky-500 text-white shadow-xs' : 'bg-slate-900/80 backdrop-blur-md text-slate-200 border border-white/20' }}">
                                 {{ $tweet->published_at->isToday() ? 'Today' : $tweet->published_at->tz('Europe/Riga')->format('d M Y') }}
                             </span>
                         @endif
@@ -106,7 +115,7 @@
                     <div class="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none z-20">
                         <a href="{{ route('athletes.show', $mentionedAthlete->id) }}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] bg-slate-900/85 backdrop-blur-md text-white text-[11px] font-bold border border-white/20 shadow-md pointer-events-auto hover:bg-sky-600 transition-colors">
                             @if($mentionedAthlete->nat)
-                                <span class="px-1.5 py-0.2 rounded-[2px] bg-sky-500/30 text-sky-300 font-black text-[10px] border border-sky-400/40">{{ $mentionedAthlete->nat }}</span>
+                                <span class="px-1.5 py-0.2 rounded-[2px] bg-sky-500 text-white font-black text-[10px] shadow-2xs">{{ $mentionedAthlete->nat }}</span>
                                 <span class="text-slate-400 text-[10px]">&bull;</span>
                             @endif
                             <span class="truncate max-w-[160px]">{{ $mentionedAthlete->given_name }} {{ $mentionedAthlete->family_name }}</span>
@@ -114,16 +123,8 @@
                     </div>
                 </div>
             @else
-                <!-- Thematic Author Brand Visual Header for text posts without mentioned athlete -->
+                <!-- Thematic Author Brand Visual Header (Crisp Light Winter Theme) -->
                 @php
-                    $themeClasses = match(strtolower($tweet->author_handle)) {
-                        'penaltyloop' => 'from-sky-800 via-blue-900 to-slate-900',
-                        'biathstats' => 'from-emerald-800 via-teal-900 to-slate-900',
-                        'biathlonworld', 'ibu_newsroom' => 'from-blue-800 via-indigo-900 to-slate-900',
-                        'nordicmag' => 'from-cyan-800 via-sky-900 to-slate-900',
-                        'biathlonlivefr' => 'from-indigo-800 via-violet-900 to-slate-900',
-                        default => 'from-sky-800 via-blue-900 to-slate-900',
-                    };
                     $tagline = match(strtolower($tweet->author_handle)) {
                         'penaltyloop' => 'Penalty Loop &bull; Biathlon Insights',
                         'biathstats' => 'BiathlonStats &bull; Telemetry & Analytics',
@@ -134,10 +135,16 @@
                         default => $tweet->author_name,
                     };
                 @endphp
-                <div class="w-full aspect-[16/10] sm:h-48 xl:h-52 2xl:h-56 overflow-hidden relative bg-gradient-to-tr {{ $themeClasses }} flex flex-col justify-between p-3.5 flex-shrink-0 select-none">
-                    <!-- Subtle dot matrix pattern -->
-                    <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#ffffff_1.2px,transparent_1.2px)] [background-size:18px_18px] pointer-events-none"></div>
-                    <div class="absolute top-0 right-0 w-36 h-36 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="w-full aspect-[16/10] sm:h-48 xl:h-52 2xl:h-56 overflow-hidden relative bg-gradient-to-b from-sky-100 via-sky-50 to-slate-100 flex flex-col justify-between p-3.5 flex-shrink-0 select-none border-b border-slate-200/60">
+                    <!-- Mountain Silhouettes & Snow Texture -->
+                    <div class="absolute inset-0 pointer-events-none opacity-30">
+                        <svg class="w-full h-full" viewBox="0 0 400 240" preserveAspectRatio="none" fill="none">
+                            <path d="M0,170 L75,105 L145,145 L235,75 L315,135 L400,85 L400,240 L0,240 Z" fill="#38bdf8" opacity="0.3"/>
+                            <path d="M0,195 L60,150 L140,180 L220,130 L300,175 L400,140 L400,240 L0,240 Z" fill="#7dd3fc" opacity="0.4"/>
+                            <path d="M0,215 L100,190 L200,210 L300,185 L400,200 L400,240 L0,240 Z" fill="#ffffff" opacity="0.9"/>
+                        </svg>
+                    </div>
+                    <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#0284c7_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none"></div>
 
                     <!-- Top Bar: Author Pill & Date Badge -->
                     <div class="flex items-center justify-between gap-2 relative z-10">
@@ -145,7 +152,7 @@
                             href="{{ $tweet->tweet_url ?: ('https://x.com/' . $tweet->author_handle) }}"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] bg-slate-900/85 backdrop-blur-xs text-white text-[11px] font-bold shadow-xs hover:bg-sky-600 transition-colors"
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-bold border border-white/20 shadow-xs hover:bg-sky-600 transition-colors"
                         >
                             @if($tweet->author_avatar)
                                 <img src="{{ $tweet->author_avatar }}" alt="{{ $tweet->author_name }}" class="w-3.5 h-3.5 rounded-full object-cover">
@@ -156,7 +163,7 @@
                         </a>
 
                         @if($tweet->published_at)
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-[4px] text-[10px] font-extrabold uppercase tracking-wider {{ $tweet->published_at->isToday() ? 'bg-sky-500 text-white shadow-xs' : 'bg-slate-900/80 backdrop-blur-xs text-slate-200' }}">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-[4px] text-[10px] font-extrabold uppercase tracking-wider {{ $tweet->published_at->isToday() ? 'bg-sky-500 text-white shadow-xs' : 'bg-slate-900/80 backdrop-blur-md text-slate-200 border border-white/20' }}">
                                 {{ $tweet->published_at->isToday() ? 'Today' : $tweet->published_at->tz('Europe/Riga')->format('d M Y') }}
                             </span>
                         @endif
@@ -165,7 +172,7 @@
                     <!-- Center Brand Focus -->
                     <div class="my-auto text-center relative z-10 py-1">
                         <a href="{{ $tweet->tweet_url ?: ('https://x.com/' . $tweet->author_handle) }}" target="_blank" rel="noopener noreferrer" class="inline-flex flex-col items-center group/author">
-                            <div class="w-12 h-12 rounded-full p-1 bg-white/10 backdrop-blur-md border border-white/20 shadow-lg group-hover/author:scale-105 transition-transform mb-1.5">
+                            <div class="w-13 h-13 rounded-full p-1 bg-white/80 backdrop-blur-md border border-slate-200/80 shadow-md group-hover/author:scale-105 transition-transform mb-1.5">
                                 @if($tweet->author_avatar)
                                     <img src="{{ $tweet->author_avatar }}" alt="{{ $tweet->author_name }}" class="w-full h-full rounded-full object-cover">
                                 @else
@@ -174,19 +181,19 @@
                                     </div>
                                 @endif
                             </div>
-                            <span class="text-xs font-black text-white tracking-wide block drop-shadow-xs group-hover/author:text-sky-300 transition-colors">
+                            <span class="text-xs font-black text-slate-900 tracking-wide block group-hover/author:text-sky-600 transition-colors">
                                 {{ $tweet->author_name }}
                             </span>
-                            <span class="text-[10px] font-medium text-slate-300/80 mt-0.5 tracking-wider uppercase block">
+                            <span class="text-[10px] font-bold text-sky-700 mt-0.5 tracking-wider uppercase block">
                                 {!! $tagline !!}
                             </span>
                         </a>
                     </div>
 
                     <!-- Bottom Accent Bar -->
-                    <div class="flex items-center justify-between text-[10px] text-slate-400 relative z-10 pt-1 border-t border-white/10">
-                        <span class="font-semibold text-slate-300"><i class="fa-solid fa-bullhorn text-sky-400 mr-1"></i>Trackside Bulletin</span>
-                        <span>{{ $tweet->published_at ? $tweet->published_at->tz('Europe/Riga')->format('H:i') : '' }}</span>
+                    <div class="flex items-center justify-between text-[10px] text-slate-500 relative z-10 pt-1 border-t border-slate-200/80">
+                        <span class="font-semibold text-slate-600"><i class="fa-solid fa-bullhorn text-sky-600 mr-1"></i>Trackside Bulletin</span>
+                        <span class="font-medium text-slate-500">{{ $tweet->published_at ? $tweet->published_at->tz('Europe/Riga')->format('H:i') : '' }}</span>
                     </div>
                 </div>
             @endif
