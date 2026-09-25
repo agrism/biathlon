@@ -1238,7 +1238,7 @@ class BiathlonTweetService
      */
     public function getAthletesNameIndex(): array
     {
-        return Cache::remember('athletes_name_index_v5', 3600 * 24, function () {
+        return Cache::remember('athletes_name_index_v6', 3600 * 24, function () {
             $athletes = $this->getAthletesWithPhotos();
 
             $fullNames = [];
@@ -1252,7 +1252,7 @@ class BiathlonTweetService
                 'swiss', 'switzerland', 'estonian', 'estonia', 'latvian', 'latvia', 'ukrainian', 'ukraine',
                 'canadian', 'canada', 'american', 'usa', 'cup', 'summer', 'winter', 'world',
                 'sprint', 'pursuit', 'individual', 'mass', 'relay', 'stage', 'season', 'race',
-                'globe', 'men', 'women', 'team', 'junior', 'best', 'gold', 'silver', 'bronze',
+                'globe', 'globes', 'men', 'women', 'team', 'junior', 'best', 'gold', 'silver', 'bronze',
                 'start', 'finish', 'point', 'total', 'rank', 'time', 'shot', 'short', 'long',
                 'young', 'king', 'fast', 'white', 'black', 'brown', 'green', 'rose', 'hall',
                 'gross', 'horn', 'brand', 'cross', 'post', 'wolf', 'graf', 'clarke', 'williams',
@@ -1275,7 +1275,9 @@ class BiathlonTweetService
                 'need', 'make', 'take', 'give', 'come', 'went', 'well', 'also', 'back', 'first',
                 'last', 'next', 'help', 'keep', 'show', 'mean', 'home', 'away', 'line', 'loop',
                 'slip', 'bain', 'baie', 'demain', 'gagnent', 'jette', 'dans', 'avec', 'pour',
-                'cette', 'mais', 'nous', 'vous', 'elles', 'tres', 'apres', 'avant', 'monde'
+                'cette', 'mais', 'nous', 'vous', 'elles', 'tres', 'apres', 'avant', 'monde',
+                'coupe', 'coupes', 'relais', 'poursuite', 'masse', 'grand', 'grande', 'stade',
+                'piste', 'tirs', 'billetterie', 'forfait', 'victoire', 'victoires', 'classement'
             ];
 
             foreach ($athletes as $athlete) {
