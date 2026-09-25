@@ -34,9 +34,14 @@
 @include('menu', ['ignoreHome' => true])
 
 <main class="flex-1 w-full p-0">
-    <div class="px-4 sm:px-6 lg:px-8 mb-4">
-        {!! \App\Helpers\BreadCrumbHelper::instance()->render() !!}
-    </div>
+    @php
+        $breadcrumbHtml = \App\Helpers\BreadCrumbHelper::instance()->render();
+    @endphp
+    @if(!empty(trim($breadcrumbHtml)))
+        <div class="px-4 sm:px-6 lg:px-8 mb-4">
+            {!! $breadcrumbHtml !!}
+        </div>
+    @endif
 
     @isset($heading)
         @if($heading)

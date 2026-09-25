@@ -16,7 +16,7 @@
 
     <!-- Modern Editorial Biathlon Story Carousel (100% Full Bleed, 0px Padding, No Rounding) -->
     <div
-        class="mb-12 w-full overflow-hidden rounded-none border-y border-slate-800/90 shadow-md bg-slate-950 relative select-none"
+        class="mb-12 w-full overflow-hidden rounded-none border-y border-slate-800/90 shadow-none bg-slate-950 relative select-none"
         x-data="{
             active: 0,
             slides: [
@@ -85,11 +85,11 @@
             <div class="lg:col-span-4 xl:col-span-4 p-6 sm:p-8 lg:p-10 flex flex-col justify-between bg-slate-950 text-white z-20">
                 <!-- Top Tag & Counter -->
                 <div class="flex items-center justify-between gap-3 mb-4">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-black uppercase tracking-wider">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-none bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-black uppercase tracking-wider">
                         <i class="fa-solid fa-snowflake text-[10px]"></i>
                         <span x-text="slides[active].tag"></span>
                     </span>
-                    <span class="text-xs font-bold text-slate-400 bg-slate-800/80 px-2.5 py-1 rounded-md border border-slate-700">
+                    <span class="text-xs font-bold text-slate-400 bg-slate-800/80 px-2.5 py-1 rounded-none border border-slate-700">
                         <span class="text-white font-extrabold" x-text="active + 1"></span> / <span x-text="slides.length"></span>
                     </span>
                 </div>
@@ -108,7 +108,7 @@
                             <button
                                 type="button"
                                 @click="goTo(index)"
-                                class="h-2 rounded-sm transition-all duration-300 cursor-pointer"
+                                class="h-2 rounded-none transition-all duration-300 cursor-pointer"
                                 :class="active === index ? 'w-7 bg-sky-400' : 'w-2 bg-slate-700 hover:bg-slate-500'"
                                 :aria-label="'Go to slide ' + (index + 1)"
                             ></button>
@@ -120,7 +120,7 @@
                         <button
                             type="button"
                             @click="prev()"
-                            class="w-9 h-9 rounded-md bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white flex items-center justify-center border border-slate-700 transition-all cursor-pointer shadow-xs"
+                            class="w-9 h-9 rounded-none bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white flex items-center justify-center border border-slate-700 transition-all cursor-pointer shadow-xs"
                             aria-label="Previous Slide"
                         >
                             <i class="fa-solid fa-chevron-left text-xs"></i>
@@ -128,7 +128,7 @@
                         <button
                             type="button"
                             @click="next()"
-                            class="w-9 h-9 rounded-md bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white flex items-center justify-center border border-slate-700 transition-all cursor-pointer shadow-xs"
+                            class="w-9 h-9 rounded-none bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white flex items-center justify-center border border-slate-700 transition-all cursor-pointer shadow-xs"
                             aria-label="Next Slide"
                         >
                             <i class="fa-solid fa-chevron-right text-xs"></i>
@@ -173,7 +173,7 @@
         <div class="mb-10 w-full rounded-none bg-gradient-to-r from-slate-950 via-slate-900 to-sky-950 text-white shadow-md relative overflow-hidden border-y border-slate-800/80">
             <div class="max-w-7xl mx-auto p-6 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
                 <div>
-                    <span class="px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-300 text-xs font-bold uppercase tracking-wider">
+                    <span class="px-2.5 py-1 rounded-none bg-amber-500/20 text-amber-300 text-xs font-bold uppercase tracking-wider">
                         Next World Cup Stage
                     </span>
                     <h2 class="text-xl sm:text-2xl font-black mt-2 text-white">
@@ -184,7 +184,7 @@
                     </p>
                 </div>
 
-                <div class="text-center bg-white/10 backdrop-blur-md px-6 py-3 rounded-md border border-white/15">
+                <div class="text-center bg-white/10 backdrop-blur-md px-6 py-3 rounded-none border border-white/15">
                     <span class="text-[11px] uppercase tracking-wider text-slate-300 font-semibold block">Starts In</span>
                     <span id="countdown" class="text-lg sm:text-xl font-black text-amber-400 tracking-tight"></span>
                 </div>

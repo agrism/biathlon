@@ -1,7 +1,7 @@
 @foreach($tweets as $tweet)
     <div
         id="tweet-card-{{ $tweet->id }}"
-        class="bg-white rounded-md border border-slate-200 hover:border-sky-400 shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between overflow-hidden group {{ $tweet->should_hide ? 'bg-rose-50/40 border-rose-300 ring-1 ring-rose-300' : '' }}"
+        class="bg-white rounded-none border border-slate-200 hover:border-sky-400 shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between overflow-hidden group {{ $tweet->should_hide ? 'bg-rose-50/40 border-rose-300 ring-1 ring-rose-300' : '' }}"
         @if($tweet->hasTranslation()) x-data="{ showOriginal: false }" @endif
     >
         <div class="flex-1 flex flex-col">
@@ -24,7 +24,7 @@
                             href="{{ $tweet->tweet_url ?: ('https://x.com/' . $tweet->author_handle) }}"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900/85 backdrop-blur-xs text-white text-[11px] font-bold shadow-xs hover:bg-sky-600 transition-colors"
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-none bg-slate-900/85 backdrop-blur-xs text-white text-[11px] font-bold shadow-xs hover:bg-sky-600 transition-colors"
                         >
                             @if($tweet->author_avatar)
                                 <img src="{{ $tweet->author_avatar }}" alt="{{ $tweet->author_name }}" class="w-3.5 h-3.5 rounded-full object-cover">
@@ -38,14 +38,14 @@
                     <!-- Top Right Date Badge Overlay -->
                     <div class="absolute top-2.5 right-2.5">
                         @if($tweet->published_at)
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider {{ $tweet->published_at->isToday() ? 'bg-sky-500 text-white shadow-xs' : 'bg-slate-900/80 backdrop-blur-xs text-slate-200' }}">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-none text-[10px] font-extrabold uppercase tracking-wider {{ $tweet->published_at->isToday() ? 'bg-sky-500 text-white shadow-xs' : 'bg-slate-900/80 backdrop-blur-xs text-slate-200' }}">
                                 {{ $tweet->published_at->isToday() ? 'Today' : $tweet->published_at->tz('Europe/Riga')->format('d M') }}
                             </span>
                         @endif
                     </div>
 
                     @if(count($tweet->media_urls) > 1)
-                        <div class="absolute bottom-2.5 right-2.5 bg-slate-900/80 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-md">
+                        <div class="absolute bottom-2.5 right-2.5 bg-slate-900/80 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-none">
                             +{{ count($tweet->media_urls) - 1 }}
                         </div>
                     @endif
@@ -133,7 +133,7 @@
         hx-swap="outerHTML"
         hx-indicator="#tweet-loader-indicator-{{ $tweets->currentPage() }}"
     >
-        <div id="tweet-loader-indicator-{{ $tweets->currentPage() }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 text-slate-600 text-xs font-bold shadow-2xs">
+        <div id="tweet-loader-indicator-{{ $tweets->currentPage() }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-none bg-slate-100 text-slate-600 text-xs font-bold shadow-2xs">
             <i class="fa-solid fa-circle-notch fa-spin text-sky-500 text-xs"></i>
             <span>Loading more stories...</span>
         </div>

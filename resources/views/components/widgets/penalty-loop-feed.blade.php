@@ -10,8 +10,8 @@
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <div class="flex items-center gap-2 mb-1">
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sky-50 text-sky-700 text-[11px] font-extrabold uppercase tracking-wider border border-sky-200/80">
-                    <span class="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></span>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-none bg-sky-50 text-sky-700 text-[11px] font-extrabold uppercase tracking-wider border border-sky-200/80">
+                    <span class="w-1.5 h-1.5 rounded-none bg-sky-500 animate-pulse"></span>
                     Live Telemetry & News
                 </span>
             </div>
@@ -24,13 +24,13 @@
         </div>
 
         <!-- View Switcher Controls (Wide Auto, 4 Cards, 3 Cards, List) -->
-        <div class="flex items-center gap-1 bg-slate-100/90 p-1 rounded-xl self-start sm:self-auto border border-slate-200/60 shadow-inner">
+        <div class="flex items-center gap-1 bg-slate-100/90 p-1 rounded-none self-start sm:self-auto border border-slate-200/60 shadow-inner">
             <!-- Auto Fluid Grid (scales from 1 up to 6/7 cards on wider monitors) -->
             <button
                 type="button"
                 @click="setView('grid_auto')"
                 :class="(viewMode === 'grid_auto' || viewMode === 'grid_5' || !viewMode) ? 'bg-white text-sky-600 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800 font-medium'"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none text-xs transition-all cursor-pointer"
                 title="Wide Fluid Grid (auto scales up to 5-7 cards on wide/ultrawide monitors)"
             >
                 <i class="fa-solid fa-table-cells text-xs"></i>
@@ -42,7 +42,7 @@
                 type="button"
                 @click="setView('grid_4')"
                 :class="viewMode === 'grid_4' ? 'bg-white text-sky-600 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800 font-medium'"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none text-xs transition-all cursor-pointer"
                 title="4 Cards per row"
             >
                 <i class="fa-solid fa-border-all text-xs"></i>
@@ -54,7 +54,7 @@
                 type="button"
                 @click="setView('grid_3')"
                 :class="viewMode === 'grid_3' ? 'bg-white text-sky-600 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800 font-medium'"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none text-xs transition-all cursor-pointer"
                 title="3 Cards per row"
             >
                 <i class="fa-solid fa-table-cells-large text-xs"></i>
@@ -66,7 +66,7 @@
                 type="button"
                 @click="setView('list')"
                 :class="viewMode === 'list' ? 'bg-white text-sky-600 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800 font-medium'"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none text-xs transition-all cursor-pointer"
                 title="Compact single column list"
             >
                 <i class="fa-solid fa-bars-staggered text-xs"></i>
