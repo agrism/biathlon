@@ -16,7 +16,7 @@
             @if($hasMedia)
                 <!-- Top Media Container (Image from tweet / web card) -->
                 <div class="w-full aspect-[16/10] sm:h-48 xl:h-52 2xl:h-56 overflow-hidden relative bg-slate-100 flex-shrink-0">
-                    <a href="{{ $tweet->tweet_url ?: ('https://x.com/' . $tweet->author_handle) }}" target="_blank" rel="noopener noreferrer" class="block w-full h-full">
+                    <a href="{{ $tweet->tweet_url ?: ('https://x.com/' . $tweet->author_handle) }}" target="_blank" rel="noopener noreferrer" class="block w-full h-full relative z-0">
                         <img
                             src="{{ $tweet->media_urls[0] }}"
                             alt="Media for {{ $tweet->author_handle }}"
@@ -25,13 +25,13 @@
                         >
                     </a>
                     <!-- Top subtle dark vignette for author and date pill readability -->
-                    <div class="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-black/45 via-black/15 to-transparent pointer-events-none"></div>
+                    <div class="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-black/45 via-black/15 to-transparent pointer-events-none z-10"></div>
 
-                    <!-- Bottom subtle gradual transition only at the very bottom edge -->
-                    <div class="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-white via-white/60 to-transparent pointer-events-none"></div>
+                    <!-- Bottom smooth gradual transition from image to light white card background -->
+                    <div class="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-10"></div>
 
                     <!-- Top Left Author Pill Overlay -->
-                    <div class="absolute top-2.5 left-2.5 z-10">
+                    <div class="absolute top-2.5 left-2.5 z-20">
                         <a
                             href="{{ $tweet->tweet_url ?: ('https://x.com/' . $tweet->author_handle) }}"
                             target="_blank"
@@ -48,7 +48,7 @@
                     </div>
 
                     <!-- Top Right Date Badge Overlay -->
-                    <div class="absolute top-2.5 right-2.5 z-10">
+                    <div class="absolute top-2.5 right-2.5 z-20">
                         @if($tweet->published_at)
                             <span class="inline-flex items-center px-2 py-0.5 rounded-[4px] text-[10px] font-extrabold uppercase tracking-wider {{ $tweet->published_at->isToday() ? 'bg-sky-500 text-white shadow-xs' : 'bg-slate-900/80 backdrop-blur-md text-slate-200 border border-white/20' }}">
                                 {{ $tweet->published_at->isToday() ? 'Today' : $tweet->published_at->tz('Europe/Riga')->format('d M Y') }}
@@ -57,7 +57,7 @@
                     </div>
 
                     @if(count($tweet->media_urls) > 1)
-                        <div class="absolute bottom-2.5 right-2.5 bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-[4px] border border-white/20 z-10">
+                        <div class="absolute bottom-2.5 right-2.5 bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-[4px] border border-white/20 z-20">
                             +{{ count($tweet->media_urls) - 1 }}
                         </div>
                     @endif
@@ -66,7 +66,7 @@
                 <!-- Top Media Container (First Mentioned Athlete Portrait - Crisp Light Winter Snow Theme) -->
                 <div class="w-full aspect-[16/10] sm:h-48 xl:h-52 2xl:h-56 overflow-hidden relative bg-gradient-to-b from-sky-200 via-sky-100 to-slate-100 flex-shrink-0 group/athlete">
                     <!-- Crisp Alpine Snowy Mountain Silhouettes -->
-                    <div class="absolute inset-0 pointer-events-none opacity-35">
+                    <div class="absolute inset-0 pointer-events-none opacity-35 z-0">
                         <svg class="w-full h-full" viewBox="0 0 400 240" preserveAspectRatio="none" fill="none">
                             <path d="M0,170 L75,105 L145,145 L235,75 L315,135 L400,85 L400,240 L0,240 Z" fill="#38bdf8" opacity="0.35"/>
                             <path d="M0,185 L55,145 L135,175 L215,125 L295,165 L400,130 L400,240 L0,240 Z" fill="#7dd3fc" opacity="0.45"/>
@@ -75,10 +75,10 @@
                     </div>
 
                     <!-- Subtle Snowflakes / Frost Sparkle Texture -->
-                    <div class="absolute inset-0 opacity-25 bg-[radial-gradient(#0284c7_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none"></div>
-                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-32 bg-sky-300/30 rounded-full blur-2xl pointer-events-none"></div>
+                    <div class="absolute inset-0 opacity-25 bg-[radial-gradient(#0284c7_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none z-0"></div>
+                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-32 bg-sky-300/30 rounded-full blur-2xl pointer-events-none z-0"></div>
 
-                    <a href="{{ route('athletes.show', $mentionedAthlete->id) }}" class="block w-full h-full relative z-10">
+                    <a href="{{ route('athletes.show', $mentionedAthlete->id) }}" class="block w-full h-full relative z-0">
                         <img
                             src="{{ $mentionedAthlete->photo_uri }}"
                             alt="{{ $mentionedAthlete->given_name }} {{ $mentionedAthlete->family_name }}"
@@ -88,10 +88,10 @@
                     </a>
 
                     <!-- Top subtle vignette for badge contrast -->
-                    <div class="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-slate-900/35 to-transparent pointer-events-none z-15"></div>
+                    <div class="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-slate-900/35 to-transparent pointer-events-none z-10"></div>
 
-                    <!-- Bottom subtle gradual transition only at the very bottom edge -->
-                    <div class="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-white via-white/60 to-transparent pointer-events-none z-15"></div>
+                    <!-- Bottom smooth gradual transition from image to light white card background -->
+                    <div class="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-10"></div>
 
                     <!-- Top Left Author Pill Overlay -->
                     <div class="absolute top-2.5 left-2.5 z-20">
@@ -145,17 +145,17 @@
                 @endphp
                 <div class="w-full aspect-[16/10] sm:h-48 xl:h-52 2xl:h-56 overflow-hidden relative bg-gradient-to-b from-sky-100 via-sky-50 to-white flex flex-col justify-between p-3.5 flex-shrink-0 select-none">
                     <!-- Mountain Silhouettes & Snow Texture -->
-                    <div class="absolute inset-0 pointer-events-none opacity-30">
+                    <div class="absolute inset-0 pointer-events-none opacity-30 z-0">
                         <svg class="w-full h-full" viewBox="0 0 400 240" preserveAspectRatio="none" fill="none">
                             <path d="M0,170 L75,105 L145,145 L235,75 L315,135 L400,85 L400,240 L0,240 Z" fill="#38bdf8" opacity="0.3"/>
                             <path d="M0,195 L60,150 L140,180 L220,130 L300,175 L400,140 L400,240 L0,240 Z" fill="#7dd3fc" opacity="0.4"/>
                             <path d="M0,215 L100,190 L200,210 L300,185 L400,200 L400,240 L0,240 Z" fill="#ffffff" opacity="0.9"/>
                         </svg>
                     </div>
-                    <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#0284c7_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none"></div>
+                    <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#0284c7_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none z-0"></div>
 
-                    <!-- Bottom subtle gradual transition only at the very bottom edge -->
-                    <div class="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-white via-white/50 to-transparent pointer-events-none"></div>
+                    <!-- Bottom smooth gradual transition from image to light white card background -->
+                    <div class="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-10"></div>
 
                     <!-- Top Bar: Author Pill & Date Badge -->
                     <div class="flex items-center justify-between gap-2 relative z-10">
