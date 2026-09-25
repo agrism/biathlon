@@ -25,10 +25,10 @@
                         >
                     </a>
                     <!-- Top subtle dark vignette for author and date pill readability -->
-                    <div class="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-black/45 via-black/15 to-transparent pointer-events-none"></div>
+                    <div class="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-black/45 via-black/15 to-transparent pointer-events-none"></div>
 
-                    <!-- Bottom smooth gradual transition from image to light white card background -->
-                    <div class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none"></div>
+                    <!-- Bottom subtle gradual transition only at the very bottom edge -->
+                    <div class="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-white via-white/60 to-transparent pointer-events-none"></div>
 
                     <!-- Top Left Author Pill Overlay -->
                     <div class="absolute top-2.5 left-2.5 z-10">
@@ -88,10 +88,10 @@
                     </a>
 
                     <!-- Top subtle vignette for badge contrast -->
-                    <div class="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-slate-900/35 to-transparent pointer-events-none z-15"></div>
+                    <div class="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-slate-900/35 to-transparent pointer-events-none z-15"></div>
 
-                    <!-- Bottom smooth gradual transition from image to light white card background -->
-                    <div class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-15"></div>
+                    <!-- Bottom subtle gradual transition only at the very bottom edge -->
+                    <div class="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-white via-white/60 to-transparent pointer-events-none z-15"></div>
 
                     <!-- Top Left Author Pill Overlay -->
                     <div class="absolute top-2.5 left-2.5 z-20">
@@ -154,8 +154,8 @@
                     </div>
                     <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#0284c7_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none"></div>
 
-                    <!-- Bottom smooth gradual transition to white -->
-                    <div class="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-white via-white/70 to-transparent pointer-events-none"></div>
+                    <!-- Bottom subtle gradual transition only at the very bottom edge -->
+                    <div class="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-white via-white/50 to-transparent pointer-events-none"></div>
 
                     <!-- Top Bar: Author Pill & Date Badge -->
                     <div class="flex items-center justify-between gap-2 relative z-10">
