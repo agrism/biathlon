@@ -34,6 +34,7 @@ class Tweet extends Model
         'translated_content',
         'source_language',
         'media_urls',
+        'mentioned_athlete_id',
         'likes_count',
         'retweets_count',
         'tweet_url',
@@ -47,11 +48,17 @@ class Tweet extends Model
 
     protected $casts = [
         'media_urls' => 'array',
+        'mentioned_athlete_id' => 'integer',
         'published_at' => 'datetime',
         'likes_count' => 'integer',
         'retweets_count' => 'integer',
         'should_hide' => 'boolean',
     ];
+
+    public function mentionedAthlete(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Athlete::class, 'mentioned_athlete_id');
+    }
 
     public function hasTranslation(): bool
     {
@@ -78,24 +85,30 @@ class Tweet extends Model
      */
     public function findFirstMentionedAthlete(): ?\App\Models\Athlete
     {
+        if ($this->relationLoaded('mentionedAthlete') && $this->mentionedAthlete) {
+            return $this->mentionedAthlete;
+        }
+
         if ($this->mentionedAthleteChecked) {
             return $this->cachedMentionedAthlete;
         }
 
         $this->mentionedAthleteChecked = true;
 
-        if ($this->id) {
-            $athleteId = \Illuminate\Support\Facades\Cache::remember(
-                "tweet_athlete_id_v3_{$this->id}",
-                86400 * 7,
-                fn() => app(\App\Services\BiathlonTweetService::class)->findMentionedAthleteInText($this->content)?->id
-            );
+        if ($this->mentioned_athlete_id) {
+            $this->cachedMentionedAthlete = $this->mentionedAthlete;
+            return $this->cachedMentionedAthlete;
+        }
 
-            if ($athleteId) {
-                $this->cachedMentionedAthlete = app(\App\Services\BiathlonTweetService::class)->getAthleteById($athleteId);
+        $athlete = app(\App\Services\BiathlonTweetService::class)->findMentionedAthleteInText($this->content);
+        $this->cachedMentionedAthlete = $athlete;
+
+        if ($this->id && $athlete && \Illuminate\Support\Facades\Schema::hasColumn('tweets', 'mentioned_athlete_id')) {
+            try {
+                $this->updateQuietly(['mentioned_athlete_id' => $athlete->id]);
+            } catch (\Throwable $e) {
+                // Ignore silent migration timing differences
             }
-        } else {
-            $this->cachedMentionedAthlete = app(\App\Services\BiathlonTweetService::class)->findMentionedAthleteInText($this->content);
         }
 
         return $this->cachedMentionedAthlete;

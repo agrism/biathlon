@@ -443,7 +443,7 @@ class BiathlonTweetService
             $this->syncTweets();
         }
 
-        $query = Tweet::query();
+        $query = Tweet::query()->with('mentionedAthlete');
 
         $isAdmin = (bool) auth()->user()?->isAdmin();
         if (!$isAdmin) {
@@ -464,7 +464,7 @@ class BiathlonTweetService
         $cacheKey = 'biathlon_latest_tweets_' . $limit . ($isAdmin ? '_admin' : '');
 
         return Cache::remember($cacheKey, 300, function () use ($limit, $isAdmin) {
-            $query = Tweet::query();
+            $query = Tweet::query()->with('mentionedAthlete');
             if (!$isAdmin) {
                 $query->where('should_hide', false);
             }
@@ -476,7 +476,7 @@ class BiathlonTweetService
 
             if ($tweets->isEmpty()) {
                 $this->syncTweets();
-                $query = Tweet::query();
+                $query = Tweet::query()->with('mentionedAthlete');
                 if (!$isAdmin) {
                     $query->where('should_hide', false);
                 }
