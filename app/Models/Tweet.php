@@ -60,6 +60,22 @@ class Tweet extends Model
         return $this->belongsTo(Athlete::class, 'mentioned_athlete_id');
     }
 
+    protected static function booted(): void
+    {
+        static::saving(function (Tweet $tweet) {
+            if (empty($tweet->media_urls) && empty($tweet->mentioned_athlete_id) && !empty($tweet->content)) {
+                try {
+                    $athlete = app(\App\Services\BiathlonTweetService::class)->findMentionedAthleteInText($tweet->content);
+                    if ($athlete) {
+                        $tweet->mentioned_athlete_id = $athlete->id;
+                    }
+                } catch (\Throwable $e) {
+                    // Ignore during testing / bootstrapping
+                }
+            }
+        });
+    }
+
     public function hasTranslation(): bool
     {
         return !empty($this->translated_content)
