@@ -79,9 +79,9 @@
         @mouseenter="autoplay = false"
         @mouseleave="autoplay = true"
     >
-        <div class="grid grid-cols-1 lg:grid-cols-12 min-h-[360px] lg:min-h-[380px]">
-            <!-- Left Side: Editorial Content & Controls (5 cols on lg) -->
-            <div class="lg:col-span-5 p-6 sm:p-8 lg:p-10 flex flex-col justify-between bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 text-white z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 min-h-[400px] sm:min-h-[460px] lg:min-h-[520px] xl:min-h-[580px] 2xl:min-h-[640px] 3xl:min-h-[700px]">
+            <!-- Left Side: Editorial Content & Controls (5 cols on lg, 4 cols on 2xl) -->
+            <div class="lg:col-span-5 2xl:col-span-4 p-6 sm:p-8 lg:p-10 xl:p-12 flex flex-col justify-between bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 text-white z-10">
                 <!-- Top Tag & Counter -->
                 <div class="flex items-center justify-between gap-3 mb-4">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-black uppercase tracking-wider">
@@ -94,21 +94,21 @@
                 </div>
 
                 <!-- Middle Headline & Subtitle -->
-                <div class="my-auto py-2">
-                    <h2 class="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight leading-tight" x-text="slides[active].title"></h2>
-                    <p class="text-xs sm:text-sm text-slate-300 mt-2.5 leading-relaxed font-medium" x-text="slides[active].subtitle"></p>
+                <div class="my-auto py-4">
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight" x-text="slides[active].title"></h2>
+                    <p class="text-sm sm:text-base text-slate-300 mt-3.5 leading-relaxed font-medium" x-text="slides[active].subtitle"></p>
                 </div>
 
                 <!-- Bottom Navigation Toolbar -->
-                <div class="flex items-center justify-between gap-4 pt-4 border-t border-slate-800/80 mt-4">
+                <div class="flex items-center justify-between gap-4 pt-5 border-t border-slate-800/80 mt-4">
                     <!-- Dots -->
                     <div class="flex items-center gap-1.5">
                         <template x-for="(slide, index) in slides" :key="index">
                             <button
                                 type="button"
                                 @click="goTo(index)"
-                                class="h-2 rounded-full transition-all duration-300 cursor-pointer"
-                                :class="active === index ? 'w-6 bg-sky-400' : 'w-2 bg-slate-700 hover:bg-slate-500'"
+                                class="h-2.5 rounded-full transition-all duration-300 cursor-pointer"
+                                :class="active === index ? 'w-8 bg-sky-400' : 'w-2.5 bg-slate-700 hover:bg-slate-500'"
                                 :aria-label="'Go to slide ' + (index + 1)"
                             ></button>
                         </template>
@@ -119,25 +119,25 @@
                         <button
                             type="button"
                             @click="prev()"
-                            class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white flex items-center justify-center border border-slate-700 transition-all cursor-pointer shadow-xs"
+                            class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white flex items-center justify-center border border-slate-700 transition-all cursor-pointer shadow-xs"
                             aria-label="Previous Slide"
                         >
-                            <i class="fa-solid fa-chevron-left text-xs"></i>
+                            <i class="fa-solid fa-chevron-left text-sm"></i>
                         </button>
                         <button
                             type="button"
                             @click="next()"
-                            class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white flex items-center justify-center border border-slate-700 transition-all cursor-pointer shadow-xs"
+                            class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white flex items-center justify-center border border-slate-700 transition-all cursor-pointer shadow-xs"
                             aria-label="Next Slide"
                         >
-                            <i class="fa-solid fa-chevron-right text-xs"></i>
+                            <i class="fa-solid fa-chevron-right text-sm"></i>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Side: High-Resolution Visual (7 cols on lg) -->
-            <div class="lg:col-span-7 relative bg-slate-950 overflow-hidden min-h-[260px] sm:min-h-[320px] lg:min-h-full">
+            <!-- Right Side: High-Resolution Visual (7 cols on lg, 8 cols on 2xl) -->
+            <div class="lg:col-span-7 2xl:col-span-8 relative bg-slate-950 overflow-hidden min-h-[300px] sm:min-h-[380px] lg:min-h-full">
                 <template x-for="(slide, index) in slides" :key="index">
                     <div
                         x-show="active === index"
@@ -152,10 +152,10 @@
                         <img
                             :src="slide.src"
                             :alt="slide.title"
-                            class="w-full h-full object-cover object-center"
+                            class="w-full h-full object-cover object-top"
                         >
                         <!-- Left-edge subtle vignette connecting into card -->
-                        <div class="hidden lg:block absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-slate-900 to-transparent pointer-events-none"></div>
+                        <div class="hidden lg:block absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-slate-900 to-transparent pointer-events-none"></div>
                     </div>
                 </template>
             </div>

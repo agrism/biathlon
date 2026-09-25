@@ -7,12 +7,12 @@
         <div class="flex-1 flex flex-col">
             <!-- Top Media Container (Image if available) -->
             @if(!empty($tweet->media_urls) && is_array($tweet->media_urls) && count($tweet->media_urls) > 0)
-                <div class="w-full aspect-video sm:h-44 overflow-hidden relative bg-slate-900 flex-shrink-0">
+                <div class="w-full aspect-[16/10] sm:h-48 xl:h-52 2xl:h-56 overflow-hidden relative bg-slate-900 flex-shrink-0">
                     <a href="{{ $tweet->tweet_url ?: ('https://x.com/' . $tweet->author_handle) }}" target="_blank" rel="noopener noreferrer" class="block w-full h-full">
                         <img
                             src="{{ $tweet->media_urls[0] }}"
                             alt="Media for {{ $tweet->author_handle }}"
-                            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            class="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                             loading="lazy"
                         >
                     </a>
