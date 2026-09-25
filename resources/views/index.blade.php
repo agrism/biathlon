@@ -148,20 +148,15 @@
                         x-transition:leave="transition ease-in duration-400"
                         x-transition:leave-start="opacity-100 scale-100"
                         x-transition:leave-end="opacity-0 scale-98"
-                        class="absolute inset-0 w-full h-full flex items-center justify-center"
+                        class="absolute inset-0 w-full h-full flex items-center justify-center overflow-hidden"
                     >
-                        <!-- Foreground crisp photo in full brightness -->
+                        <!-- Foreground crisp photo with ~7mm soft gradient transition on edges into dark background -->
                         <img
                             :src="slide.src"
                             :alt="slide.title"
-                            class="relative h-full w-full object-cover lg:object-contain object-center z-10"
+                            class="relative h-full w-auto max-w-full object-cover lg:object-contain object-center z-10"
+                            style="mask-image: linear-gradient(to right, transparent 0, black 7mm, black calc(100% - 7mm), transparent 100%); -webkit-mask-image: linear-gradient(to right, transparent 0, black 7mm, black calc(100% - 7mm), transparent 100%);"
                         >
-
-                        <!-- Left-edge subtle vignette connecting smoothly to text block without obscuring people -->
-                        <div class="hidden lg:block absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-slate-950 to-transparent pointer-events-none z-20"></div>
-
-                        <!-- Right-edge subtle vignette -->
-                        <div class="hidden lg:block absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-slate-950 to-transparent pointer-events-none z-20"></div>
                     </div>
                 </template>
             </div>
