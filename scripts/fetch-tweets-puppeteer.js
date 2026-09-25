@@ -489,10 +489,46 @@ async function scrapeRssFeed(page, rssUrl, timeout = 25000) {
             const titleMatch = /<title>(?:<!\[CDATA\[(.*?)\]\]>|(.*?))<\/title>/is.exec(itemBlock);
             const title = (titleMatch ? (titleMatch[1] || titleMatch[2]) : '').trim();
 
-            const descMatch = /<description>(?:<!\[CDATA\[(.*?)\]\]>|(.*?))<\/description>/is.exec(itemBlock);
-            let desc = (descMatch ? (descMatch[1] || descMatch[2]) : '').trim();
-            // Strip HTML tags from description
-            desc = desc.replace(/<\/?[^>]+(>|$)/g, '');
+            const encodedMatch = /<content:encoded>(?:<!\[CDATA\[([\s\S]*?)\]\]>|([\s\S]*?))<\/content:encoded>/is.exec(itemBlock);
+            const rawContent = (encodedMatch ? (encodedMatch[1] || encodedMatch[2]) : '') || (descMatch ? (descMatch[1] || descMatch[2]) : '');
+
+            // Convert emoji images, tables and block elements to structured clean text
+            let processedHtml = rawContent;
+            processedHtml = processedHtml.replace(/<img[^>]+alt=["']([^"']+)["'][^>]*>/gi, '$1');
+            processedHtml = processedHtml.replace(/<tr[^>]*>([\s\S]*?)<\/tr>/gi, (match, trContent) => {
+                const tdRegex = /<(?:td|th)[^>]*>([\s\S]*?)<\/(?:td|th)>/gi;
+                const cells = [];
+                let tdMatch;
+                while ((tdMatch = tdRegex.exec(trContent)) !== null) {
+                    let cellText = tdMatch[1].replace(/<img[^>]+alt=["']([^"']+)["'][^>]*>/gi, '$1').replace(/<\/?[^>]+(>|$)/g, '').trim();
+                    if (cellText) cells.push(cellText);
+                }
+                if (cells.length === 2) return cells[0] + ': ' + cells[1] + '\n';
+                if (cells.length > 0) return cells.join(' | ') + '\n';
+                return '\n';
+            });
+            processedHtml = processedHtml.replace(/<\/(?:p|div|h[1-6]|li|figure|table)>/gi, '\n');
+            processedHtml = processedHtml.replace(/<br\s*\/?>/gi, '\n');
+            let cleanDesc = processedHtml.replace(/<\/?[^>]+(>|$)/g, '');
+            // Decode HTML entities
+            cleanDesc = cleanDesc.replace(/&#8217;/g, '’').replace(/&#8216;/g, '‘').replace(/&#8220;/g, '“').replace(/&#8221;/g, '”').replace(/&#8211;/g, '–').replace(/&#8212;/g, '—').replace(/&#038;/g, '&').replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').replace(/&quot;/g, '"');
+            cleanDesc = cleanDesc.replace(/[ \t]+/g, ' ').replace(/\n[ \t]+/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+
+            let cleanTitle = title.replace(/&#8217;/g, '’').replace(/&#8216;/g, '‘').replace(/&#8220;/g, '“').replace(/&#8221;/g, '”').replace(/&#8211;/g, '–').replace(/&#8212;/g, '—').replace(/&#038;/g, '&').replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').replace(/&quot;/g, '"').trim();
+            if (cleanDesc.startsWith(cleanTitle)) {
+                cleanDesc = cleanDesc.substring(cleanTitle.length).trim();
+            }
+            if (cleanDesc.length > 350) {
+                const truncated = cleanDesc.substring(0, 350);
+                const lastNewline = truncated.lastIndexOf('\n');
+                const lastPeriod = truncated.lastIndexOf('. ');
+                const cutoff = Math.max(lastNewline > 0 ? lastNewline : 0, lastPeriod > 0 ? lastPeriod + 1 : 0);
+                if (cutoff > 200) {
+                    cleanDesc = truncated.substring(0, cutoff);
+                } else {
+                    cleanDesc = truncated + '...';
+                }
+            }
 
             const linkMatch = /<link>(?:<!\[CDATA\[(.*?)\]\]>|(.*?))<\/link>/is.exec(itemBlock);
             const link = (linkMatch ? (linkMatch[1] || linkMatch[2]) : '').trim();
@@ -521,8 +557,8 @@ async function scrapeRssFeed(page, rssUrl, timeout = 25000) {
                 }
             }
 
-            if (title || desc) {
-                const textContent = `📝 ${title}${desc ? "\n" + desc.substring(0, 240) + '...' : ''}`;
+            if (cleanTitle || cleanDesc) {
+                const textContent = `📝 ${cleanTitle}${cleanDesc ? "\n" + cleanDesc : ''}`;
                 const slugMatch = link.match(/\/([^\/]+)\/?$/);
                 const slug = slugMatch ? slugMatch[1] : Buffer.from(link).toString('base64').substring(0, 16);
 

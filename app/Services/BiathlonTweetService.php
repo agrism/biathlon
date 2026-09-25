@@ -949,8 +949,9 @@ class BiathlonTweetService
                 if ($xml && isset($xml->channel->item)) {
                     foreach ($xml->channel->item as $item) {
                         $title = trim((string)$item->title);
-                        $desc = strip_tags(trim((string)$item->description));
-                        $content = "📝 " . $title . ($desc ? "\n" . substr($desc, 0, 240) . '...' : '');
+                        $contentNs = $item->children('http://purl.org/rss/1.0/modules/content/');
+                        $encodedContent = isset($contentNs->encoded) ? (string)$contentNs->encoded : (string)$item->description;
+                        $content = $this->extractCleanArticleContent($encodedContent, $title);
 
                         $link = trim((string)$item->link);
                         $slug = basename(parse_url($link, PHP_URL_PATH));
@@ -984,8 +985,6 @@ class BiathlonTweetService
                         }
 
                         // Check content:encoded for embedded <img> tags
-                        $contentNs = $item->children('http://purl.org/rss/1.0/modules/content/');
-                        $encodedContent = isset($contentNs->encoded) ? (string)$contentNs->encoded : (string)$item->description;
                         if (!empty($encodedContent)) {
                             preg_match_all('/<img[^>]+(?:src|data-orig-file)=["\']([^"\']+)["\']/i', $encodedContent, $imgMatches);
                             if (!empty($imgMatches[1])) {
@@ -1026,6 +1025,68 @@ class BiathlonTweetService
         }
 
         return $synced;
+    }
+
+    /**
+     * Convert HTML tables, emoji images, and block elements from RSS into clean readable text
+     */
+    public function extractCleanArticleContent(string $rawHtml, string $title): string
+    {
+        // 1. Convert WordPress emoji images (<img alt="🥇" ...>) to raw emoji
+        $html = preg_replace('/<img[^>]+alt=[\'"]([^\'"]+)[\'"][^>]*>/i', '$1', $rawHtml);
+
+        // 2. Convert table structures (e.g. <tr><td>Nation</td><td>Medals</td></tr>) into clean text rows
+        $html = preg_replace_callback('/<tr[^>]*>(.*?)<\/tr>/is', function ($m) {
+            preg_match_all('/<(?:td|th)[^>]*>(.*?)<\/(?:td|th)>/is', $m[1], $tds);
+            if (!empty($tds[1])) {
+                $cells = array_map(function ($c) {
+                    $c = preg_replace('/<img[^>]+alt=[\'"]([^\'"]+)[\'"][^>]*>/i', '$1', $c);
+                    return trim(strip_tags($c));
+                }, $tds[1]);
+                $cells = array_filter($cells, fn($c) => $c !== '');
+                if (count($cells) === 2) {
+                    return $cells[0] . ': ' . $cells[1] . "\n";
+                }
+                return implode(' | ', $cells) . "\n";
+            }
+            return "\n";
+        }, $html);
+
+        // 3. Convert block level elements to newlines
+        $html = preg_replace('/<\/(?:p|div|h[1-6]|li|figure|table)>/i', "\n", $html);
+        $html = preg_replace('/<br\s*\/?>/i', "\n", $html);
+
+        // 4. Strip remaining HTML tags and decode entities
+        $text = strip_tags($html);
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        // 5. Normalize whitespace and newlines
+        $text = preg_replace('/[ \t]+/u', ' ', $text);
+        $text = preg_replace("/\n[ \t]+/u", "\n", $text);
+        $text = preg_replace("/\n{3,}/u", "\n\n", $text);
+        $text = trim($text);
+
+        // 6. Avoid repeating title if text starts with it
+        $cleanTitle = html_entity_decode(trim($title), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if (str_starts_with($text, $cleanTitle)) {
+            $text = trim(substr($text, strlen($cleanTitle)));
+        }
+
+        // Limit excerpt to reasonable length (~350 chars) while keeping clean sentence cutoff
+        if (mb_strlen($text) > 350) {
+            $truncated = mb_substr($text, 0, 350);
+            $lastNewline = mb_strrpos($truncated, "\n");
+            $lastPeriod = mb_strrpos($truncated, '. ');
+            $cutoff = max($lastNewline !== false ? $lastNewline : 0, $lastPeriod !== false ? $lastPeriod + 1 : 0);
+            if ($cutoff > 200) {
+                $text = mb_substr($truncated, 0, $cutoff);
+            } else {
+                $text = $truncated . '...';
+            }
+        }
+
+        return "📝 " . $cleanTitle . ($text ? "\n" . $text : '');
     }
 
     /**

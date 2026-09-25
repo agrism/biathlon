@@ -76,45 +76,125 @@ class Tweet extends Model
             return '';
         }
 
+        // 1. Decode HTML entities multiple times (handles &#8217;, &#8220;, &amp;, &quot;, etc.)
+        $decoded = html_entity_decode($raw, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $decoded = html_entity_decode($decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        $decoded = str_replace(
+            ['&#8217;', '&#8216;', '&#8220;', '&#8221;', '&#8211;', '&#8212;', '&#038;', '&amp;', '&nbsp;', '&quot;', '&apos;'],
+            ["’", "‘", "“", "”", "–", "—", "&", "&", " ", '"', "'"],
+            $decoded
+        );
+
         // Clean double protocols if any
-        $content = preg_replace('~https?://https?://~i', 'https://', $raw);
+        $decoded = preg_replace('~https?://https?://~i', 'https://', $decoded);
 
-        $content = e(trim($content));
+        // 2. Expand squashed table fragments from scraped web articles
+        $decoded = preg_replace('/Nations Medal Table\s*Nations Medals/iu', "🏆 Nations Medal Table:\n", $decoded);
+        $decoded = preg_replace('/Athletes \([^)]+\) Medal Table\s*Athlete Medals/iu', "\n🏅 Athletes Medal Table:\n", $decoded);
+        $decoded = preg_replace('/([🥇🥈🥉]+)\s+([A-ZÀ-ÖØ-ß][a-zA-ZÀ-ÿ\s\-\.]{2,30})(?=\s+[🥇🥈🥉])/u', "$1\n• $2", $decoded);
 
-        // Convert URLs (both https?:// and domain paths like penaltyloop.com/..., www.example.com, etc.) to clickable links with shortened visible text
-        $content = preg_replace_callback(
-            '~(https?://[^\s<]+|(?:www\.|[a-zA-Z0-9-]+\.(?:com|org|net|lv|no|de|fr|info|io|co|me|tv|social))(?:\/[^\s<]*)?)~i',
-            function ($matches) {
-                $url = $matches[1];
-                $cleanUrl = rtrim($url, '.,;:!?');
-                $href = (stripos($cleanUrl, 'http://') === 0 || stripos($cleanUrl, 'https://') === 0)
-                    ? $cleanUrl
-                    : 'https://' . $cleanUrl;
+        $lines = explode("\n", trim($decoded));
+        $formattedLines = [];
 
-                $displayUrl = preg_replace('~^https?://(?:www\.)?~i', '', $cleanUrl);
-                if (mb_strlen($displayUrl) > 34) {
-                    $displayUrl = mb_substr($displayUrl, 0, 31) . '…';
-                }
+        foreach ($lines as $index => $line) {
+            $trimmed = trim($line);
+            if ($trimmed === '') {
+                continue;
+            }
 
-                return '<a href="' . $href . '" target="_blank" rel="noopener noreferrer" title="' . $href . '" class="text-sky-600 hover:underline font-semibold">' . $displayUrl . '</a>';
-            },
-            $content
-        );
+            // Article Header: 📝 Title
+            if ($index === 0 && preg_match('/^📝\s*(.*)$/u', $trimmed, $m)) {
+                $titleText = e(trim($m[1]));
+                $formattedLines[] = '<div class="font-bold text-slate-900 text-sm mb-1.5 pb-1 border-b border-slate-100 flex items-center gap-1.5"><span class="text-sky-600 text-xs">📝</span><span>' . $titleText . '</span></div>';
+                continue;
+            }
 
-        // Format @mentions as styled badges
-        $content = preg_replace(
-            '/(^|\s)@([A-Za-z0-9_]+)/',
-            '$1<span class="text-sky-600 font-bold">@$2</span>',
-            $content
-        );
+            // Escape line content
+            $escaped = e($trimmed);
 
-        // Format #hashtags as styled tags (keeping hashtags intact)
-        $content = preg_replace(
-            '/(^|\s)#([A-Za-z0-9_]+)/u',
-            '$1<span class="text-sky-600 font-semibold">#$2</span>',
-            $content
-        );
+            // Convert URLs to clickable links with shortened visible text
+            $escaped = preg_replace_callback(
+                '~(https?://[^\s<]+|(?:www\.|[a-zA-Z0-9-]+\.(?:com|org|net|lv|no|de|fr|info|io|co|me|tv|social))(?:\/[^\s<]*)?)~i',
+                function ($matches) {
+                    $url = $matches[1];
+                    $cleanUrl = rtrim($url, '.,;:!?');
+                    $href = (stripos($cleanUrl, 'http://') === 0 || stripos($cleanUrl, 'https://') === 0)
+                        ? $cleanUrl
+                        : 'https://' . $cleanUrl;
 
-        return nl2br($content);
+                    $displayUrl = preg_replace('~^https?://(?:www\.)?~i', '', $cleanUrl);
+                    if (mb_strlen($displayUrl) > 34) {
+                        $displayUrl = mb_substr($displayUrl, 0, 31) . '…';
+                    }
+
+                    return '<a href="' . $href . '" target="_blank" rel="noopener noreferrer" title="' . $href . '" class="text-sky-600 hover:underline font-semibold">' . $displayUrl . '</a>';
+                },
+                $escaped
+            );
+
+            // Format @mentions as styled badges
+            $escaped = preg_replace(
+                '/(^|\s)@([A-Za-z0-9_]+)/',
+                '$1<span class="text-sky-600 font-bold">@$2</span>',
+                $escaped
+            );
+
+            // Format #hashtags as styled tags
+            $escaped = preg_replace(
+                '/(^|\s)#([A-Za-z0-9_]+)/u',
+                '$1<span class="text-sky-600 font-semibold">#$2</span>',
+                $escaped
+            );
+
+            // Numbered Rankings (e.g. "1) Eric Perrot...", "1. Johannes...")
+            if (preg_match('/^([1-9]|1[0-9]|20)[\)\.]\s*(.*)$/u', $trimmed, $rm)) {
+                $rank = (int)$rm[1];
+                $restEscaped = preg_replace('/^([1-9]|1[0-9]|20)[\)\.]\s*/u', '', $escaped);
+
+                $badgeStyle = match ($rank) {
+                    1 => 'bg-amber-100 text-amber-800 border border-amber-300 font-black',
+                    2 => 'bg-slate-200 text-slate-800 border border-slate-300 font-black',
+                    3 => 'bg-amber-700/15 text-amber-900 border border-amber-700/30 font-black',
+                    default => 'bg-slate-100 text-slate-600 font-bold',
+                };
+
+                $formattedLines[] = '<div class="flex items-center gap-2 my-0.5 py-0.5 text-xs"><span class="inline-flex items-center justify-center w-5 h-5 rounded-[4px] ' . $badgeStyle . ' text-[10px] flex-shrink-0 shadow-2xs">' . $rank . '</span><span class="font-medium truncate">' . $restEscaped . '</span></div>';
+                continue;
+            }
+
+            // Bullet List Items (e.g. "- Highlights...", "– Sunday...", "• Item...")
+            if (preg_match('/^[-–—•]\s*(.*)$/u', $trimmed)) {
+                $bulletContent = preg_replace('/^[-–—•]\s*/u', '', $escaped);
+                $formattedLines[] = '<div class="flex items-start gap-1.5 my-0.5 text-xs"><span class="text-sky-500 font-bold leading-none mt-0.5 text-xs flex-shrink-0">•</span><span>' . $bulletContent . '</span></div>';
+                continue;
+            }
+
+            // Country / Athlete Medals Row (e.g. "France: 🥇🥇🥇..." or "• France: 🥇...")
+            if (preg_match('/^([A-ZÀ-ÖØ-ß][a-zA-ZÀ-ÿ\s\-\.]{2,30}):\s*([🥇🥈🥉\s]+)$/u', $trimmed, $mm)) {
+                $nameEscaped = e(trim($mm[1]));
+                $medals = trim($mm[2]);
+                $formattedLines[] = '<div class="flex items-center justify-between gap-2 py-0.5 my-0.5 text-xs border-b border-slate-100 last:border-0"><span class="font-semibold text-slate-700">' . $nameEscaped . '</span><span class="tracking-widest flex-shrink-0">' . $medals . '</span></div>';
+                continue;
+            }
+
+            // Section titles (e.g. "🏆 Nations Medal Table:", "🏅 Athletes Medal Table:")
+            if (preg_match('/^(?:🏆|🏅|Dates:|Schedule:)/u', $trimmed)) {
+                $formattedLines[] = '<div class="font-bold text-slate-800 text-xs mt-2 mb-1">' . $escaped . '</div>';
+                continue;
+            }
+
+            $formattedLines[] = $escaped;
+        }
+
+        $result = '';
+        foreach ($formattedLines as $i => $line) {
+            if ($i > 0 && !str_starts_with($line, '<div') && !str_starts_with($formattedLines[$i - 1], '<div')) {
+                $result .= "<br>\n";
+            }
+            $result .= $line;
+        }
+
+        return $result;
     }
 }
