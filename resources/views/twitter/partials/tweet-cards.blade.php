@@ -51,27 +51,79 @@
                     @endif
                 </div>
             @else
-                <!-- Top Header for text-only cards -->
-                <div class="p-3.5 pb-2.5 border-b border-slate-100 flex items-center justify-between gap-2 bg-slate-50/70 flex-shrink-0">
-                    <a
-                        href="{{ $tweet->tweet_url ?: ('https://x.com/' . $tweet->author_handle) }}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-800 hover:text-sky-600 transition-colors"
-                    >
-                        @if($tweet->author_avatar)
-                            <img src="{{ $tweet->author_avatar }}" alt="{{ $tweet->author_name }}" class="w-4 h-4 rounded-full object-cover">
-                        @else
-                            <i class="fa-brands fa-x-twitter text-slate-400"></i>
-                        @endif
-                        <span>{{ '@' . $tweet->author_handle }}</span>
-                    </a>
+                <!-- Thematic Author Brand Visual Header for text posts -->
+                @php
+                    $themeClasses = match(strtolower($tweet->author_handle)) {
+                        'penaltyloop' => 'from-slate-950 via-slate-900 to-sky-950',
+                        'biathstats' => 'from-slate-950 via-slate-900 to-emerald-950',
+                        'biathlonworld', 'ibu_newsroom' => 'from-slate-950 via-slate-900 to-blue-950',
+                        'nordicmag' => 'from-slate-950 via-slate-900 to-cyan-950',
+                        'biathlonlivefr' => 'from-slate-950 via-slate-900 to-indigo-950',
+                        default => 'from-slate-950 via-slate-900 to-sky-950',
+                    };
+                    $tagline = match(strtolower($tweet->author_handle)) {
+                        'penaltyloop' => 'Penalty Loop &bull; Biathlon Insights',
+                        'biathstats' => 'BiathlonStats &bull; Telemetry & Analytics',
+                        'biathlonworld' => 'IBU &bull; World Cup Official',
+                        'ibu_newsroom' => 'IBU &bull; Press & Newsroom',
+                        'nordicmag' => 'Nordic Magazine &bull; Ski & Biathlon',
+                        'biathlonlivefr' => 'Biathlon Live &bull; Actualités',
+                        default => $tweet->author_name,
+                    };
+                @endphp
+                <div class="w-full aspect-[16/10] sm:h-48 xl:h-52 2xl:h-56 overflow-hidden relative bg-gradient-to-tr {{ $themeClasses }} flex flex-col justify-between p-3.5 flex-shrink-0 select-none">
+                    <!-- Subtle dot matrix pattern -->
+                    <div class="absolute inset-0 opacity-15 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
 
-                    @if($tweet->published_at)
-                        <span class="text-[11px] font-semibold {{ $tweet->published_at->isToday() ? 'text-sky-600 font-bold' : 'text-slate-400' }}">
-                            {{ $tweet->published_at->isToday() ? 'Today' : $tweet->published_at->tz('Europe/Riga')->format('d M Y') }}
-                        </span>
-                    @endif
+                    <!-- Top Bar: Author Pill & Date Badge -->
+                    <div class="flex items-center justify-between gap-2 relative z-10">
+                        <a
+                            href="{{ $tweet->tweet_url ?: ('https://x.com/' . $tweet->author_handle) }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-slate-900/85 backdrop-blur-xs text-white text-[11px] font-bold shadow-xs hover:bg-sky-600 transition-colors"
+                        >
+                            @if($tweet->author_avatar)
+                                <img src="{{ $tweet->author_avatar }}" alt="{{ $tweet->author_name }}" class="w-3.5 h-3.5 rounded-full object-cover">
+                            @else
+                                <i class="fa-brands fa-x-twitter text-[10px]"></i>
+                            @endif
+                            <span>{{ '@' . $tweet->author_handle }}</span>
+                        </a>
+
+                        @if($tweet->published_at)
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-extrabold uppercase tracking-wider {{ $tweet->published_at->isToday() ? 'bg-sky-500 text-white shadow-xs' : 'bg-slate-900/80 backdrop-blur-xs text-slate-200' }}">
+                                {{ $tweet->published_at->isToday() ? 'Today' : $tweet->published_at->tz('Europe/Riga')->format('d M Y') }}
+                            </span>
+                        @endif
+                    </div>
+
+                    <!-- Center Brand Focus -->
+                    <div class="my-auto text-center relative z-10 py-1">
+                        <a href="{{ $tweet->tweet_url ?: ('https://x.com/' . $tweet->author_handle) }}" target="_blank" rel="noopener noreferrer" class="inline-flex flex-col items-center group/author">
+                            <div class="w-12 h-12 rounded-full p-1 bg-white/10 backdrop-blur-md border border-white/20 shadow-lg group-hover/author:scale-105 transition-transform mb-1.5">
+                                @if($tweet->author_avatar)
+                                    <img src="{{ $tweet->author_avatar }}" alt="{{ $tweet->author_name }}" class="w-full h-full rounded-full object-cover">
+                                @else
+                                    <div class="w-full h-full rounded-full bg-sky-600 flex items-center justify-center text-white text-base font-bold">
+                                        <i class="fa-solid fa-crosshairs"></i>
+                                    </div>
+                                @endif
+                            </div>
+                            <span class="text-xs font-black text-white tracking-wide block drop-shadow-xs group-hover/author:text-sky-300 transition-colors">
+                                {{ $tweet->author_name }}
+                            </span>
+                            <span class="text-[10px] font-medium text-slate-300/80 mt-0.5 tracking-wider uppercase block">
+                                {!! $tagline !!}
+                            </span>
+                        </a>
+                    </div>
+
+                    <!-- Bottom Accent Bar -->
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 relative z-10 pt-1 border-t border-white/10">
+                        <span class="font-semibold text-slate-300"><i class="fa-solid fa-bullhorn text-sky-400 mr-1"></i>Trackside Bulletin</span>
+                        <span>{{ $tweet->published_at ? $tweet->published_at->tz('Europe/Riga')->format('H:i') : '' }}</span>
+                    </div>
                 </div>
             @endif
 
