@@ -89,6 +89,80 @@ class BiathlonTweetService
     }
 
     /**
+     * Extract Open Graph or Twitter Card preview image from URL if tweet has no uploaded media
+     */
+    public function extractOpenGraphImageFromContent(string $content): ?string
+    {
+        if (preg_match('~https?://[^\s<"\']+~i', $content, $match)) {
+            $url = rtrim($match[0], '.,;:!?');
+            if (stripos($url, 'x.com') !== false || stripos($url, 'twitter.com') !== false) {
+                return null;
+            }
+
+            try {
+                $cacheKey = 'og_img_' . md5($url);
+                return Cache::remember($cacheKey, 86400 * 7, function () use ($url) {
+                    $res = $this->client->get($url, [
+                        'timeout' => 5,
+                        'http_errors' => false,
+                        'headers' => [
+                            'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+                            'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                        ],
+                    ]);
+
+                    if ($res->getStatusCode() === 200) {
+                        $html = (string) $res->getBody();
+                        if (preg_match('/<meta[^>]+property=[\'"]og:image[\'"][^>]+content=[\'"]([^\'"]+)[\'"]/i', $html, $m) ||
+                            preg_match('/<meta[^>]+content=[\'"]([^\'"]+)[\'"][^>]+property=[\'"]og:image[\'"]/i', $html, $m)) {
+                            return html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                        }
+                        if (preg_match('/<meta[^>]+name=[\'"]twitter:image[\'"][^>]+content=[\'"]([^\'"]+)[\'"]/i', $html, $m) ||
+                            preg_match('/<meta[^>]+content=[\'"]([^\'"]+)[\'"][^>]+name=[\'"]twitter:image[\'"]/i', $html, $m)) {
+                            return html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                        }
+                    }
+
+                    return null;
+                });
+            } catch (\Throwable $e) {
+                Log::info("Could not extract OG image from {$url}: " . $e->getMessage());
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Backfill missing media URLs by extracting Open Graph images from article links
+     */
+    public function backfillMissingMediaUrls(int $limit = 100): int
+    {
+        $tweets = Tweet::query()
+            ->whereNull('media_urls')
+            ->where(function ($q) {
+                $q->where('content', 'LIKE', '%http://%')
+                  ->orWhere('content', 'LIKE', '%https://%');
+            })
+            ->orderByDesc('published_at')
+            ->take($limit)
+            ->get();
+
+        $count = 0;
+        foreach ($tweets as $tweet) {
+            $ogImage = $this->extractOpenGraphImageFromContent($tweet->content);
+            if ($ogImage) {
+                $tweet->update([
+                    'media_urls' => [$ogImage],
+                ]);
+                $count++;
+            }
+        }
+
+        return $count;
+    }
+
+    /**
      * Translate any existing tweets in the database that have not been checked for translation yet
      */
     public function translateUntranslatedTweets(int $limit = 50): int
@@ -325,6 +399,8 @@ class BiathlonTweetService
 
         // Backfill / translate any remaining untranslated tweets in DB
         $this->translateUntranslatedTweets(50);
+        // Backfill / extract Open Graph preview images for tweets that contain article links
+        $this->backfillMissingMediaUrls(100);
 
         Cache::forget('biathlon_latest_tweets_6');
         Cache::forget('biathlon_latest_tweets_12');
@@ -393,6 +469,13 @@ class BiathlonTweetService
             $items = $puppeteerResult['results'][$handle]['items'];
             foreach ($items as $item) {
                 $translationData = $this->getTranslationAttributes($item['tweet_id'], $item['content']);
+                $mediaUrls = $item['media_urls'] ?? null;
+                if (empty($mediaUrls)) {
+                    $ogImg = $this->extractOpenGraphImageFromContent($item['content']);
+                    if ($ogImg) {
+                        $mediaUrls = [$ogImg];
+                    }
+                }
 
                 Tweet::query()->updateOrCreate(
                     ['tweet_id' => $item['tweet_id']],
@@ -403,7 +486,7 @@ class BiathlonTweetService
                         'content' => $item['content'],
                         'translated_content' => $translationData['translated_content'],
                         'source_language' => $translationData['source_language'],
-                        'media_urls' => $item['media_urls'] ?? null,
+                        'media_urls' => !empty($mediaUrls) ? $mediaUrls : null,
                         'likes_count' => (int)($item['likes_count'] ?? 0),
                         'retweets_count' => (int)($item['retweets_count'] ?? 0),
                         'tweet_url' => $item['tweet_url'] ?? 'https://x.com/' . $handle,
@@ -477,6 +560,12 @@ class BiathlonTweetService
                                 if (isset($media['media_url_https'])) {
                                     $mediaUrls[] = $media['media_url_https'];
                                 }
+                            }
+                        }
+                        if (empty($mediaUrls)) {
+                            $ogImg = $this->extractOpenGraphImageFromContent($text);
+                            if ($ogImg) {
+                                $mediaUrls = [$ogImg];
                             }
                         }
 

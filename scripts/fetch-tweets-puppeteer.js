@@ -165,6 +165,17 @@ async function fetchTweetById(id, fallbackHandle = '') {
                 }
             }
         }
+        if (tweet.card && tweet.card.binding_values) {
+            const bv = tweet.card.binding_values;
+            const cardImg = bv.thumbnail_image_large?.image_value?.url_https
+                || bv.photo_image_full_size_large?.image_value?.url_https
+                || bv.thumbnail_image?.image_value?.url_https
+                || bv.summary_photo_image_large?.image_value?.url_https
+                || bv.promo_image?.image_value?.url_https;
+            if (cardImg && !mediaUrls.includes(cardImg)) {
+                mediaUrls.push(cardImg);
+            }
+        }
 
         const authorHandle = tweet.user?.screen_name || fallbackHandle;
         const idStr = tweet.id_str || id;
@@ -215,7 +226,7 @@ async function scrapeTwitterHandle(page, handle, timeout = 25000) {
                     const id = match[2];
                     const textEl = art.querySelector('[data-testid="tweetText"]');
                     const timeEl = art.querySelector('time');
-                    const imgEls = art.querySelectorAll('[data-testid="tweetPhoto"] img, img[src*="pbs.twimg.com/media"]');
+                    const imgEls = art.querySelectorAll('[data-testid="tweetPhoto"] img, [data-testid="card.wrapper"] img, [data-testid="card.layoutLarge.media"] img, img[src*="pbs.twimg.com/media"], img[src*="pbs.twimg.com/card_img"]');
                     const media = Array.from(imgEls).map(img => img.src).filter(Boolean);
 
                     found.push({
