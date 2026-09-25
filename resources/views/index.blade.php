@@ -14,7 +14,7 @@
         </p>
     </div>
 
-    <!-- Modern Editorial Biathlon Story Carousel (Full Width) -->
+    <!-- Modern Editorial Biathlon Story Carousel (Full Width with Centered Content & Soft Edge Gradients) -->
     <div
         class="mb-12 w-full overflow-hidden rounded-2xl border border-slate-800/90 shadow-md bg-slate-950 relative select-none"
         x-data="{
@@ -79,9 +79,10 @@
         @mouseenter="autoplay = false"
         @mouseleave="autoplay = true"
     >
-        <div class="grid grid-cols-1 lg:grid-cols-12 min-h-[380px] sm:min-h-[420px] lg:min-h-[460px] xl:min-h-[480px]">
-            <!-- Left Side: Editorial Content & Controls (5 cols on lg, 4 cols on xl) -->
-            <div class="lg:col-span-5 xl:col-span-4 p-6 sm:p-8 lg:p-10 xl:p-12 flex flex-col justify-between bg-slate-950 text-white z-10 border-b lg:border-b-0 lg:border-r border-slate-800/60">
+        <!-- Centered Core Content Grid (Golden Proportions) -->
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 min-h-[380px] sm:min-h-[420px] lg:min-h-[460px] xl:min-h-[480px]">
+            <!-- Left Side: Editorial Content & Controls (5 cols on lg) -->
+            <div class="lg:col-span-5 p-6 sm:p-8 lg:p-10 flex flex-col justify-between bg-slate-950 text-white z-20">
                 <!-- Top Tag & Counter -->
                 <div class="flex items-center justify-between gap-3 mb-4">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-black uppercase tracking-wider">
@@ -136,8 +137,8 @@
                 </div>
             </div>
 
-            <!-- Right Side: Full-Bleed Visual with Ambient Backdrop (7 cols on lg, 8 cols on xl) -->
-            <div class="lg:col-span-7 xl:col-span-8 relative bg-slate-950 overflow-hidden min-h-[280px] sm:min-h-[340px] lg:min-h-full flex items-center justify-center">
+            <!-- Right Side: Centered Visual with Smooth Left & Right Gradient Blend -->
+            <div class="lg:col-span-7 relative bg-slate-950 overflow-hidden min-h-[280px] sm:min-h-[340px] lg:min-h-full flex items-center justify-center">
                 <template x-for="(slide, index) in slides" :key="index">
                     <div
                         x-show="active === index"
@@ -147,28 +148,24 @@
                         x-transition:leave="transition ease-in duration-400"
                         x-transition:leave-start="opacity-100 scale-100"
                         x-transition:leave-end="opacity-0 scale-98"
-                        class="absolute inset-0 w-full h-full flex items-center justify-center lg:justify-end"
+                        class="absolute inset-0 w-full h-full flex items-center justify-center"
                     >
-                        <!-- Blurred ambient backdrop to seamlessly fill any screen aspect ratio with matching colors -->
+                        <!-- Foreground crisp photo -->
                         <img
                             :src="slide.src"
                             :alt="slide.title"
-                            class="absolute inset-0 w-full h-full object-cover blur-3xl opacity-35 scale-110 pointer-events-none"
-                            aria-hidden="true"
+                            class="relative h-full w-full object-cover lg:object-contain object-center z-10"
                         >
 
-                        <!-- Foreground uncropped crisp photo -->
-                        <img
-                            :src="slide.src"
-                            :alt="slide.title"
-                            class="relative h-full w-full max-h-[520px] object-cover lg:object-contain object-center lg:object-right z-10"
-                        >
+                        <!-- Left-edge smooth gradient blend into dark background (no strict line) -->
+                        <div class="hidden lg:block absolute inset-y-0 left-0 w-36 xl:w-48 bg-gradient-to-r from-slate-950 via-slate-950/75 to-transparent pointer-events-none z-20"></div>
 
-                        <!-- Left-edge subtle vignette connecting smoothly into dark editorial block -->
-                        <div class="hidden lg:block absolute inset-y-0 left-0 w-32 xl:w-48 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent pointer-events-none z-20"></div>
+                        <!-- Right-edge smooth gradient blend into dark background (no strict line) -->
+                        <div class="hidden lg:block absolute inset-y-0 right-0 w-32 xl:w-44 bg-gradient-to-l from-slate-950 via-slate-950/75 to-transparent pointer-events-none z-20"></div>
 
-                        <!-- Right-edge subtle vignette -->
-                        <div class="hidden xl:block absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-slate-950 to-transparent pointer-events-none z-20"></div>
+                        <!-- Top & Bottom subtle edge fades -->
+                        <div class="absolute inset-x-0 top-0 h-8 bg-gradient-to-b from-slate-950/50 to-transparent pointer-events-none z-20"></div>
+                        <div class="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-slate-950/50 to-transparent pointer-events-none z-20"></div>
                     </div>
                 </template>
             </div>
@@ -176,9 +173,9 @@
     </div>
 
     @if(isset($event) && $event->first_competition_date)
-        <!-- Upcoming Stage Countdown Banner -->
-        <div class="mb-10 w-full p-6 rounded-2xl bg-gradient-to-r from-slate-950 via-slate-900 to-sky-950 text-white shadow-md relative overflow-hidden border border-slate-800/80">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+        <!-- Upcoming Stage Countdown Banner (Full Width with Centered Content) -->
+        <div class="mb-10 w-full rounded-2xl bg-gradient-to-r from-slate-950 via-slate-900 to-sky-950 text-white shadow-md relative overflow-hidden border border-slate-800/80">
+            <div class="max-w-7xl mx-auto p-6 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
                 <div>
                     <span class="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold uppercase tracking-wider">
                         Next World Cup Stage
