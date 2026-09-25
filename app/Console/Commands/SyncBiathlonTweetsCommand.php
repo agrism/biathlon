@@ -76,6 +76,12 @@ class SyncBiathlonTweetsCommand extends Command
             }
         });
 
+        // Deep media backfill for tweets without photos (quoted tweets, cards, OpenGraph)
+        $backfilled = $tweetService->backfillMissingMediaUrls(150);
+        if ($backfilled > 0) {
+            $this->line(sprintf('🖼️ <fg=cyan;options=bold>Media Deep Search:</> Enriched <fg=green;options=bold>%d</> tweets with images from quoted posts & web cards.', $backfilled));
+        }
+
         $totalAfter = Tweet::count();
         $totalNew = max(0, $totalAfter - $totalBefore);
         $totalDuration = round(microtime(true) - $startTime, 2);

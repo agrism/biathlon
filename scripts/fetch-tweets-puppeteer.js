@@ -122,6 +122,34 @@ async function setupOptimizedPage(browser) {
     return page;
 }
 
+// Helper: Extract OpenGraph image from article URL with timeout and user-agent
+async function extractOpenGraphImage(url) {
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        const res = await fetch(url, {
+            signal: controller.signal,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            }
+        });
+        clearTimeout(timeoutId);
+        if (!res.ok) return null;
+        const html = await res.text();
+        const ogMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+            || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i)
+            || html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i)
+            || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["']/i);
+        if (ogMatch && ogMatch[1]) {
+            let img = ogMatch[1].replace(/&#038;/g, '&').replace(/&amp;/g, '&');
+            if (img.startsWith('//')) img = 'https:' + img;
+            if (img.startsWith('http')) return img;
+        }
+    } catch (e) {}
+    return null;
+}
+
 // Helper: Fetch rich tweet metadata by status ID
 async function fetchTweetById(id, fallbackHandle = '') {
     try {
@@ -165,15 +193,77 @@ async function fetchTweetById(id, fallbackHandle = '') {
                 }
             }
         }
-        if (tweet.card && tweet.card.binding_values) {
-            const bv = tweet.card.binding_values;
-            const cardImg = bv.thumbnail_image_large?.image_value?.url_https
+        // Helper to extract media from tweet or quoted tweet card binding values
+        const extractCardImage = (card) => {
+            if (!card || !card.binding_values) return null;
+            const bv = card.binding_values;
+            return bv.photo_image_full_size_original?.image_value?.url
+                || bv.photo_image_full_size_large?.image_value?.url
                 || bv.photo_image_full_size_large?.image_value?.url_https
-                || bv.thumbnail_image?.image_value?.url_https
+                || bv.summary_photo_image_large?.image_value?.url
                 || bv.summary_photo_image_large?.image_value?.url_https
+                || bv.thumbnail_image_original?.image_value?.url
+                || bv.thumbnail_image_large?.image_value?.url
+                || bv.thumbnail_image_large?.image_value?.url_https
+                || bv.photo_image_full_size?.image_value?.url
+                || bv.thumbnail_image?.image_value?.url
+                || bv.thumbnail_image?.image_value?.url_https
                 || bv.promo_image?.image_value?.url_https;
-            if (cardImg && !mediaUrls.includes(cardImg)) {
-                mediaUrls.push(cardImg);
+        };
+
+        const cardImg = extractCardImage(tweet.card);
+        if (cardImg && !mediaUrls.includes(cardImg)) {
+            mediaUrls.push(cardImg);
+        }
+
+        // Deep extraction: If no media found on root tweet, check quoted_tweet (e.g. quote tweets with articles/media)
+        if (tweet.quoted_tweet) {
+            const qt = tweet.quoted_tweet;
+            if (Array.isArray(qt.photos)) {
+                for (const p of qt.photos) {
+                    if (p.url && !mediaUrls.includes(p.url)) mediaUrls.push(p.url);
+                }
+            }
+            if (Array.isArray(qt.mediaDetails)) {
+                for (const m of qt.mediaDetails) {
+                    if (m.media_url_https && !mediaUrls.includes(m.media_url_https)) {
+                        mediaUrls.push(m.media_url_https);
+                    }
+                }
+            }
+            const qtCardImg = extractCardImage(qt.card);
+            if (qtCardImg && !mediaUrls.includes(qtCardImg)) {
+                mediaUrls.push(qtCardImg);
+            }
+
+            // If quoted tweet has an ID and we still don't have media, fetch quoted tweet details
+            if (mediaUrls.length === 0 && qt.id_str) {
+                try {
+                    const quotedFull = await fetchTweetById(qt.id_str, qt.user?.screen_name || '');
+                    if (quotedFull && Array.isArray(quotedFull.media_urls)) {
+                        for (const qm of quotedFull.media_urls) {
+                            if (!mediaUrls.includes(qm)) mediaUrls.push(qm);
+                        }
+                    }
+                } catch (e) {}
+            }
+        }
+
+        // Deep extraction: If still no media, check external links for Open Graph images
+        if (mediaUrls.length === 0) {
+            const allUrls = [
+                ...(tweet.entities?.urls || []).map(u => u.expanded_url || u.url),
+                ...(tweet.quoted_tweet?.entities?.urls || []).map(u => u.expanded_url || u.url),
+            ].filter(Boolean);
+
+            for (const targetUrl of allUrls) {
+                if (!targetUrl.includes('x.com') && !targetUrl.includes('twitter.com') && !targetUrl.includes('t.co')) {
+                    const ogImg = await extractOpenGraphImage(targetUrl);
+                    if (ogImg && !mediaUrls.includes(ogImg)) {
+                        mediaUrls.push(ogImg);
+                        break;
+                    }
+                }
             }
         }
 

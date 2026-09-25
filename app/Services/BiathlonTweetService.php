@@ -91,6 +91,48 @@ class BiathlonTweetService
     /**
      * Extract Open Graph or Twitter Card preview image from URL if tweet has no uploaded media
      */
+    public function extractOpenGraphImageFromUrl(string $url): ?string
+    {
+        try {
+            $cacheKey = 'og_img_' . md5($url);
+            return Cache::remember($cacheKey, 86400 * 7, function () use ($url) {
+                $res = $this->client->get($url, [
+                    'timeout' => 6,
+                    'http_errors' => false,
+                    'headers' => [
+                        'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+                        'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    ],
+                ]);
+
+                if ($res->getStatusCode() === 200) {
+                    $html = (string) $res->getBody();
+                    if (preg_match('/<meta[^>]+property=[\'"]og:image[\'"][^>]+content=[\'"]([^\'"]+)[\'"]/i', $html, $m) ||
+                        preg_match('/<meta[^>]+content=[\'"]([^\'"]+)[\'"][^>]+property=[\'"]og:image[\'"]/i', $html, $m)) {
+                        $img = html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                        if (str_starts_with($img, '//')) $img = 'https:' . $img;
+                        if (str_starts_with($img, 'http')) return $img;
+                    }
+                    if (preg_match('/<meta[^>]+name=[\'"]twitter:image[\'"][^>]+content=[\'"]([^\'"]+)[\'"]/i', $html, $m) ||
+                        preg_match('/<meta[^>]+content=[\'"]([^\'"]+)[\'"][^>]+name=[\'"]twitter:image[\'"]/i', $html, $m)) {
+                        $img = html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                        if (str_starts_with($img, '//')) $img = 'https:' . $img;
+                        if (str_starts_with($img, 'http')) return $img;
+                    }
+                }
+
+                return null;
+            });
+        } catch (\Throwable $e) {
+            Log::info("Could not extract OG image from {$url}: " . $e->getMessage());
+        }
+
+        return null;
+    }
+
+    /**
+     * Extract Open Graph or Twitter Card preview image from text content if tweet has URLs
+     */
     public function extractOpenGraphImageFromContent(string $content): ?string
     {
         if (preg_match('~https?://[^\s<"\']+~i', $content, $match)) {
@@ -99,34 +141,36 @@ class BiathlonTweetService
                 return null;
             }
 
-            try {
-                $cacheKey = 'og_img_' . md5($url);
-                return Cache::remember($cacheKey, 86400 * 7, function () use ($url) {
-                    $res = $this->client->get($url, [
-                        'timeout' => 5,
-                        'http_errors' => false,
-                        'headers' => [
-                            'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
-                            'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                        ],
-                    ]);
+            return $this->extractOpenGraphImageFromUrl($url);
+        }
 
-                    if ($res->getStatusCode() === 200) {
-                        $html = (string) $res->getBody();
-                        if (preg_match('/<meta[^>]+property=[\'"]og:image[\'"][^>]+content=[\'"]([^\'"]+)[\'"]/i', $html, $m) ||
-                            preg_match('/<meta[^>]+content=[\'"]([^\'"]+)[\'"][^>]+property=[\'"]og:image[\'"]/i', $html, $m)) {
-                            return html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-                        }
-                        if (preg_match('/<meta[^>]+name=[\'"]twitter:image[\'"][^>]+content=[\'"]([^\'"]+)[\'"]/i', $html, $m) ||
-                            preg_match('/<meta[^>]+content=[\'"]([^\'"]+)[\'"][^>]+name=[\'"]twitter:image[\'"]/i', $html, $m)) {
-                            return html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-                        }
-                    }
+        return null;
+    }
 
-                    return null;
-                });
-            } catch (\Throwable $e) {
-                Log::info("Could not extract OG image from {$url}: " . $e->getMessage());
+    /**
+     * Extract card image from Twitter card payload
+     */
+    protected function extractCardImageFromPayload(array $card): ?string
+    {
+        $bv = $card['binding_values'] ?? [];
+        $candidates = [
+            $bv['photo_image_full_size_original']['image_value']['url'] ?? null,
+            $bv['photo_image_full_size_large']['image_value']['url'] ?? null,
+            $bv['photo_image_full_size_large']['image_value']['url_https'] ?? null,
+            $bv['summary_photo_image_large']['image_value']['url'] ?? null,
+            $bv['summary_photo_image_large']['image_value']['url_https'] ?? null,
+            $bv['thumbnail_image_original']['image_value']['url'] ?? null,
+            $bv['thumbnail_image_large']['image_value']['url'] ?? null,
+            $bv['thumbnail_image_large']['image_value']['url_https'] ?? null,
+            $bv['photo_image_full_size']['image_value']['url'] ?? null,
+            $bv['thumbnail_image']['image_value']['url'] ?? null,
+            $bv['thumbnail_image']['image_value']['url_https'] ?? null,
+            $bv['promo_image']['image_value']['url_https'] ?? null,
+        ];
+
+        foreach ($candidates as $c) {
+            if (!empty($c) && is_string($c)) {
+                return $c;
             }
         }
 
@@ -134,26 +178,141 @@ class BiathlonTweetService
     }
 
     /**
-     * Backfill missing media URLs by extracting Open Graph images from article links
+     * Deeply extract media from a tweet's JSON payload (photos, mediaDetails, cards, quoted tweets)
+     */
+    public function extractMediaFromTweetPayload(array $data): array
+    {
+        $media = [];
+
+        // 1. Root photos
+        if (!empty($data['photos']) && is_array($data['photos'])) {
+            foreach ($data['photos'] as $p) {
+                if (!empty($p['url']) && !in_array($p['url'], $media)) $media[] = $p['url'];
+            }
+        }
+
+        // 2. Root media details
+        if (!empty($data['mediaDetails']) && is_array($data['mediaDetails'])) {
+            foreach ($data['mediaDetails'] as $m) {
+                if (!empty($m['media_url_https']) && !in_array($m['media_url_https'], $media)) {
+                    $media[] = $m['media_url_https'];
+                }
+            }
+        }
+
+        // 3. Root card images
+        $cardImg = $this->extractCardImageFromPayload($data['card'] ?? []);
+        if ($cardImg && !in_array($cardImg, $media)) {
+            $media[] = $cardImg;
+        }
+
+        // 4. Quoted tweet media & cards
+        if (!empty($data['quoted_tweet']) && is_array($data['quoted_tweet'])) {
+            $qt = $data['quoted_tweet'];
+            if (!empty($qt['photos']) && is_array($qt['photos'])) {
+                foreach ($qt['photos'] as $p) {
+                    if (!empty($p['url']) && !in_array($p['url'], $media)) $media[] = $p['url'];
+                }
+            }
+            if (!empty($qt['mediaDetails']) && is_array($qt['mediaDetails'])) {
+                foreach ($qt['mediaDetails'] as $m) {
+                    if (!empty($m['media_url_https']) && !in_array($m['media_url_https'], $media)) {
+                        $media[] = $m['media_url_https'];
+                    }
+                }
+            }
+            $qtCardImg = $this->extractCardImageFromPayload($qt['card'] ?? []);
+            if ($qtCardImg && !in_array($qtCardImg, $media)) {
+                $media[] = $qtCardImg;
+            }
+
+            // Quoted tweet external URLs
+            if (empty($media) && !empty($qt['entities']['urls'])) {
+                foreach ($qt['entities']['urls'] as $u) {
+                    $url = $u['expanded_url'] ?? $u['url'] ?? '';
+                    if ($url && !str_contains($url, 'x.com') && !str_contains($url, 'twitter.com') && !str_contains($url, 't.co')) {
+                        $og = $this->extractOpenGraphImageFromUrl($url);
+                        if ($og && !in_array($og, $media)) {
+                            $media[] = $og;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 5. Root external URLs
+        if (empty($media) && !empty($data['entities']['urls'])) {
+            foreach ($data['entities']['urls'] as $u) {
+                $url = $u['expanded_url'] ?? $u['url'] ?? '';
+                if ($url && !str_contains($url, 'x.com') && !str_contains($url, 'twitter.com') && !str_contains($url, 't.co')) {
+                    $og = $this->extractOpenGraphImageFromUrl($url);
+                    if ($og && !in_array($og, $media)) {
+                        $media[] = $og;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $media;
+    }
+
+    /**
+     * Deeply search and extract media for a tweet (syndication, quoted tweets, twitter cards, and OpenGraph)
+     */
+    public function enrichTweetMedia(Tweet $tweet): ?array
+    {
+        $rawId = str_replace('tw_', '', $tweet->tweet_id);
+        if (is_numeric($rawId)) {
+            try {
+                $res = $this->client->get("https://cdn.syndication.twimg.com/tweet-result?id={$rawId}&token=1", [
+                    'timeout' => 6,
+                    'http_errors' => false,
+                    'headers' => [
+                        'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+                        'Referer' => 'https://platform.twitter.com/',
+                    ]
+                ]);
+
+                if ($res->getStatusCode() === 200) {
+                    $data = json_decode((string)$res->getBody(), true);
+                    if ($data) {
+                        $media = $this->extractMediaFromTweetPayload($data);
+                        if (!empty($media)) {
+                            return $media;
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {}
+        }
+
+        // Fallback: extract OG image from any URLs in tweet content
+        $og = $this->extractOpenGraphImageFromContent($tweet->content);
+        if ($og) {
+            return [$og];
+        }
+
+        return null;
+    }
+
+    /**
+     * Backfill missing media URLs by performing deep inspection (quoted tweets, cards, and OpenGraph)
      */
     public function backfillMissingMediaUrls(int $limit = 100): int
     {
         $tweets = Tweet::query()
             ->whereNull('media_urls')
-            ->where(function ($q) {
-                $q->where('content', 'LIKE', '%http://%')
-                  ->orWhere('content', 'LIKE', '%https://%');
-            })
             ->orderByDesc('published_at')
             ->take($limit)
             ->get();
 
         $count = 0;
         foreach ($tweets as $tweet) {
-            $ogImage = $this->extractOpenGraphImageFromContent($tweet->content);
-            if ($ogImage) {
+            $media = $this->enrichTweetMedia($tweet);
+            if (!empty($media)) {
                 $tweet->update([
-                    'media_urls' => [$ogImage],
+                    'media_urls' => $media,
                 ]);
                 $count++;
             }
