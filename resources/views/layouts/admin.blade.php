@@ -33,12 +33,12 @@
 
 @include('menu', ['ignoreHome' => true])
 
-<main class="flex-1 w-full p-0">
+<main class="flex-1 w-full pt-5 sm:pt-6 p-0">
     @php
         $breadcrumbHtml = \App\Helpers\BreadCrumbHelper::instance()->render();
     @endphp
     @if(!empty(trim($breadcrumbHtml)))
-        <div class="px-4 sm:px-6 lg:px-8 mb-4">
+        <div class="px-4 sm:px-6 lg:px-8 mb-5">
             {!! $breadcrumbHtml !!}
         </div>
     @endif

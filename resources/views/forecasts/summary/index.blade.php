@@ -16,9 +16,9 @@
     @foreach($seasons as $index => $season)
         <div class="mb-12" x-data="{ showDetails: false }">
             <!-- Season Header & Controls -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 bg-gradient-to-r from-slate-900 via-slate-800 to-sky-950 text-white p-5 rounded-2xl shadow-lg">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 bg-gradient-to-r from-slate-900 via-slate-800 to-sky-950 text-white p-5 rounded-[5px] shadow-sm">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-400 font-black text-lg shadow-inner">
+                    <div class="w-10 h-10 rounded-[4px] bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-400 font-black text-lg shadow-inner">
                         🏆
                     </div>
                     <div>
@@ -33,8 +33,8 @@
                     <button
                         type="button"
                         @click="showDetails = !showDetails"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border"
-                        :class="showDetails ? 'bg-sky-500 text-white border-sky-400 shadow-sm' : 'bg-white/10 text-slate-200 border-white/10 hover:bg-white/20'"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] text-xs font-bold transition-all border"
+                        :class="showDetails ? 'bg-sky-500 text-white border-sky-400 shadow-xs' : 'bg-white/10 text-slate-200 border-white/10 hover:bg-white/20'"
                     >
                         <i class="fa-solid fa-list-ol text-xs"></i>
                         <span x-text="showDetails ? 'Hide Split Points' : 'Show Split Points (Reg+Bon)'"></span>
@@ -43,7 +43,7 @@
             </div>
 
             <!-- Leaderboard Table Card -->
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-white rounded-[5px] border border-slate-200 shadow-xs overflow-hidden">
                 <div id="totals" class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
                         <thead class="bg-slate-50 text-xs font-bold text-slate-500 uppercase tracking-wider">

@@ -1,15 +1,15 @@
-<nav class="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-sm transition-all">
+<nav class="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-xs transition-all">
     <div class="w-full px-2 sm:px-4">
         <div class="flex justify-between items-center h-16">
             <!-- Brand Logo -->
             <a href="{{ route('home') }}" class="flex items-center gap-2.5 group">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 flex items-center justify-center text-white shadow-md shadow-sky-500/20 group-hover:scale-105 transition-transform p-1.5">
+                <div class="w-9 h-9 rounded-[6px] bg-gradient-to-tr from-sky-600 to-sky-400 flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition-transform p-1.5">
                     <img src="{{ asset('img.png') }}" alt="Biathlon" class="w-5 h-5 brightness-0 invert object-contain">
                 </div>
                 <div class="flex flex-col">
                     <div class="flex items-center gap-1.5">
                         <span class="font-extrabold text-lg text-slate-900 tracking-tight leading-none group-hover:text-sky-600 transition-colors">BIATHLON</span>
-                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-sky-100 text-sky-700 uppercase tracking-wide">PRO</span>
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-[3px] bg-sky-100 text-sky-700 uppercase tracking-wide">PRO</span>
                     </div>
                     <span class="text-[10px] text-slate-400 font-medium tracking-wider uppercase leading-tight mt-0.5">IBU Prediction League</span>
                 </div>
@@ -20,7 +20,7 @@
                 <button
                     id="menu-toggle"
                     type="button"
-                    class="inline-flex items-center justify-center p-2 rounded-xl text-slate-500 hover:text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors"
+                    class="inline-flex items-center justify-center p-2 rounded-[4px] text-slate-500 hover:text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors"
                     aria-controls="mobile-menu"
                     aria-expanded="false"
                 >
@@ -45,7 +45,7 @@
                 @foreach($navItems as $item)
                     <a
                         href="{{ route($item['route']) }}"
-                        class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all {{ $item['active'] ? 'bg-sky-50 text-sky-600 font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}"
+                        class="flex items-center gap-1.5 px-3 py-2 rounded-[4px] text-sm font-medium transition-all {{ $item['active'] ? 'bg-sky-50 text-sky-600 font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}"
                     >
                         <i class="{{ $item['icon'] }} text-xs {{ $item['active'] ? 'text-sky-600' : 'text-slate-400' }}"></i>
                         <span>{{ $item['name'] }}</span>
@@ -59,9 +59,9 @@
                     <div class="flex items-center gap-2 pl-3 border-l border-slate-200">
                         <a
                             href="{{ route('private.profile') }}"
-                            class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/80 hover:bg-slate-200/80 border border-slate-200 text-slate-800 text-sm font-medium transition-all"
+                            class="flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-sm font-medium transition-all"
                         >
-                            <span class="w-6 h-6 rounded-full bg-gradient-to-tr from-sky-600 to-indigo-600 text-white flex items-center justify-center text-xs font-bold uppercase shadow-xs">
+                            <span class="w-6 h-6 rounded-[3px] bg-gradient-to-tr from-sky-600 to-indigo-600 text-white flex items-center justify-center text-xs font-bold uppercase shadow-xs">
                                 {{ substr(auth()->user()->name, 0, 1) }}
                             </span>
                             <span>{{ auth()->user()->name }}</span>
@@ -72,7 +72,7 @@
                             <button
                                 type="submit"
                                 title="Logout"
-                                class="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                                class="p-2 rounded-[4px] text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
                             >
                                 <i class="fa-solid fa-arrow-right-from-bracket text-sm"></i>
                             </button>
@@ -82,7 +82,7 @@
                     <div class="flex items-center gap-2 pl-3 border-l border-slate-200">
                         <a
                             href="{{ route('login') }}"
-                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold shadow-md shadow-sky-500/20 hover:shadow-sky-500/30 transition-all"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-[4px] bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold shadow-xs hover:shadow-sm transition-all"
                         >
                             <i class="fa-solid fa-user text-xs"></i>
                             <span>Sign In</span>
@@ -98,7 +98,7 @@
         @foreach($navItems ?? [] as $item)
             <a
                 href="{{ route($item['route']) }}"
-                class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-base font-medium {{ $item['active'] ? 'bg-sky-50 text-sky-600 font-semibold' : 'text-slate-600 hover:bg-slate-50' }}"
+                class="flex items-center gap-2 px-3 py-2.5 rounded-[4px] text-base font-medium {{ $item['active'] ? 'bg-sky-50 text-sky-600 font-semibold' : 'text-slate-600 hover:bg-slate-50' }}"
             >
                 <i class="{{ $item['icon'] }} w-5 text-sm {{ $item['active'] ? 'text-sky-600' : 'text-slate-400' }}"></i>
                 <span>{{ $item['name'] }}</span>
@@ -109,14 +109,14 @@
             @if(auth()->check())
                 <div class="flex items-center justify-between px-3 py-2">
                     <a href="{{ route('private.profile') }}" class="flex items-center gap-2 font-medium text-slate-800">
-                        <span class="w-7 h-7 rounded-full bg-sky-600 text-white flex items-center justify-center text-xs font-bold uppercase">
+                        <span class="w-7 h-7 rounded-[4px] bg-sky-600 text-white flex items-center justify-center text-xs font-bold uppercase">
                             {{ substr(auth()->user()->name, 0, 1) }}
                         </span>
                         <span>{{ auth()->user()->name }}</span>
                     </a>
                     <form method="POST" action="{{ route('logout') }}" class="inline">
                         @csrf
-                        <button type="submit" class="text-xs font-semibold text-rose-600 px-2.5 py-1 rounded-lg bg-rose-50">
+                        <button type="submit" class="text-xs font-semibold text-rose-600 px-2.5 py-1 rounded-[4px] bg-rose-50">
                             Logout
                         </button>
                     </form>
@@ -124,7 +124,7 @@
             @else
                 <a
                     href="{{ route('login') }}"
-                    class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 text-white font-semibold text-center shadow-md"
+                    class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-[4px] bg-sky-600 text-white font-semibold text-center shadow-xs"
                 >
                     <i class="fa-solid fa-user text-xs"></i>
                     <span>Sign In</span>

@@ -10,7 +10,7 @@
     @if($helper->filters())
         <form @if($helper->getFilterHtmxFormAttributes()) {!! $helper->getFilterHtmxFormAttributes() !!} @else method="GET" @endif class="w-full sm:w-auto">
             @csrf
-            <div class="inline-flex flex-wrap items-center gap-2 p-1.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
+            <div class="inline-flex flex-wrap items-center gap-2 p-1.5 rounded-[4px] bg-white border border-slate-200 shadow-2xs">
                 <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-2 flex items-center gap-1.5">
                     <i class="fa-solid fa-filter text-sky-600 text-[10px]"></i>
                     <span>Filter</span>
@@ -19,16 +19,16 @@
                 @foreach($helper->filters() as $filter)
                     <div class="flex items-center gap-1.5">
                         <label class="text-xs font-medium text-slate-600 px-1" for="{{ $filter->key }}">{{ $filter->title ?: $filter->key }}:</label>
-                        {!! $filter->inputType->getElement(name: $filter->key, value: $filter->value, style: '', classes: 'text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none transition-all font-medium text-slate-800', options: $filter->options) !!}
+                        {!! $filter->inputType->getElement(name: $filter->key, value: $filter->value, style: '', classes: 'text-xs px-2.5 py-1.5 rounded-[4px] border border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none transition-all font-medium text-slate-800', options: $filter->options) !!}
                     </div>
                 @endforeach
 
                 <div class="flex items-center gap-1 ml-auto">
-                    <button type="submit" class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white shadow-2xs transition-colors cursor-pointer">
+                    <button type="submit" class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-[4px] bg-slate-900 hover:bg-slate-800 text-white shadow-2xs transition-colors cursor-pointer">
                         <i class="fa-solid fa-check text-[10px]"></i>
                         <span>Apply</span>
                     </button>
-                    <button type="submit" name="clear" value="1" class="inline-flex items-center text-xs font-medium px-2.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer">
+                    <button type="submit" name="clear" value="1" class="inline-flex items-center text-xs font-medium px-2.5 py-1.5 rounded-[4px] text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer">
                         Clear
                     </button>
                 </div>
@@ -43,7 +43,7 @@
         <div class="flex justify-end">
             <a href="{{ request()->url() . '?export=excel' }}">
                 <button
-                    class="inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 shadow-2xs transition-colors cursor-pointer"
+                    class="inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-1.5 rounded-[4px] bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 shadow-2xs transition-colors cursor-pointer"
                     type="button"
                     hx-target="#show"
                 >

@@ -49,7 +49,7 @@ class BreadCrumbHelper
         $items = array_values($this->objects);
         $total = count($items);
 
-        $html = '<nav class="flex items-center text-xs font-medium text-slate-500 py-2 px-3.5 bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-2xl shadow-2xs w-fit mb-5" aria-label="Breadcrumb">';
+        $html = '<nav class="flex items-center text-xs font-medium text-slate-500 py-2 px-3.5 bg-white border border-slate-200 rounded-[4px] shadow-2xs w-fit mb-5" aria-label="Breadcrumb">';
         $html .= '<ol class="inline-flex items-center gap-1.5 flex-wrap">';
 
         foreach ($items as $index => $object) {
@@ -65,7 +65,7 @@ class BreadCrumbHelper
             }
 
             if ($isLast) {
-                $html .= '<li class="inline-flex items-center font-bold text-slate-900 bg-slate-100/90 px-2.5 py-0.5 rounded-lg tracking-tight" aria-current="page">';
+                $html .= '<li class="inline-flex items-center font-bold text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-[3px] tracking-tight" aria-current="page">';
                 $html .= e($title);
                 $html .= '</li>';
             } else {
