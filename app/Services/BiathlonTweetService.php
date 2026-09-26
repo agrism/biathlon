@@ -578,6 +578,9 @@ class BiathlonTweetService
             }
         }
 
+        // Prune any cross-posted duplicates (e.g. twitter teasers when full web articles exist)
+        $this->pruneDuplicateTweets();
+
         // Backfill / translate any remaining untranslated tweets in DB
         $this->translateUntranslatedTweets(50);
         // Backfill / extract Open Graph preview images for tweets that contain article links
@@ -649,6 +652,13 @@ class BiathlonTweetService
         if ($puppeteerResult && !empty($puppeteerResult['results'][$handle]['items'])) {
             $items = $puppeteerResult['results'][$handle]['items'];
             foreach ($items as $item) {
+                $pubDate = isset($item['published_at']) ? Carbon::parse($item['published_at']) : now();
+                $itemUrl = $item['tweet_url'] ?? 'https://x.com/' . $handle;
+
+                if ($this->isDuplicateContent($item['content'], $item['author_handle'] ?? $handle, $pubDate, $item['tweet_id'], $itemUrl)) {
+                    continue;
+                }
+
                 $translationData = $this->getTranslationAttributes($item['tweet_id'], $item['content']);
                 $mediaUrls = $item['media_urls'] ?? null;
                 if (empty($mediaUrls)) {
@@ -670,8 +680,8 @@ class BiathlonTweetService
                         'media_urls' => !empty($mediaUrls) ? $mediaUrls : null,
                         'likes_count' => (int)($item['likes_count'] ?? 0),
                         'retweets_count' => (int)($item['retweets_count'] ?? 0),
-                        'tweet_url' => $item['tweet_url'] ?? 'https://x.com/' . $handle,
-                        'published_at' => isset($item['published_at']) ? Carbon::parse($item['published_at']) : now(),
+                        'tweet_url' => $itemUrl,
+                        'published_at' => $pubDate,
                     ]
                 );
                 $synced++;
@@ -751,6 +761,12 @@ class BiathlonTweetService
                         }
 
                         $tweetId = 'tw_' . $idStr;
+                        $tweetUrl = 'https://x.com/' . ($user['screen_name'] ?? $handle) . '/status/' . $idStr;
+
+                        if ($this->isDuplicateContent($text, $user['screen_name'] ?? $handle, $createdAt, $tweetId, $tweetUrl)) {
+                            continue;
+                        }
+
                         $translationData = $this->getTranslationAttributes($tweetId, $text);
 
                         Tweet::query()->updateOrCreate(
@@ -765,7 +781,7 @@ class BiathlonTweetService
                                 'media_urls' => !empty($mediaUrls) ? $mediaUrls : null,
                                 'likes_count' => (int)($tweet['favorite_count'] ?? 0),
                                 'retweets_count' => (int)($tweet['retweet_count'] ?? 0),
-                                'tweet_url' => 'https://x.com/' . ($user['screen_name'] ?? $handle) . '/status/' . $idStr,
+                                'tweet_url' => $tweetUrl,
                                 'published_at' => $createdAt,
                             ]
                         );
@@ -850,47 +866,213 @@ class BiathlonTweetService
     }
 
     /**
-     * Check if a tweet/post with matching or substantially identical content already exists
+     * Check if two handles/names belong to the same biathlon media outlet
      */
-    protected function isDuplicateContent(string $content, ?string $authorHandle = null, ?Carbon $publishedAt = null, ?string $excludeTweetId = null): bool
+    public function isSameMediaOutlet(?string $a1, ?string $a2): bool
+    {
+        if (empty($a1) || empty($a2)) return false;
+        $a1 = strtolower(trim($a1));
+        $a2 = strtolower(trim($a2));
+        if ($a1 === $a2) return true;
+        if (str_contains($a1, 'nordic') && str_contains($a2, 'nordic')) return true;
+        if (str_contains($a1, 'biathlonlive') && str_contains($a2, 'biathlonlive')) return true;
+        if (str_contains($a1, 'penalty') && str_contains($a2, 'penalty')) return true;
+        if (str_contains($a1, 'ibu') && str_contains($a2, 'ibu')) return true;
+        if (str_contains($a1, 'biathstats') && str_contains($a2, 'biathstats')) return true;
+        return false;
+    }
+
+    /**
+     * Clean core article or tweet text for cross-platform comparison (strips emojis, hashtags, URLs, and title prefixes)
+     */
+    public function cleanCoreTextForComparison(string $text): string
+    {
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = preg_replace('~https?://\S+~i', '', $text);
+        $text = preg_replace('/^biathlon\s*[:|]\s*/i', '', trim($text));
+        $text = preg_replace('/#\w+/u', '', $text);
+        $text = preg_replace('/[^\p{L}\p{N}\s]/u', '', $text);
+        $text = preg_replace('/\s+/', ' ', trim($text));
+        return mb_strtolower($text, 'UTF-8');
+    }
+
+    /**
+     * Check if a tweet/post with matching or substantially identical content / article URL already exists
+     */
+    protected function isDuplicateContent(string $content, ?string $authorHandle = null, ?Carbon $publishedAt = null, ?string $excludeTweetId = null, ?string $itemUrl = null): bool
     {
         $normalizedIncoming = $this->normalizeContentForComparison($content);
         if (mb_strlen($normalizedIncoming) < 10) {
             return false;
         }
 
+        // Extract possible URLs / slugs from itemUrl or content
+        $incomingUrls = [];
+        if ($itemUrl) {
+            $incomingUrls[] = $itemUrl;
+        }
+        if (preg_match_all('~https?://[^\s<>"\']+~i', $content, $m)) {
+            foreach ($m[0] as $u) {
+                $incomingUrls[] = $u;
+            }
+        }
+
+        $incomingSlugs = [];
+        foreach ($incomingUrls as $u) {
+            $path = trim(parse_url($u, PHP_URL_PATH) ?? '', '/');
+            $slug = basename($path);
+            if (mb_strlen($slug) > 12) {
+                $incomingSlugs[] = $slug;
+            }
+        }
+
         $query = Tweet::query();
         if ($excludeTweetId) {
             $query->where('tweet_id', '!=', $excludeTweetId);
         }
-        if ($authorHandle) {
-            $query->where('author_handle', $authorHandle);
-        }
+
         if ($publishedAt) {
             $query->whereBetween('published_at', [
                 $publishedAt->copy()->subDays(4),
                 $publishedAt->copy()->addDays(4),
             ]);
         } else {
-            $query->orderByDesc('published_at')->take(50);
+            $query->orderByDesc('published_at')->take(100);
         }
 
-        $candidates = $query->get(['tweet_id', 'content']);
+        $candidates = $query->get(['id', 'tweet_id', 'author_handle', 'content', 'tweet_url', 'published_at']);
 
         foreach ($candidates as $candidate) {
+            // 1. Direct URL match or containment
+            if (!empty($candidate->tweet_url)) {
+                if ($itemUrl && $candidate->tweet_url === $itemUrl) {
+                    return true;
+                }
+                foreach ($incomingUrls as $u) {
+                    if (str_contains($candidate->content, $u) || str_contains($candidate->tweet_url, $u)) {
+                        return true;
+                    }
+                }
+            }
+
+            // 2. Slug match (e.g. twitter post contains link to article slug or candidate tweet_url has slug)
+            if (!empty($incomingSlugs)) {
+                foreach ($incomingSlugs as $slug) {
+                    if (str_contains($candidate->content, $slug) || (!empty($candidate->tweet_url) && str_contains($candidate->tweet_url, $slug))) {
+                        return true;
+                    }
+                }
+            }
+
+            // Also check if candidate has slugs contained in incoming content/url
+            if (!empty($candidate->tweet_url)) {
+                $candSlug = basename(trim(parse_url($candidate->tweet_url, PHP_URL_PATH) ?? '', '/'));
+                if (mb_strlen($candSlug) > 12 && (str_contains($content, $candSlug) || ($itemUrl && str_contains($itemUrl, $candSlug)))) {
+                    return true;
+                }
+            }
+
+            // 3. Exact normalized content match
             $normalizedCandidate = $this->normalizeContentForComparison($candidate->content);
             if ($normalizedIncoming === $normalizedCandidate) {
                 return true;
             }
 
-            // Fuzzy similarity check for cross-posted content with minor formatting differences
-            similar_text($normalizedIncoming, $normalizedCandidate, $percent);
-            if ($percent >= 85.0) {
-                return true;
+            // 4. Clean prefix match for same media outlet (first 35+ chars of core text without emojis/hashtags)
+            if ($this->isSameMediaOutlet($authorHandle, $candidate->author_handle)) {
+                $cleanIncoming = $this->cleanCoreTextForComparison($content);
+                $cleanCandidate = $this->cleanCoreTextForComparison($candidate->content);
+                if (mb_strlen($cleanIncoming) >= 25 && mb_strlen($cleanCandidate) >= 25) {
+                    $len = min(35, mb_strlen($cleanIncoming), mb_strlen($cleanCandidate));
+                    if (mb_substr($cleanIncoming, 0, $len) === mb_substr($cleanCandidate, 0, $len)) {
+                        return true;
+                    }
+                }
+            }
+
+            // 5. Fuzzy similarity check for same author
+            if ($authorHandle && $this->isSameMediaOutlet($authorHandle, $candidate->author_handle)) {
+                similar_text($normalizedIncoming, $normalizedCandidate, $percent);
+                if ($percent >= 80.0) {
+                    return true;
+                }
             }
         }
 
         return false;
+    }
+
+    /**
+     * Scan and prune cross-platform duplicate tweets (e.g., when an outlet posts both a tweet and an RSS article)
+     * Keeps the clean web article (full text + high-res image) over the truncated twitter teaser.
+     */
+    public function pruneDuplicateTweets(): int
+    {
+        $tweets = Tweet::query()->orderBy('id')->get();
+        $toDelete = [];
+
+        for ($i = 0; $i < count($tweets); $i++) {
+            $t1 = $tweets[$i];
+            if (in_array($t1->id, $toDelete)) continue;
+
+            for ($j = $i + 1; $j < count($tweets); $j++) {
+                $t2 = $tweets[$j];
+                if (in_array($t2->id, $toDelete)) continue;
+
+                $isDup = false;
+
+                // 1. Direct URL containment
+                if (!empty($t1->tweet_url) && !empty($t2->content) && str_contains($t2->content, $t1->tweet_url)) {
+                    $isDup = true;
+                } elseif (!empty($t2->tweet_url) && !empty($t1->content) && str_contains($t1->content, $t2->tweet_url)) {
+                    $isDup = true;
+                }
+
+                // 2. Slug containment
+                if (!$isDup) {
+                    $path1 = trim(parse_url($t1->tweet_url ?? '', PHP_URL_PATH) ?? '', '/');
+                    $slug1 = basename($path1);
+                    if (mb_strlen($slug1) > 15 && (!empty($t2->content) && str_contains($t2->content, $slug1) || !empty($t2->tweet_url) && str_contains($t2->tweet_url, $slug1))) {
+                        $isDup = true;
+                    }
+
+                    $path2 = trim(parse_url($t2->tweet_url ?? '', PHP_URL_PATH) ?? '', '/');
+                    $slug2 = basename($path2);
+                    if (mb_strlen($slug2) > 15 && (!empty($t1->content) && str_contains($t1->content, $slug2) || !empty($t1->tweet_url) && str_contains($t1->tweet_url, $slug2))) {
+                        $isDup = true;
+                    }
+                }
+
+                // 3. Prefix text match for items from the SAME media outlet published within 48h
+                if (!$isDup && $this->isSameMediaOutlet($t1->author_handle, $t2->author_handle) && $t1->published_at && $t2->published_at && abs($t1->published_at->diffInHours($t2->published_at)) <= 48) {
+                    $c1 = $this->cleanCoreTextForComparison($t1->content);
+                    $c2 = $this->cleanCoreTextForComparison($t2->content);
+                    if (mb_strlen($c1) >= 25 && mb_strlen($c2) >= 25) {
+                        $len = min(35, mb_strlen($c1), mb_strlen($c2));
+                        if (mb_substr($c1, 0, $len) === mb_substr($c2, 0, $len)) {
+                            $isDup = true;
+                        }
+                    }
+                }
+
+                if ($isDup) {
+                    // Prefer full web article over Twitter tweet
+                    if (str_starts_with($t1->tweet_id, 'tw_') && !str_starts_with($t2->tweet_id, 'tw_')) {
+                        $toDelete[] = $t1->id;
+                        break; // t1 is queued for deletion, move to next t1
+                    } else {
+                        $toDelete[] = $t2->id;
+                    }
+                }
+            }
+        }
+
+        if (!empty($toDelete)) {
+            Tweet::whereIn('id', array_unique($toDelete))->delete();
+            Log::info('Pruned ' . count($toDelete) . ' duplicate tweets/cross-posts from feed.');
+        }
+
+        return count($toDelete);
     }
 
     /**
@@ -953,7 +1135,7 @@ class BiathlonTweetService
                     $tweetId = 'article_' . ($slug ?: md5($link));
                     $pubDate = (string)$item->pubDate ? Carbon::parse((string)$item->pubDate) : now();
 
-                    if ($this->isDuplicateContent($content, 'penaltyloop', $pubDate, $tweetId)) {
+                    if ($this->isDuplicateContent($content, 'penaltyloop', $pubDate, $tweetId, $link)) {
                         continue;
                     }
 
@@ -1069,7 +1251,7 @@ class BiathlonTweetService
                     $link = $post['link'] ?? 'https://biathlonlive.com';
                     $pubDate = isset($post['date']) ? Carbon::parse($post['date']) : now();
 
-                    if ($this->isDuplicateContent($content, 'BiathlonLivefr', $pubDate, $tweetId)) {
+                    if ($this->isDuplicateContent($content, 'BiathlonLivefr', $pubDate, $tweetId, $link)) {
                         continue;
                     }
 
@@ -1152,7 +1334,7 @@ class BiathlonTweetService
                     $tweetId = 'nm_' . md5($guid);
                     $pubDate = (string)$item->pubDate ? Carbon::parse((string)$item->pubDate) : now();
 
-                    if ($this->isDuplicateContent($content, 'NordicMag', $pubDate, $tweetId)) {
+                    if ($this->isDuplicateContent($content, 'NordicMag', $pubDate, $tweetId, $link)) {
                         continue;
                     }
 
