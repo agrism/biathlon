@@ -425,7 +425,19 @@ class BiathlonTweetService
 
         $providers[] = [
             'type' => 'penaltyloop_rss',
-            'name' => 'PenaltyLoop.com Blog RSS Feed',
+            'name' => 'PenaltyLoop.com Blog Archives',
+            'delay' => 0,
+        ];
+
+        $providers[] = [
+            'type' => 'biathlonlive_rest',
+            'name' => 'BiathlonLive.com News (REST API)',
+            'delay' => 0,
+        ];
+
+        $providers[] = [
+            'type' => 'nordicmag_feed',
+            'name' => 'Nordic Magazine Biathlon Feed',
             'delay' => 0,
         ];
 
@@ -538,6 +550,8 @@ class BiathlonTweetService
                 'twitter' => $this->syncFromTwitterSyndication($provider['handle']),
                 'rss' => $this->syncFromRssFeed($provider['url']),
                 'penaltyloop_rss' => $this->syncFromPenaltyLoopRss(),
+                'biathlonlive_rest' => $this->syncFromBiathlonLiveRest(),
+                'nordicmag_feed' => $this->syncFromNordicMagFeed(),
                 'bluesky' => $this->syncFromBluesky(),
                 default => 0,
             };
@@ -895,141 +909,298 @@ class BiathlonTweetService
     }
 
     /**
-     * Sync from PenaltyLoop.com official blog RSS (with Puppeteer WAF bypass)
+     * Sync from PenaltyLoop.com official blog RSS (paginated across all archive pages)
      */
     protected function syncFromPenaltyLoopRss(): int
     {
         $synced = 0;
-        $rssUrl = 'https://penaltyloop.com/feed/';
 
-        // 1. Try Puppeteer stealth scraper to easily pass Cloudflare/Wordfence
-        $puppeteerResult = $this->runPuppeteerScraper(["--rss={$rssUrl}"]);
-        if ($puppeteerResult && !empty($puppeteerResult['results']['rss']['items'])) {
-            $items = $puppeteerResult['results']['rss']['items'];
-            foreach ($items as $item) {
-                $pubDate = isset($item['published_at']) ? Carbon::parse($item['published_at']) : now();
-                $tweetId = $item['tweet_id'];
+        // Iterate through paginated RSS pages (pages 1 to 8) to fetch all historical and latest posts
+        for ($page = 1; $page <= 8; $page++) {
+            $rssUrl = $page === 1 ? 'https://penaltyloop.com/feed/' : "https://penaltyloop.com/feed/?paged={$page}";
 
-                if ($this->isDuplicateContent($item['content'], 'penaltyloop', $pubDate, $tweetId)) {
-                    continue;
+            try {
+                $ua = $this->userAgents[array_rand($this->userAgents)];
+                $res = $this->client->get($rssUrl, [
+                    'headers' => [
+                        'User-Agent' => $ua,
+                        'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                        'Accept-Language' => 'en-US,en;q=0.9',
+                    ],
+                    'http_errors' => false,
+                    'timeout' => 12,
+                ]);
+
+                if ($res->getStatusCode() !== 200) {
+                    break;
                 }
 
-                $translationData = $this->getTranslationAttributes($tweetId, $item['content']);
-
-                Tweet::query()->updateOrCreate(
-                    ['tweet_id' => $tweetId],
-                    [
-                        'author_name' => $item['author_name'] ?? 'Penalty Loop',
-                        'author_handle' => $item['author_handle'] ?? 'penaltyloop',
-                        'author_avatar' => $item['author_avatar'] ?? 'https://pbs.twimg.com/profile_images/2084999188614373376/QytLH4Fk_normal.jpg',
-                        'content' => $item['content'],
-                        'translated_content' => $translationData['translated_content'],
-                        'source_language' => $translationData['source_language'],
-                        'media_urls' => $item['media_urls'] ?? null,
-                        'likes_count' => 0,
-                        'retweets_count' => 0,
-                        'tweet_url' => $item['tweet_url'] ?? 'https://penaltyloop.com',
-                        'published_at' => $pubDate,
-                    ]
-                );
-                $synced++;
-            }
-
-            if ($synced > 0) {
-                return $synced;
-            }
-        }
-
-        // 2. Direct HTTP Fallback
-        try {
-            $ua = $this->userAgents[array_rand($this->userAgents)];
-            $res = $this->client->get($rssUrl, [
-                'headers' => [
-                    'User-Agent' => $ua,
-                    'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                    'Accept-Language' => 'en-US,en;q=0.9',
-                ]
-            ]);
-            if ($res->getStatusCode() === 200) {
                 $body = (string)$res->getBody();
                 $xml = @simplexml_load_string($body, 'SimpleXMLElement', LIBXML_NOCDATA);
 
-                if ($xml && isset($xml->channel->item)) {
-                    foreach ($xml->channel->item as $item) {
-                        $title = trim((string)$item->title);
-                        $contentNs = $item->children('http://purl.org/rss/1.0/modules/content/');
-                        $encodedContent = isset($contentNs->encoded) ? (string)$contentNs->encoded : (string)$item->description;
-                        $content = $this->extractCleanArticleContent($encodedContent, $title);
-
-                        $link = trim((string)$item->link);
-                        $slug = basename(parse_url($link, PHP_URL_PATH));
-                        $tweetId = 'article_' . ($slug ?: md5($link));
-                        $pubDate = (string)$item->pubDate ? Carbon::parse((string)$item->pubDate) : now();
-
-                        if ($this->isDuplicateContent($content, 'penaltyloop', $pubDate, $tweetId)) {
-                            continue;
-                        }
-
-                        $mediaUrls = [];
-                        if (isset($item->enclosure) && !empty($item->enclosure['url'])) {
-                            $mediaUrls[] = (string)$item->enclosure['url'];
-                        }
-
-                        // Check media:content and media:thumbnail
-                        $mediaNs = $item->children('http://search.yahoo.com/mrss/');
-                        if (isset($mediaNs->content)) {
-                            foreach ($mediaNs->content as $mc) {
-                                if (isset($mc->attributes()->url)) {
-                                    $mediaUrls[] = (string)$mc->attributes()->url;
-                                }
-                            }
-                        }
-                        if (isset($mediaNs->thumbnail)) {
-                            foreach ($mediaNs->thumbnail as $mt) {
-                                if (isset($mt->attributes()->url)) {
-                                    $mediaUrls[] = (string)$mt->attributes()->url;
-                                }
-                            }
-                        }
-
-                        // Check content:encoded for embedded <img> tags
-                        if (!empty($encodedContent)) {
-                            preg_match_all('/<img[^>]+(?:src|data-orig-file)=["\']([^"\']+)["\']/i', $encodedContent, $imgMatches);
-                            if (!empty($imgMatches[1])) {
-                                foreach ($imgMatches[1] as $imgUrl) {
-                                    $imgUrl = html_entity_decode($imgUrl);
-                                    if (!str_contains($imgUrl, 'pixel') && !str_contains($imgUrl, 'smilies') && !str_contains($imgUrl, 's.w.org') && !str_contains($imgUrl, 'emoji') && !in_array($imgUrl, $mediaUrls)) {
-                                        $mediaUrls[] = $imgUrl;
-                                    }
-                                }
-                            }
-                        }
-
-                        $translationData = $this->getTranslationAttributes($tweetId, $content);
-
-                        Tweet::query()->updateOrCreate(
-                            ['tweet_id' => $tweetId],
-                            [
-                                'author_name' => 'Penalty Loop',
-                                'author_handle' => 'penaltyloop',
-                                'author_avatar' => 'https://pbs.twimg.com/profile_images/2084999188614373376/QytLH4Fk_normal.jpg',
-                                'content' => $content,
-                                'translated_content' => $translationData['translated_content'],
-                                'source_language' => $translationData['source_language'],
-                                'media_urls' => !empty($mediaUrls) ? $mediaUrls : null,
-                                'likes_count' => 0,
-                                'retweets_count' => 0,
-                                'tweet_url' => $link ?: 'https://penaltyloop.com',
-                                'published_at' => $pubDate,
-                            ]
-                        );
-
-                        $synced++;
-                    }
+                if (!$xml || !isset($xml->channel->item) || count($xml->channel->item) === 0) {
+                    break;
                 }
+
+                foreach ($xml->channel->item as $item) {
+                    $title = trim((string)$item->title);
+                    $contentNs = $item->children('http://purl.org/rss/1.0/modules/content/');
+                    $encodedContent = isset($contentNs->encoded) ? (string)$contentNs->encoded : (string)$item->description;
+                    $content = $this->extractCleanArticleContent($encodedContent, $title);
+
+                    $link = trim((string)$item->link);
+                    $slug = basename(parse_url($link, PHP_URL_PATH));
+                    $tweetId = 'article_' . ($slug ?: md5($link));
+                    $pubDate = (string)$item->pubDate ? Carbon::parse((string)$item->pubDate) : now();
+
+                    if ($this->isDuplicateContent($content, 'penaltyloop', $pubDate, $tweetId)) {
+                        continue;
+                    }
+
+                    $mediaUrls = [];
+                    if (isset($item->enclosure) && !empty($item->enclosure['url'])) {
+                        $mediaUrls[] = (string)$item->enclosure['url'];
+                    }
+
+                    // Check media:content and media:thumbnail
+                    $mediaNs = $item->children('http://search.yahoo.com/mrss/');
+                    if (isset($mediaNs->content)) {
+                        foreach ($mediaNs->content as $mc) {
+                            if (isset($mc->attributes()->url)) {
+                                $mediaUrls[] = (string)$mc->attributes()->url;
+                            }
+                        }
+                    }
+                    if (isset($mediaNs->thumbnail)) {
+                        foreach ($mediaNs->thumbnail as $mt) {
+                            if (isset($mt->attributes()->url)) {
+                                $mediaUrls[] = (string)$mt->attributes()->url;
+                            }
+                        }
+                    }
+
+                    // Check content:encoded for embedded <img> tags
+                    if (!empty($encodedContent)) {
+                        preg_match_all('/<img[^>]+(?:src|data-orig-file)=["\']([^"\']+)["\']/i', $encodedContent, $imgMatches);
+                        if (!empty($imgMatches[1])) {
+                            foreach ($imgMatches[1] as $imgUrl) {
+                                $imgUrl = html_entity_decode($imgUrl);
+                                if (!str_contains($imgUrl, 'pixel') && !str_contains($imgUrl, 'smilies') && !str_contains($imgUrl, 's.w.org') && !str_contains($imgUrl, 'emoji') && !in_array($imgUrl, $mediaUrls)) {
+                                    $mediaUrls[] = $imgUrl;
+                                }
+                            }
+                        }
+                    }
+
+                    if (empty($mediaUrls)) {
+                        $ogImg = $this->extractOpenGraphImageFromContent($content) ?: $this->extractOpenGraphImageFromUrl($link);
+                        if ($ogImg) {
+                            $mediaUrls[] = $ogImg;
+                        }
+                    }
+
+                    $translationData = $this->getTranslationAttributes($tweetId, $content);
+
+                    Tweet::query()->updateOrCreate(
+                        ['tweet_id' => $tweetId],
+                        [
+                            'author_name' => 'Penalty Loop',
+                            'author_handle' => 'penaltyloop',
+                            'author_avatar' => 'https://pbs.twimg.com/profile_images/2084999188614373376/QytLH4Fk_normal.jpg',
+                            'content' => $content,
+                            'translated_content' => $translationData['translated_content'],
+                            'source_language' => $translationData['source_language'],
+                            'media_urls' => !empty($mediaUrls) ? $mediaUrls : null,
+                            'likes_count' => 0,
+                            'retweets_count' => 0,
+                            'tweet_url' => $link ?: 'https://penaltyloop.com',
+                            'published_at' => $pubDate,
+                        ]
+                    );
+
+                    $synced++;
+                }
+            } catch (\Exception $e) {
+                Log::warning("Error syncing PenaltyLoop.com RSS (page {$page}): " . $e->getMessage());
             }
-        } catch (\Exception $e) {
-            Log::warning('Error syncing from PenaltyLoop.com RSS: ' . $e->getMessage());
+        }
+
+        return $synced;
+    }
+
+    /**
+     * Sync from BiathlonLive.com official WordPress REST API (race recaps & insights)
+     */
+    protected function syncFromBiathlonLiveRest(): int
+    {
+        $synced = 0;
+
+        for ($page = 1; $page <= 3; $page++) {
+            try {
+                $url = "https://biathlonlive.com/wp-json/wp/v2/posts?per_page=50&page={$page}";
+                $res = $this->client->get($url, [
+                    'headers' => [
+                        'User-Agent' => $this->userAgents[array_rand($this->userAgents)],
+                        'Accept' => 'application/json',
+                    ],
+                    'http_errors' => false,
+                    'timeout' => 15,
+                ]);
+
+                if ($res->getStatusCode() !== 200) {
+                    break;
+                }
+
+                $posts = json_decode((string)$res->getBody(), true);
+                if (!is_array($posts) || empty($posts)) {
+                    break;
+                }
+
+                foreach ($posts as $post) {
+                    $id = $post['id'] ?? null;
+                    if (!$id) continue;
+
+                    $tweetId = 'bl_' . $id;
+                    $title = html_entity_decode(strip_tags($post['title']['rendered'] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                    $excerpt = html_entity_decode(strip_tags($post['excerpt']['rendered'] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                    $content = trim($title . "\n\n" . $excerpt);
+                    if (empty($content)) continue;
+
+                    $link = $post['link'] ?? 'https://biathlonlive.com';
+                    $pubDate = isset($post['date']) ? Carbon::parse($post['date']) : now();
+
+                    if ($this->isDuplicateContent($content, 'BiathlonLivefr', $pubDate, $tweetId)) {
+                        continue;
+                    }
+
+                    $mediaUrls = [];
+                    if (!empty($post['jetpack_featured_media_url'])) {
+                        $mediaUrls[] = $post['jetpack_featured_media_url'];
+                    } elseif (!empty($post['yoast_head_json']['og_image'][0]['url'])) {
+                        $mediaUrls[] = $post['yoast_head_json']['og_image'][0]['url'];
+                    }
+
+                    $translationData = $this->getTranslationAttributes($tweetId, $content);
+
+                    Tweet::query()->updateOrCreate(
+                        ['tweet_id' => $tweetId],
+                        [
+                            'author_name' => 'Biathlon Live',
+                            'author_handle' => 'BiathlonLivefr',
+                            'author_avatar' => 'https://pbs.twimg.com/profile_images/1608404284592230401/f9w6g9qS_normal.jpg',
+                            'content' => $content,
+                            'translated_content' => $translationData['translated_content'],
+                            'source_language' => $translationData['source_language'],
+                            'media_urls' => !empty($mediaUrls) ? $mediaUrls : null,
+                            'likes_count' => 0,
+                            'retweets_count' => 0,
+                            'tweet_url' => $link,
+                            'published_at' => $pubDate,
+                        ]
+                    );
+
+                    $synced++;
+                }
+            } catch (\Exception $e) {
+                Log::warning("Error syncing BiathlonLive REST API (page {$page}): " . $e->getMessage());
+            }
+        }
+
+        return $synced;
+    }
+
+    /**
+     * Sync from NordicMag official biathlon category RSS feed
+     */
+    protected function syncFromNordicMagFeed(): int
+    {
+        $synced = 0;
+
+        for ($page = 1; $page <= 3; $page++) {
+            $rssUrl = $page === 1 ? 'https://www.nordicmag.info/category/biathlon/feed/' : "https://www.nordicmag.info/category/biathlon/feed/?paged={$page}";
+
+            try {
+                $ua = $this->userAgents[array_rand($this->userAgents)];
+                $res = $this->client->get($rssUrl, [
+                    'headers' => [
+                        'User-Agent' => $ua,
+                        'Accept' => 'application/rss+xml, application/xml, text/xml, */*',
+                    ],
+                    'http_errors' => false,
+                    'timeout' => 12,
+                ]);
+
+                if ($res->getStatusCode() !== 200) {
+                    break;
+                }
+
+                $body = (string)$res->getBody();
+                $xml = @simplexml_load_string($body, 'SimpleXMLElement', LIBXML_NOCDATA);
+
+                if (!$xml || !isset($xml->channel->item) || count($xml->channel->item) === 0) {
+                    break;
+                }
+
+                foreach ($xml->channel->item as $item) {
+                    $title = html_entity_decode(trim((string)$item->title), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                    $desc = html_entity_decode(strip_tags(trim((string)$item->description)), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                    $content = trim($title . "\n\n" . $desc);
+                    if (empty($content)) continue;
+
+                    $link = trim((string)$item->link);
+                    $guid = trim((string)$item->guid) ?: $link;
+                    $tweetId = 'nm_' . md5($guid);
+                    $pubDate = (string)$item->pubDate ? Carbon::parse((string)$item->pubDate) : now();
+
+                    if ($this->isDuplicateContent($content, 'NordicMag', $pubDate, $tweetId)) {
+                        continue;
+                    }
+
+                    $mediaUrls = [];
+                    if (isset($item->enclosure) && !empty($item->enclosure['url'])) {
+                        $mediaUrls[] = (string)$item->enclosure['url'];
+                    }
+
+                    $mediaNs = $item->children('http://search.yahoo.com/mrss/');
+                    if (isset($mediaNs->content)) {
+                        foreach ($mediaNs->content as $mc) {
+                            if (isset($mc->attributes()->url)) {
+                                $mediaUrls[] = (string)$mc->attributes()->url;
+                            }
+                        }
+                    }
+
+                    if (empty($mediaUrls)) {
+                        $ogImg = $this->extractOpenGraphImageFromUrl($link);
+                        if ($ogImg) {
+                            $mediaUrls[] = $ogImg;
+                        }
+                    }
+
+                    $translationData = $this->getTranslationAttributes($tweetId, $content);
+
+                    Tweet::query()->updateOrCreate(
+                        ['tweet_id' => $tweetId],
+                        [
+                            'author_name' => 'Nordic Magazine',
+                            'author_handle' => 'NordicMag',
+                            'author_avatar' => 'https://pbs.twimg.com/profile_images/1691456209537167360/4c-vE7N1_normal.jpg',
+                            'content' => $content,
+                            'translated_content' => $translationData['translated_content'],
+                            'source_language' => $translationData['source_language'],
+                            'media_urls' => !empty($mediaUrls) ? $mediaUrls : null,
+                            'likes_count' => 0,
+                            'retweets_count' => 0,
+                            'tweet_url' => $link ?: 'https://www.nordicmag.info',
+                            'published_at' => $pubDate,
+                        ]
+                    );
+
+                    $synced++;
+                }
+            } catch (\Exception $e) {
+                Log::warning("Error syncing NordicMag RSS feed (page {$page}): " . $e->getMessage());
+            }
         }
 
         return $synced;
