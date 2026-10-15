@@ -16,23 +16,28 @@
     @foreach($seasons as $index => $season)
         <div class="mb-12" x-data="{ showDetails: false }">
             <!-- Season Header & Controls -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 bg-gradient-to-r {{ data_get($season, 'gradient', 'from-slate-900 via-slate-800 to-sky-950') }} text-white p-5 rounded-[5px] shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 bg-gradient-to-r {{ data_get($season, 'gradient', 'from-slate-900 via-slate-800 to-sky-950') }} text-white p-5 rounded-[5px] {{ data_get($season, 'is_active') ? 'shadow-lg ring-2 ring-indigo-400/50 border border-white/25' : 'shadow-sm' }}">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-[4px] {{ data_get($season, 'icon_bg', 'bg-amber-500/20 border-amber-400/30 text-amber-400') }} border flex items-center justify-center font-black text-lg shadow-inner">
+                    <div class="w-11 h-11 rounded-[6px] {{ data_get($season, 'icon_bg', 'bg-amber-500/20 border-amber-400/30 text-amber-400') }} border flex items-center justify-center font-black text-xl shadow-inner backdrop-blur-xs">
                         {{ data_get($season, 'icon', '🏆') }}
                     </div>
                     <div>
-                        <div class="flex items-center gap-2">
-                            <h2 class="text-lg sm:text-xl font-extrabold tracking-tight text-white">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h2 class="text-lg sm:text-xl font-black tracking-tight text-white">
                                 {{ data_get($season, 'title') }}
                             </h2>
-                            @if(data_get($season, 'badge'))
+                            @if(data_get($season, 'is_active'))
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-400 text-emerald-950 text-[10px] font-black uppercase tracking-wider shadow-sm">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-950 animate-pulse"></span>
+                                    {{ data_get($season, 'badge', 'ACTIVE') }}
+                                </span>
+                            @elseif(data_get($season, 'badge'))
                                 <span class="px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[10px] font-black uppercase tracking-wider">
                                     {{ data_get($season, 'badge') }}
                                 </span>
                             @endif
                         </div>
-                        <span class="text-xs text-sky-300 font-medium">{{ data_get($season, 'subtitle', 'Official World Cup Season Matrix') }}</span>
+                        <span class="text-xs {{ data_get($season, 'is_active') ? 'text-violet-100 font-semibold' : 'text-sky-300 font-medium' }}">{{ data_get($season, 'subtitle', 'Official World Cup Season Matrix') }}</span>
                     </div>
                 </div>
 
@@ -41,7 +46,7 @@
                         type="button"
                         @click="showDetails = !showDetails"
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] text-xs font-bold transition-all border"
-                        :class="showDetails ? 'bg-sky-500 text-white border-sky-400 shadow-xs' : 'bg-white/10 text-slate-200 border-white/10 hover:bg-white/20'"
+                        :class="showDetails ? 'bg-white text-slate-900 border-white shadow-xs' : 'bg-white/15 text-white border-white/20 hover:bg-white/25'"
                     >
                         <i class="fa-solid fa-list-ol text-xs"></i>
                         <span x-text="showDetails ? 'Hide Split Points' : 'Show Split Points (Reg+Bon)'"></span>
@@ -50,7 +55,7 @@
             </div>
 
             <!-- Leaderboard Table Card -->
-            <div class="bg-white rounded-[5px] border border-slate-200 shadow-xs overflow-hidden">
+            <div class="bg-white rounded-[5px] border {{ data_get($season, 'is_active') ? 'border-indigo-300/80 shadow-md ring-1 ring-indigo-200/50' : 'border-slate-200 shadow-xs' }} overflow-hidden">
                 <div id="totals" class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
                         <thead class="bg-slate-50 text-xs font-bold text-slate-500 uppercase tracking-wider">

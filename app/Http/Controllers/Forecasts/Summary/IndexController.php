@@ -34,9 +34,10 @@ class IndexController extends Controller
                 'title' => 'Loop One Festival Munich 2026 — Pre-Season Special',
                 'subtitle' => 'Super Sprint Exhibition Tournament • Olympiapark Munich (17–18 Oct 2026)',
                 'icon' => '⚡',
-                'badge' => 'Pre-Season Show',
-                'gradient' => 'from-violet-950 via-slate-900 to-sky-950',
-                'icon_bg' => 'bg-violet-500/20 border-violet-400/30 text-violet-300',
+                'badge' => 'Active This Weekend',
+                'is_active' => true,
+                'gradient' => 'from-violet-600 via-indigo-600 to-sky-500',
+                'icon_bg' => 'bg-white/20 border-white/30 text-amber-300',
                 'data' => $this->getEventSummaryData(eventId: $loopOneEvent->id),
             ];
         }
