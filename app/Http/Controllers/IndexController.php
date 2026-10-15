@@ -15,7 +15,7 @@ class IndexController extends Controller
     {
         $this->registerBread('Home');
 
-        $season = Season::query()->where('name', '2526')->first();
+        $season = Season::query()->where('name', '2627')->first() ?? Season::query()->orderBy('id', 'desc')->first();
 
         $event = Event::query()
             ->where('season_id', $season?->id)

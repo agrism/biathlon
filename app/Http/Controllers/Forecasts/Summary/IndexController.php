@@ -28,6 +28,12 @@ class IndexController extends Controller
         $seasons = [];
 
         $seasons[] = [
+            'id' => 's2627',
+            'title' => 'LaVita IBU World Cup Biathlon, season 26/27',
+            'data' => $this->getSeasonData(season: '2627'),
+        ];
+
+        $seasons[] = [
             'id' => 's2526',
             'title' => 'BMW IBU World Cup Biathlon, season 25/26',
             'data' => $this->getSeasonData(season: '2526'),

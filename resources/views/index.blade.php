@@ -190,9 +190,15 @@
                     </p>
                 </div>
 
-                <div class="text-center bg-white/10 backdrop-blur-md px-6 py-3 rounded-none border border-white/15">
-                    <span class="text-[11px] uppercase tracking-wider text-slate-300 font-semibold block">Starts In</span>
-                    <span id="countdown" class="text-lg sm:text-xl font-black text-amber-400 tracking-tight"></span>
+                <div class="flex items-center gap-4">
+                    <a href="{{ route('events.show', $event->event_remote_id) }}" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-[4px] bg-sky-500 hover:bg-sky-400 text-white text-xs font-bold transition-all shadow-xs">
+                        <i class="fa-solid fa-crosshairs"></i>
+                        <span>Stage Races & Predictions</span>
+                    </a>
+                    <div class="text-center bg-white/10 backdrop-blur-md px-6 py-3 rounded-none border border-white/15">
+                        <span class="text-[11px] uppercase tracking-wider text-slate-300 font-semibold block">Starts In</span>
+                        <span id="countdown" class="text-lg sm:text-xl font-black text-amber-400 tracking-tight"></span>
+                    </div>
                 </div>
             </div>
         </div>
