@@ -32,11 +32,18 @@ class GenerateMissingForecastsCommand extends Command
     {
         EventCompetition::query()
             ->where('start_time', '>', now()->subMonths(3))
-            ->with('forecast')
+            ->with(['forecast', 'event'])
             ->get()
             ->each(function (EventCompetition $competition): bool {
                 if ($competition->forecast) {
                     return true;
+                }
+
+                // Skip non-finals for Loop One Festival
+                if ($competition->event?->event_remote_id === 'SB2627SIBUL1MU') {
+                    if (!str_contains($competition->description, 'Final') && !str_contains($competition->short_description, 'Final')) {
+                        return true;
+                    }
                 }
 
                 $forecast = new Forecast;

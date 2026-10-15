@@ -37,6 +37,15 @@ class ShowUserEventController extends Controller
             abort(404);
         }
 
+        if ($event->event_remote_id === 'SB2627SIBUL1MU') {
+            $event->setRelation(
+                'competitions',
+                $event->competitions->filter(function (EventCompetition $competition) {
+                    return str_contains($competition->description, 'Final') || str_contains($competition->short_description, 'Final');
+                })
+            );
+        }
+
         $event->competitions->map(function(EventCompetition $competition):EventCompetition{
 
             if($competition->forecast){

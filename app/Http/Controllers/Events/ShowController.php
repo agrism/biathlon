@@ -23,9 +23,17 @@ class ShowController extends Controller
 
         $this->registerBread('Event:' . $event->short_description);
 
-        $data = EventCompetition::query()
-            ->where('event_id', $event->id)
-            ->paginate(perPage: 2000);
+        $query = EventCompetition::query()
+            ->where('event_id', $event->id);
+
+        if ($event->event_remote_id === 'SB2627SIBUL1MU') {
+            $query->where(function ($c) {
+                $c->where('description', 'like', '%Final%')
+                  ->orWhere('short_description', 'like', '%Final%');
+            });
+        }
+
+        $data = $query->paginate(perPage: 2000);
 
         $title = [];
         $title[] = $event->description;
