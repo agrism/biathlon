@@ -41,13 +41,16 @@ class IndexController extends Controller
             ];
         }
 
-        $seasons[] = [
-            'id' => 's2627',
-            'title' => 'LaVita IBU World Cup Biathlon, season 26/27',
-            'subtitle' => 'Official World Cup Season Matrix',
-            'icon' => '🏆',
-            'data' => $this->getSeasonData(season: '2627'),
-        ];
+        // Only show season 26/27 starting from Monday, 19 October 2026 (after Loop One Festival)
+        if (now('Europe/Riga')->gte('2026-10-19 00:00:00')) {
+            $seasons[] = [
+                'id' => 's2627',
+                'title' => 'LaVita IBU World Cup Biathlon, season 26/27',
+                'subtitle' => 'Official World Cup Season Matrix',
+                'icon' => '🏆',
+                'data' => $this->getSeasonData(season: '2627'),
+            ];
+        }
 
         $seasons[] = [
             'id' => 's2526',

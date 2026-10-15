@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Athlete;
 use App\Models\EventCompetition;
 use App\Models\Forecast;
+use App\Models\Season;
 use App\ValueObjects\Helpers\Forecasts\FinalDataValueObject\AthleteValueObject;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -29,11 +30,18 @@ class IndexController extends Controller
 //
 //        dd($c->competition);
 
+        $showSeason2627 = now('Europe/Riga')->gte('2026-10-19 00:00:00');
+
         $data = Forecast::query()
             ->with('competition.event')
-            ->where(function ($query) {
-                $query->whereHas('competition.event', function ($s) {
-                    $s->where('level', 1);
+            ->where(function ($query) use ($showSeason2627) {
+                $query->where(function ($q) use ($showSeason2627) {
+                    $q->whereHas('competition.event', function ($s) use ($showSeason2627) {
+                        $s->where('level', 1);
+                        if (!$showSeason2627) {
+                            $s->where('season_id', '!=', Season::where('name', '2627')->value('id'));
+                        }
+                    });
                 })
                 ->orWhere(function ($q) {
                     $q->whereHas('competition.event', function ($s) {
