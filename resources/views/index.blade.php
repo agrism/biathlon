@@ -182,28 +182,39 @@
                 : route('events.show', $event->event_remote_id);
         @endphp
         <!-- Upcoming Stage Countdown Banner (Full Width with Centered Content) -->
-        <div class="mb-10 w-full rounded-none bg-gradient-to-r from-slate-950 via-slate-900 to-sky-950 text-white shadow-md relative overflow-hidden border-y border-slate-800/80">
+        <div class="mb-10 w-full rounded-none bg-gradient-to-r {{ $isLoopOne ? 'from-violet-600 via-indigo-600 to-sky-500 shadow-lg border-y border-violet-400/30' : 'from-slate-950 via-slate-900 to-sky-950 shadow-md border-y border-slate-800/80' }} text-white relative overflow-hidden">
             <div class="max-w-7xl mx-auto p-6 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
                 <a href="{{ $bannerTargetUrl }}" class="group block cursor-pointer">
-                    <span class="px-2.5 py-1 rounded-none bg-amber-500/20 text-amber-300 text-xs font-bold uppercase tracking-wider group-hover:bg-amber-500/30 transition-colors">
-                        {{ $event->level == 1 ? 'Next World Cup Stage' : 'Pre-Season Show Tournament' }}
-                    </span>
-                    <h2 class="text-xl sm:text-2xl font-black mt-2 text-white group-hover:text-amber-300 transition-colors">
-                        {{ $event->description }}
+                    @if($isLoopOne)
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-400 text-emerald-950 text-[10px] font-black uppercase tracking-wider shadow-sm mb-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-950 animate-pulse"></span>
+                            Active This Weekend • Pre-Season Show
+                        </span>
+                    @else
+                        <span class="px-2.5 py-1 rounded-none bg-amber-500/20 text-amber-300 text-xs font-bold uppercase tracking-wider group-hover:bg-amber-500/30 transition-colors">
+                            {{ $event->level == 1 ? 'Next World Cup Stage' : 'Pre-Season Show Tournament' }}
+                        </span>
+                    @endif
+                    <h2 class="text-xl sm:text-2xl font-black mt-2 text-white group-hover:text-amber-300 transition-colors flex items-center gap-2">
+                        @if($isLoopOne)<span class="text-amber-300">⚡</span>@endif
+                        <span>{{ $event->description }}</span>
                     </h2>
-                    <p class="text-xs text-slate-300 mt-1">
+                    <p class="text-xs {{ $isLoopOne ? 'text-violet-100 font-medium' : 'text-slate-300' }} mt-1">
                         {{ $event->short_description }} • {{ $event->first_competition_date->tz('Europe/Riga')->format('d F Y, H:i') }}
                     </p>
                 </a>
 
                 <div class="flex items-center gap-4">
-                    <a href="{{ $bannerTargetUrl }}" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-[4px] bg-sky-500 hover:bg-sky-400 active:scale-95 text-white text-xs font-bold transition-all shadow-xs">
-                        <i class="fa-solid fa-crosshairs"></i>
+                    <a
+                        href="{{ $bannerTargetUrl }}"
+                        class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-[4px] {{ $isLoopOne ? 'bg-white text-indigo-950 hover:bg-slate-100 shadow-md font-black' : 'bg-sky-500 hover:bg-sky-400 text-white font-bold shadow-xs' }} active:scale-95 text-xs transition-all cursor-pointer"
+                    >
+                        <i class="fa-solid fa-crosshairs {{ $isLoopOne ? 'text-indigo-600' : 'text-white' }}"></i>
                         <span>Stage Races & Predictions</span>
                     </a>
-                    <div class="text-center bg-white/10 backdrop-blur-md px-6 py-3 rounded-none border border-white/15">
-                        <span class="text-[11px] uppercase tracking-wider text-slate-300 font-semibold block">Starts In</span>
-                        <span id="countdown" class="text-lg sm:text-xl font-black text-amber-400 tracking-tight"></span>
+                    <div class="text-center bg-white/15 backdrop-blur-md px-6 py-3 rounded-[4px] border border-white/20 shadow-inner">
+                        <span class="text-[11px] uppercase tracking-wider {{ $isLoopOne ? 'text-violet-100 font-bold' : 'text-slate-300 font-semibold' }} block">Starts In</span>
+                        <span id="countdown" class="text-lg sm:text-xl font-black text-amber-300 tracking-tight"></span>
                     </div>
                 </div>
             </div>
