@@ -68,7 +68,25 @@ class IndexController extends Controller
             'data' => $this->getSeasonData(season: '2425'),
         ];
 
-        return view('forecasts.summary.index', compact('seasons'));
+        $autoOpenUrl = null;
+        $autoOpenEventId = $request->query('event_id');
+
+        // Auto-open Loop One Festival if requested or currently active pre-season event
+        if (!$autoOpenEventId && $loopOneEvent && $loopOneEvent->end_date >= now()->subDays(2)) {
+            $autoOpenEventId = $loopOneEvent->id;
+        }
+
+        if ($autoOpenEventId) {
+            $autoOpenUserId = $request->query('user_id') ?? auth()->id() ?? User::query()->orderBy('id')->value('id');
+            if ($autoOpenUserId) {
+                $autoOpenUrl = route('forecasts.summary.user-event', [
+                    'userId' => $autoOpenUserId,
+                    'eventId' => $autoOpenEventId,
+                ]);
+            }
+        }
+
+        return view('forecasts.summary.index', compact('seasons', 'autoOpenUrl'));
     }
 
     protected function getEventSummaryData(int $eventId): array

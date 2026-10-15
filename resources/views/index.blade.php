@@ -175,23 +175,29 @@
     </div>
 
     @if(isset($event) && $event->first_competition_date)
+        @php
+            $isLoopOne = ($event->event_remote_id === 'SB2627SIBUL1MU');
+            $bannerTargetUrl = $isLoopOne
+                ? route('forecasts.summary.index', ['event_id' => $event->id])
+                : route('events.show', $event->event_remote_id);
+        @endphp
         <!-- Upcoming Stage Countdown Banner (Full Width with Centered Content) -->
         <div class="mb-10 w-full rounded-none bg-gradient-to-r from-slate-950 via-slate-900 to-sky-950 text-white shadow-md relative overflow-hidden border-y border-slate-800/80">
             <div class="max-w-7xl mx-auto p-6 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
-                <div>
-                    <span class="px-2.5 py-1 rounded-none bg-amber-500/20 text-amber-300 text-xs font-bold uppercase tracking-wider">
+                <a href="{{ $bannerTargetUrl }}" class="group block cursor-pointer">
+                    <span class="px-2.5 py-1 rounded-none bg-amber-500/20 text-amber-300 text-xs font-bold uppercase tracking-wider group-hover:bg-amber-500/30 transition-colors">
                         {{ $event->level == 1 ? 'Next World Cup Stage' : 'Pre-Season Show Tournament' }}
                     </span>
-                    <h2 class="text-xl sm:text-2xl font-black mt-2 text-white">
+                    <h2 class="text-xl sm:text-2xl font-black mt-2 text-white group-hover:text-amber-300 transition-colors">
                         {{ $event->description }}
                     </h2>
                     <p class="text-xs text-slate-300 mt-1">
                         {{ $event->short_description }} • {{ $event->first_competition_date->tz('Europe/Riga')->format('d F Y, H:i') }}
                     </p>
-                </div>
+                </a>
 
                 <div class="flex items-center gap-4">
-                    <a href="{{ route('events.show', $event->event_remote_id) }}" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-[4px] bg-sky-500 hover:bg-sky-400 text-white text-xs font-bold transition-all shadow-xs">
+                    <a href="{{ $bannerTargetUrl }}" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-[4px] bg-sky-500 hover:bg-sky-400 active:scale-95 text-white text-xs font-bold transition-all shadow-xs">
                         <i class="fa-solid fa-crosshairs"></i>
                         <span>Stage Races & Predictions</span>
                     </a>

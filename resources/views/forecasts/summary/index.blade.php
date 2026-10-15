@@ -154,7 +154,14 @@
 
             <!-- Detail Event Inspection Container -->
             @if($index === 0)
-                <div id="user-event" class="mt-6"></div>
+                <div
+                    id="user-event"
+                    class="mt-6"
+                    @if(isset($autoOpenUrl) && $autoOpenUrl)
+                        hx-get="{{ $autoOpenUrl }}"
+                        hx-trigger="load"
+                    @endif
+                ></div>
             @endif
         </div>
     @endforeach
