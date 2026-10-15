@@ -19,8 +19,11 @@ class IndexController extends Controller
 
         $event = Event::query()
             ->where('season_id', $season?->id)
-            ->where('level', 1)
-            ->where('start_date', '>', now())
+            ->where(function ($q) {
+                $q->where('level', 1)
+                  ->orWhere('event_remote_id', 'SB2627SIBUL1MU');
+            })
+            ->where('end_date', '>=', now())
             ->orderBy('start_date')
             ->first();
 

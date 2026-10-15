@@ -180,7 +180,7 @@
             <div class="max-w-7xl mx-auto p-6 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
                 <div>
                     <span class="px-2.5 py-1 rounded-none bg-amber-500/20 text-amber-300 text-xs font-bold uppercase tracking-wider">
-                        Next World Cup Stage
+                        {{ $event->level == 1 ? 'Next World Cup Stage' : 'Pre-Season Show Tournament' }}
                     </span>
                     <h2 class="text-xl sm:text-2xl font-black mt-2 text-white">
                         {{ $event->description }}

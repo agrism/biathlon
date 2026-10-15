@@ -16,16 +16,23 @@
     @foreach($seasons as $index => $season)
         <div class="mb-12" x-data="{ showDetails: false }">
             <!-- Season Header & Controls -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 bg-gradient-to-r from-slate-900 via-slate-800 to-sky-950 text-white p-5 rounded-[5px] shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 bg-gradient-to-r {{ data_get($season, 'gradient', 'from-slate-900 via-slate-800 to-sky-950') }} text-white p-5 rounded-[5px] shadow-sm">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-[4px] bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-400 font-black text-lg shadow-inner">
-                        🏆
+                    <div class="w-10 h-10 rounded-[4px] {{ data_get($season, 'icon_bg', 'bg-amber-500/20 border-amber-400/30 text-amber-400') }} border flex items-center justify-center font-black text-lg shadow-inner">
+                        {{ data_get($season, 'icon', '🏆') }}
                     </div>
                     <div>
-                        <h2 class="text-lg sm:text-xl font-extrabold tracking-tight text-white">
-                            {{ data_get($season, 'title') }}
-                        </h2>
-                        <span class="text-xs text-sky-300 font-medium">Official World Cup Season Matrix</span>
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-lg sm:text-xl font-extrabold tracking-tight text-white">
+                                {{ data_get($season, 'title') }}
+                            </h2>
+                            @if(data_get($season, 'badge'))
+                                <span class="px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[10px] font-black uppercase tracking-wider">
+                                    {{ data_get($season, 'badge') }}
+                                </span>
+                            @endif
+                        </div>
+                        <span class="text-xs text-sky-300 font-medium">{{ data_get($season, 'subtitle', 'Official World Cup Season Matrix') }}</span>
                     </div>
                 </div>
 
