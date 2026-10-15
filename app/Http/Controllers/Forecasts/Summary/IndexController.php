@@ -121,7 +121,12 @@ class IndexController extends Controller
         $key = sprintf('%s.%s', 'total', 'total');
 
         usort($data['users'], function ($a, $b) use ($key){
-            return data_get($a, $key, 0) < data_get($b, $key, 0);
+            $totalA = data_get($a, $key, 0);
+            $totalB = data_get($b, $key, 0);
+            if ($totalA === $totalB) {
+                return strcmp($a['name'] ?? '', $b['name'] ?? '');
+            }
+            return $totalB <=> $totalA;
         });
 
         $data['events'][] = 'Points';
@@ -151,31 +156,35 @@ class IndexController extends Controller
             }
         }
 
-        // add point diff
-
-        $userTotalPoints = [];
-
-        foreach ($data['users'] ?? [] as $user){
-            $userTotalPoints[$user['id']] = data_get($user, 'total.total');
-        }
-
-        arsort($userTotalPoints);
-
-        $maxPoints = 0;
-        $counter = 0;
-        $userDiffPoints = [];
-
-        foreach ($userTotalPoints as $userId => $userTotalPoints){
-            if($counter++ === 0){
-                $maxPoints = $userTotalPoints;
+        // Add point diff, rank, and leader status
+        $maxTotalPoints = 0;
+        foreach ($data['users'] as $user) {
+            $total = data_get($user, 'total.total', 0);
+            if ($total > $maxTotalPoints) {
+                $maxTotalPoints = $total;
             }
-
-            $userDiffPoints[$userId] = $maxPoints - $userTotalPoints;
         }
 
+        $seasonStarted = $maxTotalPoints > 0;
+        $data['season_started'] = $seasonStarted;
 
-        foreach ($data['users'] as $index => $user){
-            data_set($data, 'users.'.$index.'.total.diff', data_get($userDiffPoints, $user['id']));
+        $currentRank = 1;
+        $prevPoints = null;
+
+        foreach ($data['users'] as $index => $user) {
+            $userTotal = data_get($user, 'total.total', 0);
+
+            if ($prevPoints !== null && $userTotal < $prevPoints) {
+                $currentRank = $index + 1;
+            }
+            $prevPoints = $userTotal;
+
+            $diff = $seasonStarted ? max(0, $maxTotalPoints - $userTotal) : 0;
+            $isLeader = $seasonStarted && ($userTotal === $maxTotalPoints);
+
+            data_set($data, 'users.'.$index.'.rank', $currentRank);
+            data_set($data, 'users.'.$index.'.is_leader', $isLeader);
+            data_set($data, 'users.'.$index.'.total.diff', $diff);
         }
 
         return $data;

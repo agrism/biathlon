@@ -63,19 +63,27 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 bg-white">
+                            @php $seasonStarted = $season['data']['season_started'] ?? false; @endphp
                             @foreach($season['data']['users'] ?? [] as $i => $user)
-                                <tr class="hover:bg-slate-50/80 transition-colors {{ $i === 0 ? 'bg-amber-50/20' : '' }}">
+                                @php
+                                    $isLeader = $user['is_leader'] ?? false;
+                                    $userRank = $user['rank'] ?? ($i + 1);
+                                    $diff = $user['total']['diff'] ?? 0;
+                                @endphp
+                                <tr class="hover:bg-slate-50/80 transition-colors {{ $isLeader ? 'bg-amber-50/20' : '' }}">
                                     <!-- Sticky Player Name & Rank -->
                                     <td class="sticky left-0 bg-white z-10 px-4 py-3 whitespace-nowrap font-bold text-slate-900 shadow-sm">
                                         <div class="flex items-center gap-2">
-                                            @if($i === 0)
+                                            @if($isLeader)
                                                 <span class="w-6 h-6 rounded-full bg-amber-400 text-amber-950 flex items-center justify-center text-xs font-black shadow-xs">1</span>
-                                            @elseif($i === 1)
+                                            @elseif($seasonStarted && $userRank === 2)
                                                 <span class="w-6 h-6 rounded-full bg-slate-300 text-slate-800 flex items-center justify-center text-xs font-bold shadow-xs">2</span>
-                                            @elseif($i === 2)
+                                            @elseif($seasonStarted && $userRank === 3)
                                                 <span class="w-6 h-6 rounded-full bg-amber-700 text-amber-100 flex items-center justify-center text-xs font-bold shadow-xs">3</span>
+                                            @elseif($seasonStarted)
+                                                <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-xs font-medium">{{ $userRank }}</span>
                                             @else
-                                                <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-xs font-medium">{{ $i + 1 }}</span>
+                                                <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-xs font-medium">{{ $i + 1 }}</span>
                                             @endif
                                             <span>{{ $user['name'] ?? '-' }}</span>
                                         </div>
@@ -118,11 +126,15 @@
 
                                     <!-- Diff Column -->
                                     <td class="px-3 py-3 whitespace-nowrap text-right bg-slate-50/50">
-                                        @if($i === 0)
+                                        @if($isLeader)
                                             <span class="inline-block px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-xs font-bold">Leader</span>
-                                        @else
+                                        @elseif($diff > 0)
                                             <span class="inline-block px-2 py-0.5 rounded-md bg-rose-50 text-rose-600 text-xs font-semibold">
-                                                -{{ $user['total']['diff'] ?? 0 }}
+                                                -{{ $diff }}
+                                            </span>
+                                        @else
+                                            <span class="inline-block px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 text-xs font-semibold">
+                                                0
                                             </span>
                                         @endif
                                     </td>
