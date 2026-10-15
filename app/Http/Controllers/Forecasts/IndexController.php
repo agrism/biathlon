@@ -31,9 +31,18 @@ class IndexController extends Controller
 
         $data = Forecast::query()
             ->with('competition.event')
-            ->whereHas('competition.event', function ($s){
-                $s->where('level', 1)
-                    ->orWhere('events.event_remote_id', 'SB2627SIBUL1MU');
+            ->where(function ($query) {
+                $query->whereHas('competition.event', function ($s) {
+                    $s->where('level', 1);
+                })
+                ->orWhere(function ($q) {
+                    $q->whereHas('competition.event', function ($s) {
+                        $s->where('events.event_remote_id', 'SB2627SIBUL1MU');
+                    })->whereHas('competition', function ($c) {
+                        $c->where('description', 'like', '%Final%')
+                          ->orWhere('short_description', 'like', '%Final%');
+                    });
+                });
             });
 
         if($authUserId = auth()->id()){

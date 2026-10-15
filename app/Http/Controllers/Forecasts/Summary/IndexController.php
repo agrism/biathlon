@@ -94,7 +94,14 @@ class IndexController extends Controller
         $data['events'][] = 'User';
 
         foreach ($event->competitions as $competition) {
-            $compName = $competition->short_description ?: $competition->description;
+            // Keep ONLY the Finals (Saturday & Sunday Women's and Men's Finals)
+            if (!str_contains($competition->description, 'Final') && !str_contains($competition->short_description, 'Final')) {
+                continue;
+            }
+
+            $day = $competition->start_time ? $competition->start_time->tz('Europe/Riga')->format('D d.m') : '';
+            $baseName = $competition->short_description ?: $competition->description;
+            $compName = $baseName . ($day ? ' (' . $day . ')' : '');
             $data['events'][] = $compName;
 
             $userAwardsInComp = [];
