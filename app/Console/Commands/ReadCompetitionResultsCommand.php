@@ -18,7 +18,7 @@ class ReadCompetitionResultsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'app:read-competition-results';
+    protected $signature = 'app:read-competition-results {--all : Read all past competitions}';
 
     /**
      * The console command description.
@@ -32,17 +32,28 @@ class ReadCompetitionResultsCommand extends Command
      */
     public function handle(BiathlonResultApi $api)
     {
+        $startDate = $this->option('all') ? Carbon::parse('2025-01-01') : now()->subDays(14);
+
         EventCompetition::query()
-            ->where('start_time', '>', Carbon::parse('2025-01-01'))
+            ->where('start_time', '>', $startDate)
             ->where('start_time', '<', now()->addDays(2))
+            ->whereNotNull('race_remote_id')
+            ->where('race_remote_id', '!=', '')
             ->with(['results', 'event'])
-            ->whereHas('event', function ($q) {
-                $q->where('level', 1);
+            ->where(function ($query) {
+                $query->whereHas('event', function ($q) {
+                    $q->whereIn('level', [1, 4]);
+                })->orWhereHas('forecast');
             })
             ->whereNull('results_handled_at')
+            ->orderBy('start_time', 'desc')
             ->get()->each(function (EventCompetition $competition) use ($api): bool {
 
-                $this->line('$competition: '. $competition->id);
+                $this->line('$competition: '. $competition->id . ' (' . $competition->race_remote_id . ')');
+
+                if (empty($competition->race_remote_id)) {
+                    return true;
+                }
 
                 if(in_array($competition->race_remote_id, ['BT2425SWRLCP08SWIN', 'BT2425SWRLCP08SMIN'])){
                     $this->line('skip');
@@ -52,31 +63,25 @@ class ReadCompetitionResultsCommand extends Command
                 $response = $api->results(raceId: $competition->race_remote_id);
 
                 if ($response->status() !== Response::HTTP_OK) {
-                    dd([
-                        '$competition->race_remote_id' =>  $competition->race_remote_id,
-                        'code'=> $response->status(),
-                        'responseBody' => $response->getBody()->getContents(),
-                    ]);
+                    $this->warn("Failed to fetch results for race {$competition->race_remote_id}: HTTP {$response->status()}");
                     return true;
                 }
 
                 $data = $response->body();
 
                 $data = json_decode($data, true);
-                $results = data_get($data, 'Results');
+                $results = data_get($data, 'Results') ?? [];
 
                 $isStartLst = data_get($data, 'IsStartList');
                 $isResultList = data_get($data, 'IsResult');
                 $status = data_get($data, 'Competition.StatusId');
                 $statusText = data_get($data, 'Competition.StatusText');
 
-                dump([
-                   '$isStartLst' => $isStartLst,
-                   '$isResultList' => $isResultList,
-                   '$status' => $status,
-                   '$statusText' => $statusText,
-//                   '$data' => $data,
-                ]);
+                $this->line("Status: {$statusText}, IsResult: " . ($isResultList ? 'yes' : 'no') . ", Results count: " . count($results));
+
+                if (empty($results)) {
+                    return true;
+                }
 
 //                $dbHasFinalResultsAlready = EventCompetitionResult::query()
 //                        ->where('event_competition_id', $competition->id)
@@ -174,9 +179,6 @@ class ReadCompetitionResultsCommand extends Command
                         statShootingStanding: $athlete->stat_shooting_standing,
                     );
                     $result->save();
-
-                    dump('added results, competitionId: ' . $competition->id);
-
                 }
 
                 if($isResultList){

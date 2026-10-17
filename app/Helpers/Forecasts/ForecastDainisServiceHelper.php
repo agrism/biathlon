@@ -67,6 +67,7 @@ class ForecastDainisServiceHelper extends ForecastAbstractionHelper
     {
         $this->mainPoints = 0;
         $this->bonusPoints = 0;
+        $this->pointDetails = [];
 
         foreach (range(0,5) as $_){
             $this->pointDetails[] = [
