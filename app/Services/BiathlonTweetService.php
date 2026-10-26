@@ -192,14 +192,14 @@ class BiathlonTweetService
     {
         $media = [];
 
-        // 1. Root photos
+        // 1. Root photos (official permanent Twitter uploads)
         if (!empty($data['photos']) && is_array($data['photos'])) {
             foreach ($data['photos'] as $p) {
                 if (!empty($p['url']) && !in_array($p['url'], $media)) $media[] = $p['url'];
             }
         }
 
-        // 2. Root media details
+        // 2. Root media details (official permanent Twitter uploads)
         if (!empty($data['mediaDetails']) && is_array($data['mediaDetails'])) {
             foreach ($data['mediaDetails'] as $m) {
                 if (!empty($m['media_url_https']) && !in_array($m['media_url_https'], $media)) {
@@ -208,14 +208,22 @@ class BiathlonTweetService
             }
         }
 
-        // 3. Root card images
-        $cardImg = $this->extractCardImageFromPayload($data['card'] ?? []);
-        if ($cardImg && !in_array($cardImg, $media)) {
-            $media[] = $cardImg;
+        // 3. Root external URLs - extract direct canonical OpenGraph images from the actual publisher/article
+        if (empty($media) && !empty($data['entities']['urls'])) {
+            foreach ($data['entities']['urls'] as $u) {
+                $url = $u['expanded_url'] ?? $u['url'] ?? '';
+                if ($url && !str_contains($url, 'x.com') && !str_contains($url, 'twitter.com') && !str_contains($url, 't.co')) {
+                    $og = $this->extractOpenGraphImageFromUrl($url);
+                    if ($og && !in_array($og, $media)) {
+                        $media[] = $og;
+                        break;
+                    }
+                }
+            }
         }
 
-        // 4. Quoted tweet media & cards
-        if (!empty($data['quoted_tweet']) && is_array($data['quoted_tweet'])) {
+        // 4. Quoted tweet media & external URLs
+        if (empty($media) && !empty($data['quoted_tweet']) && is_array($data['quoted_tweet'])) {
             $qt = $data['quoted_tweet'];
             if (!empty($qt['photos']) && is_array($qt['photos'])) {
                 foreach ($qt['photos'] as $p) {
@@ -228,10 +236,6 @@ class BiathlonTweetService
                         $media[] = $m['media_url_https'];
                     }
                 }
-            }
-            $qtCardImg = $this->extractCardImageFromPayload($qt['card'] ?? []);
-            if ($qtCardImg && !in_array($qtCardImg, $media)) {
-                $media[] = $qtCardImg;
             }
 
             // Quoted tweet external URLs
@@ -249,17 +253,11 @@ class BiathlonTweetService
             }
         }
 
-        // 5. Root external URLs
-        if (empty($media) && !empty($data['entities']['urls'])) {
-            foreach ($data['entities']['urls'] as $u) {
-                $url = $u['expanded_url'] ?? $u['url'] ?? '';
-                if ($url && !str_contains($url, 'x.com') && !str_contains($url, 'twitter.com') && !str_contains($url, 't.co')) {
-                    $og = $this->extractOpenGraphImageFromUrl($url);
-                    if ($og && !in_array($og, $media)) {
-                        $media[] = $og;
-                        break;
-                    }
-                }
+        // 5. Fallback card images (only if not ephemeral pbs.twimg.com/card_img which expires into 404)
+        if (empty($media)) {
+            $cardImg = $this->extractCardImageFromPayload($data['card'] ?? []);
+            if ($cardImg && !str_contains($cardImg, 'card_img') && !in_array($cardImg, $media)) {
+                $media[] = $cardImg;
             }
         }
 
@@ -271,6 +269,12 @@ class BiathlonTweetService
      */
     public function enrichTweetMedia(Tweet $tweet): ?array
     {
+        // 1. First try extracting high-resolution canonical OG image from any URLs in tweet content
+        $og = $this->extractOpenGraphImageFromContent($tweet->content);
+        if ($og) {
+            return [$og];
+        }
+
         $rawId = str_replace('tw_', '', $tweet->tweet_id);
         if (is_numeric($rawId)) {
             try {
@@ -295,22 +299,17 @@ class BiathlonTweetService
             } catch (\Throwable $e) {}
         }
 
-        // Fallback: extract OG image from any URLs in tweet content
-        $og = $this->extractOpenGraphImageFromContent($tweet->content);
-        if ($og) {
-            return [$og];
-        }
-
         return null;
     }
 
     /**
-     * Backfill missing media URLs by performing deep inspection (quoted tweets, cards, and OpenGraph)
+     * Backfill missing or broken media URLs by performing deep inspection (quoted tweets, cards, and OpenGraph)
      */
     public function backfillMissingMediaUrls(int $limit = 100): int
     {
         $tweets = Tweet::query()
             ->whereNull('media_urls')
+            ->orWhere('media_urls', 'like', '%pbs.twimg.com/card_img%')
             ->orderByDesc('published_at')
             ->take($limit)
             ->get();
@@ -321,6 +320,12 @@ class BiathlonTweetService
             if (!empty($media)) {
                 $tweet->update([
                     'media_urls' => $media,
+                ]);
+                $count++;
+            } elseif (!empty($tweet->media_urls) && collect($tweet->media_urls)->some(fn($u) => str_contains($u, 'card_img'))) {
+                // If it had a broken ephemeral card_img and no replacement OG image was found, clear the broken URL
+                $tweet->update([
+                    'media_urls' => null,
                 ]);
                 $count++;
             }

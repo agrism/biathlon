@@ -21,6 +21,7 @@
                         alt="Media for {{ $tweet->author_handle }}"
                         class="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                         loading="lazy"
+                        onerror="this.onerror=null; this.closest('.flex-shrink-0')?.classList.add('hidden');"
                     >
                 </a>
                 <!-- Top subtle dark vignette for author and date pill readability -->

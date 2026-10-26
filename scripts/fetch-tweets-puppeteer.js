@@ -211,13 +211,26 @@ async function fetchTweetById(id, fallbackHandle = '') {
                 || bv.promo_image?.image_value?.url_https;
         };
 
-        const cardImg = extractCardImage(tweet.card);
-        if (cardImg && !mediaUrls.includes(cardImg)) {
-            mediaUrls.push(cardImg);
+        // Deep extraction: If no uploaded media on root tweet, check external links for canonical Open Graph images first
+        if (mediaUrls.length === 0) {
+            const allUrls = [
+                ...(tweet.entities?.urls || []).map(u => u.expanded_url || u.url),
+                ...(tweet.quoted_tweet?.entities?.urls || []).map(u => u.expanded_url || u.url),
+            ].filter(Boolean);
+
+            for (const targetUrl of allUrls) {
+                if (!targetUrl.includes('x.com') && !targetUrl.includes('twitter.com') && !targetUrl.includes('t.co')) {
+                    const ogImg = await extractOpenGraphImage(targetUrl);
+                    if (ogImg && !mediaUrls.includes(ogImg)) {
+                        mediaUrls.push(ogImg);
+                        break;
+                    }
+                }
+            }
         }
 
-        // Deep extraction: If no media found on root tweet, check quoted_tweet (e.g. quote tweets with articles/media)
-        if (tweet.quoted_tweet) {
+        // Deep extraction: If no media found on root tweet, check quoted_tweet photos
+        if (mediaUrls.length === 0 && tweet.quoted_tweet) {
             const qt = tweet.quoted_tweet;
             if (Array.isArray(qt.photos)) {
                 for (const p of qt.photos) {
@@ -230,10 +243,6 @@ async function fetchTweetById(id, fallbackHandle = '') {
                         mediaUrls.push(m.media_url_https);
                     }
                 }
-            }
-            const qtCardImg = extractCardImage(qt.card);
-            if (qtCardImg && !mediaUrls.includes(qtCardImg)) {
-                mediaUrls.push(qtCardImg);
             }
 
             // If quoted tweet has an ID and we still don't have media, fetch quoted tweet details
@@ -249,21 +258,11 @@ async function fetchTweetById(id, fallbackHandle = '') {
             }
         }
 
-        // Deep extraction: If still no media, check external links for Open Graph images
+        // Last resort: If still no media and card has non-card_img URL (avoid ephemeral pbs.twimg.com/card_img)
         if (mediaUrls.length === 0) {
-            const allUrls = [
-                ...(tweet.entities?.urls || []).map(u => u.expanded_url || u.url),
-                ...(tweet.quoted_tweet?.entities?.urls || []).map(u => u.expanded_url || u.url),
-            ].filter(Boolean);
-
-            for (const targetUrl of allUrls) {
-                if (!targetUrl.includes('x.com') && !targetUrl.includes('twitter.com') && !targetUrl.includes('t.co')) {
-                    const ogImg = await extractOpenGraphImage(targetUrl);
-                    if (ogImg && !mediaUrls.includes(ogImg)) {
-                        mediaUrls.push(ogImg);
-                        break;
-                    }
-                }
+            const cardImg = extractCardImage(tweet.card);
+            if (cardImg && !cardImg.includes('card_img') && !mediaUrls.includes(cardImg)) {
+                mediaUrls.push(cardImg);
             }
         }
 
@@ -316,7 +315,7 @@ async function scrapeTwitterHandle(page, handle, timeout = 25000) {
                     const id = match[2];
                     const textEl = art.querySelector('[data-testid="tweetText"]');
                     const timeEl = art.querySelector('time');
-                    const imgEls = art.querySelectorAll('[data-testid="tweetPhoto"] img, [data-testid="card.wrapper"] img, [data-testid="card.layoutLarge.media"] img, img[src*="pbs.twimg.com/media"], img[src*="pbs.twimg.com/card_img"]');
+                    const imgEls = art.querySelectorAll('[data-testid="tweetPhoto"] img, img[src*="pbs.twimg.com/media"]');
                     const media = Array.from(imgEls).map(img => img.src).filter(Boolean);
 
                     found.push({
