@@ -27,6 +27,14 @@ class IndexController extends Controller
 
         $seasons = [];
 
+        $seasons[] = [
+            'id' => 's2627',
+            'title' => 'LaVita IBU World Cup Biathlon, season 26/27',
+            'subtitle' => 'Official World Cup Season Matrix',
+            'icon' => '🏆',
+            'data' => $this->getSeasonData(season: '2627'),
+        ];
+
         $loopOneEvent = Event::query()->where('event_remote_id', 'SB2627SIBUL1MU')->first();
         if ($loopOneEvent) {
             $seasons[] = [
@@ -34,22 +42,10 @@ class IndexController extends Controller
                 'title' => 'Loop One Festival Munich 2026 — Pre-Season Special',
                 'subtitle' => 'Super Sprint Exhibition Tournament • Olympiapark Munich (17–18 Oct 2026)',
                 'icon' => '⚡',
-                'badge' => 'Active This Weekend',
-                'is_active' => true,
+                'badge' => 'Pre-Season Special',
                 'gradient' => 'from-violet-600 via-indigo-600 to-sky-500',
                 'icon_bg' => 'bg-white/20 border-white/30 text-amber-300',
                 'data' => $this->getEventSummaryData(eventId: $loopOneEvent->id),
-            ];
-        }
-
-        // Only show season 26/27 starting from Monday, 19 October 2026 (after Loop One Festival)
-        if (now('Europe/Riga')->gte('2026-10-19 00:00:00')) {
-            $seasons[] = [
-                'id' => 's2627',
-                'title' => 'LaVita IBU World Cup Biathlon, season 26/27',
-                'subtitle' => 'Official World Cup Season Matrix',
-                'icon' => '🏆',
-                'data' => $this->getSeasonData(season: '2627'),
             ];
         }
 
