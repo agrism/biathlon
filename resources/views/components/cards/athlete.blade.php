@@ -1,4 +1,8 @@
 @php
+    $isOwn = $isOwnPrediction ?? false;
+    $isBeforeDeadline = $forecast->submit_deadline_at && $forecast->submit_deadline_at->gt(now());
+    $isHiddenFromViewer = $isBeforeDeadline && $athlete->isHidden && !$isOwn;
+
     $isPlace1 = ($index === 0);
     $isPlace2 = ($index === 1);
     $isPlace3 = ($index === 2);
@@ -35,7 +39,7 @@
             <span>{{ $placeTitles[$index] ?? ($index+1).'th Place' }}</span>
         </span>
 
-        @if(auth()->check() && $forecast->submit_deadline_at->gt(now()) && $athlete->name)
+        @if($isOwn && $isBeforeDeadline && $athlete->name)
             <x-tooltip :text="$athlete->isHidden ? 'Hidden from other players' : 'Publicly visible'">
                 <button
                     type="button"
@@ -46,11 +50,33 @@
                     <i class="fa {{ $athlete->isHidden ? 'fa-eye-slash text-rose-500' : 'fa-eye text-slate-400' }} text-sm"></i>
                 </button>
             </x-tooltip>
+        @elseif($isHiddenFromViewer)
+            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400">
+                <i class="fa fa-eye-slash text-slate-400 text-xs"></i>
+                <span>Hidden</span>
+            </span>
         @endif
     </div>
 
-    <!-- Athlete Content -->
-    @if($athlete->name)
+    @if($isHiddenFromViewer)
+        <!-- Hidden Prediction Placeholder -->
+        <div class="flex flex-col items-center text-center my-3">
+            <div class="w-28 h-28 rounded-full p-1 bg-gradient-to-tr from-slate-100 to-slate-200 border border-slate-200 shadow-inner flex flex-col items-center justify-center">
+                <i class="fa-solid fa-eye-slash text-3xl text-slate-300 mb-1"></i>
+            </div>
+
+            <div class="mt-3 w-full">
+                <div class="font-bold text-slate-600 text-sm">
+                    Hidden Prediction
+                </div>
+                <div class="text-[11px] text-slate-400 font-medium mt-0.5">
+                    Revealed after race start
+                </div>
+            </div>
+        </div>
+        <div class="h-6"></div>
+    @elseif($athlete->name)
+        <!-- Athlete Content -->
         <div class="flex flex-col items-center text-center">
             @php
                 $isTeam = ($athlete->getModel() && $athlete->getModel()->is_team)
@@ -111,9 +137,9 @@
             </div>
         </div>
 
-        <!-- Action Controls -->
-        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-1">
-            @if(auth()->check() && $forecast->submit_deadline_at->gt(now()))
+        @if($isOwn && $isBeforeDeadline)
+            <!-- Action Controls -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-1">
                 <!-- Move Up Button -->
                 @if($index !== 0)
                     <x-tooltip text="Move up">
@@ -155,12 +181,12 @@
                 @else
                     <span class="w-7"></span>
                 @endif
-            @endif
-        </div>
+            </div>
+        @endif
     @else
         <!-- Empty Slot Dropzone -->
         <div class="flex-1 flex flex-col items-center justify-center my-4">
-            @if(auth()->check() && $forecast->submit_deadline_at->gt(now()))
+            @if($isOwn && $isBeforeDeadline)
                 <button
                     type="button"
                     class="w-full flex flex-col items-center justify-center p-6 rounded-xl border-2 border-dashed border-sky-300 hover:border-sky-500 bg-sky-50/40 hover:bg-sky-50 text-sky-600 transition-all group cursor-pointer"

@@ -29,7 +29,7 @@
         </div>
 
         @php
-            $displayUser = $targetUser ?? (auth()->check() ? auth()->user() : ($forecast->final_data->users[0] ?? null));
+            $displayUser = $targetUser ?? (auth()->check() ? auth()->user() : null);
             $displayName = is_object($displayUser) ? ($displayUser->name ?? null) : null;
             $displayId = is_object($displayUser) ? ($displayUser->id ?? null) : null;
             $isOwnPrediction = auth()->check() && $displayId && auth()->id() === $displayId;
@@ -89,6 +89,9 @@
                         </thead>
                         <tbody class="divide-y divide-slate-100 bg-white">
                             @foreach($forecast->final_data->users as $user)
+                                @php
+                                    $isThisRowOwn = auth()->check() && ($user->id === auth()->id());
+                                @endphp
                                 <tr class="hover:bg-slate-50/80 transition-colors">
                                     <td class="px-4 py-3 whitespace-nowrap font-bold text-slate-900">
                                         <div class="flex items-center gap-2">
@@ -101,7 +104,7 @@
 
                                     @foreach($user->getAthletes() as $athlete)
                                         <td class="px-3 py-3 whitespace-nowrap @if(!in_array($athlete->tempId, $startingUserTempIds ?? [])) bg-rose-50/30 @endif">
-                                            @if($forecast->submit_deadline_at->gt(now()) && $athlete->isHidden)
+                                            @if($forecast->submit_deadline_at->gt(now()) && $athlete->isHidden && !$isThisRowOwn)
                                                 <div class="flex items-center gap-1.5 text-xs text-slate-400 italic">
                                                     <i class="fa fa-eye-slash text-slate-400 text-xs"></i>
                                                     <span>Hidden</span>
@@ -113,6 +116,9 @@
                                                             <img src="{{ $athlete->flagUrl }}" class="h-3.5 rounded-xs shadow-2xs inline-block">
                                                         @endif
                                                         <span class="truncate max-w-[120px]">{{ $athlete->getShortName() }}</span>
+                                                        @if($forecast->submit_deadline_at->gt(now()) && $athlete->isHidden && $isThisRowOwn)
+                                                            <span title="Hidden from other players"><i class="fa fa-eye-slash text-rose-500 text-[10px]"></i></span>
+                                                        @endif
                                                     </div>
                                                     <x-cards.athlete-stat :athlete="$athlete"></x-cards.athlete-stat>
                                                 </div>

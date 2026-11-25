@@ -11,6 +11,10 @@
     } elseif (!empty($forecast->final_data->users)) {
         $selectedUserObj = $forecast->final_data->users[0];
     }
+
+    $isOwn = isset($isOwnPrediction)
+        ? (bool)$isOwnPrediction
+        : (auth()->check() && $selectedUserObj && auth()->id() === $selectedUserObj->id);
 @endphp
 
 @if($selectedUserObj)
@@ -21,6 +25,7 @@
                 :index="$index"
                 :forecast="$forecast"
                 :favoriteAthleteIds="$favoriteAthleteIds"
+                :isOwnPrediction="$isOwn"
             ></x-cards.athlete>
         @endforeach
     </div>
