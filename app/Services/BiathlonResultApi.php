@@ -8,10 +8,13 @@ use Illuminate\Support\Facades\Http;
 class BiathlonResultApi
 {
     protected string $base = 'https://biathlonresults.com/modules/sportapi/api/';
+    protected string $apiKey = '88a3ac6f-84c0-4e2d-a500-535f77e73875';
 
     protected function get(string $path, array $payload = []): Response
     {
-        return Http::get(
+        return Http::withHeaders([
+            'apikey' => env('IBU_API_KEY', $this->apiKey),
+        ])->get(
             url: sprintf('%s/%s', rtrim($this->base, '/'), ltrim($path, '/')),
             query: $payload
         );
