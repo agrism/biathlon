@@ -35,9 +35,9 @@
     ];
 @endphp
 
-<div class="relative flex flex-col justify-between rounded-2xl border p-4 transition-all duration-200 card-hover {{ $podiumClass }}">
+<div class="relative flex flex-col h-full rounded-2xl border p-4 transition-all duration-200 card-hover {{ $podiumClass }}">
     <!-- Top Header: Place Badge & Privacy Toggle -->
-    <div class="flex justify-between items-center mb-3">
+    <div class="flex justify-between items-center h-7 mb-3">
         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-extrabold tracking-wide uppercase {{ $badgeClass }}">
             <span>{{\App\Enums\RankEnum::tryFrom($index+1)?->getMedal() ?? ($index+1)}}</span>
             <span>{{ $placeTitles[$index] ?? ($index+1).'th Place' }}</span>
@@ -69,12 +69,14 @@
 
     @if($isHiddenFromViewer)
         <!-- Hidden Prediction Placeholder -->
-        <div class="flex flex-col items-center text-center my-3">
-            <div class="w-28 h-28 rounded-full p-1 bg-gradient-to-tr from-slate-100 to-slate-200 border border-slate-200 shadow-inner flex flex-col items-center justify-center">
-                <i class="fa-solid fa-eye-slash text-3xl text-slate-300 mb-1"></i>
+        <div class="flex-1 flex flex-col items-center text-center">
+            <div class="relative my-1">
+                <div class="w-28 h-28 rounded-full p-1 bg-gradient-to-tr from-slate-100 to-slate-200 border border-slate-200 shadow-inner flex flex-col items-center justify-center">
+                    <i class="fa-solid fa-eye-slash text-3xl text-slate-300 mb-1"></i>
+                </div>
             </div>
 
-            <div class="mt-3 w-full">
+            <div class="mt-2 w-full">
                 <div class="font-bold text-slate-600 text-sm">
                     Hidden Prediction
                 </div>
@@ -83,7 +85,7 @@
                 </div>
             </div>
         </div>
-        <div class="h-6"></div>
+        <div class="mt-auto"></div>
     @elseif($athlete->name)
         <!-- Athlete Content -->
         <div class="flex flex-col items-center text-center">
@@ -146,59 +148,62 @@
                     <span>Not in Start List (DNS)</span>
                 </div>
             @endif
-
-            <!-- Athlete Stats Chips -->
-            <div class="w-full mt-2">
-                <x-cards.athlete-stat :athlete="$athlete"></x-cards.athlete-stat>
-            </div>
         </div>
 
-        @if($isOwn && $isBeforeDeadline)
-            <!-- Action Controls -->
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-1">
-                <!-- Move Up Button -->
-                @if($index !== 0)
-                    <x-tooltip text="Move up">
-                        <button
-                            type="button"
-                            class="p-1.5 rounded-lg text-slate-400 hover:text-sky-600 hover:bg-sky-50 transition-colors"
-                            hx-get="{{ route('forecasts.select-athlete.place.move.up-down', ['id' => $forecast->id, 'place' => $index, 'direction' => \App\Enums\MoveDirectionEnum::UP->value]) }}"
-                            hx-target="#selected-athletes"
-                        >
-                            <i class="fa-solid fa-arrow-up text-xs"></i>
-                        </button>
-                    </x-tooltip>
-                @else
-                    <span class="w-7"></span>
-                @endif
-
-                <!-- Edit Button -->
-                <button
-                    type="button"
-                    class="flex-1 py-1.5 px-3 rounded-xl {{ $isNotInStartList ? 'bg-rose-600 hover:bg-rose-700 text-white font-black shadow-xs' : 'bg-slate-100 hover:bg-sky-50 text-slate-700 hover:text-sky-600 border border-slate-200/80 hover:border-sky-200 font-semibold' }} text-xs transition-all text-center"
-                    hx-get="{{ route('forecasts.select-athlete', ['id' => $forecast->id, 'place' => $index]) }}"
-                    hx-target="#selected-athletes"
-                >
-                    <i class="fa-solid fa-pen text-[10px] mr-1"></i> {{ $isNotInStartList ? 'Change Athlete' : 'Edit' }}
-                </button>
-
-                <!-- Move Down Button -->
-                @if($index < 5)
-                    <x-tooltip text="Move down">
-                        <button
-                            type="button"
-                            class="p-1.5 rounded-lg text-slate-400 hover:text-sky-600 hover:bg-sky-50 transition-colors"
-                            hx-get="{{ route('forecasts.select-athlete.place.move.up-down', ['id' => $forecast->id, 'place' => $index, 'direction' => \App\Enums\MoveDirectionEnum::DOWN->value]) }}"
-                            hx-target="#selected-athletes"
-                        >
-                            <i class="fa-solid fa-arrow-down text-xs"></i>
-                        </button>
-                    </x-tooltip>
-                @else
-                    <span class="w-7"></span>
-                @endif
+        <!-- Bottom Section: Stats & Action Controls -->
+        <div class="mt-auto pt-3 w-full flex flex-col items-center">
+            <!-- Athlete Stats Chips -->
+            <div class="w-full">
+                <x-cards.athlete-stat :athlete="$athlete"></x-cards.athlete-stat>
             </div>
-        @endif
+
+            @if($isOwn && $isBeforeDeadline)
+                <!-- Action Controls -->
+                <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between gap-1 w-full">
+                    <!-- Move Up Button -->
+                    @if($index !== 0)
+                        <x-tooltip text="Move up">
+                            <button
+                                type="button"
+                                class="p-1.5 rounded-lg text-slate-400 hover:text-sky-600 hover:bg-sky-50 transition-colors"
+                                hx-get="{{ route('forecasts.select-athlete.place.move.up-down', ['id' => $forecast->id, 'place' => $index, 'direction' => \App\Enums\MoveDirectionEnum::UP->value]) }}"
+                                hx-target="#selected-athletes"
+                            >
+                                <i class="fa-solid fa-arrow-up text-xs"></i>
+                            </button>
+                        </x-tooltip>
+                    @else
+                        <span class="w-7"></span>
+                    @endif
+
+                    <!-- Edit Button -->
+                    <button
+                        type="button"
+                        class="flex-1 py-1.5 px-3 rounded-xl {{ $isNotInStartList ? 'bg-rose-600 hover:bg-rose-700 text-white font-black shadow-xs' : 'bg-slate-100 hover:bg-sky-50 text-slate-700 hover:text-sky-600 border border-slate-200/80 hover:border-sky-200 font-semibold' }} text-xs transition-all text-center"
+                        hx-get="{{ route('forecasts.select-athlete', ['id' => $forecast->id, 'place' => $index]) }}"
+                        hx-target="#selected-athletes"
+                    >
+                        <i class="fa-solid fa-pen text-[10px] mr-1"></i> {{ $isNotInStartList ? 'Change Athlete' : 'Edit' }}
+                    </button>
+
+                    <!-- Move Down Button -->
+                    @if($index < 5)
+                        <x-tooltip text="Move down">
+                            <button
+                                type="button"
+                                class="p-1.5 rounded-lg text-slate-400 hover:text-sky-600 hover:bg-sky-50 transition-colors"
+                                hx-get="{{ route('forecasts.select-athlete.place.move.up-down', ['id' => $forecast->id, 'place' => $index, 'direction' => \App\Enums\MoveDirectionEnum::DOWN->value]) }}"
+                                hx-target="#selected-athletes"
+                            >
+                                <i class="fa-solid fa-arrow-down text-xs"></i>
+                            </button>
+                        </x-tooltip>
+                    @else
+                        <span class="w-7"></span>
+                    @endif
+                </div>
+            @endif
+        </div>
     @else
         <!-- Empty Slot Dropzone -->
         <div class="flex-1 flex flex-col items-center justify-center my-4">
@@ -221,6 +226,6 @@
                 </div>
             @endif
         </div>
-        <div class="h-6"></div>
+        <div class="mt-auto"></div>
     @endif
 </div>
