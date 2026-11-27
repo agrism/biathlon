@@ -23,7 +23,7 @@ abstract class Controller
     {
         BreadCrumbHelper::instance()->register(
             new BreadCrumbValueObject(
-                name: request()->route()->getName(),
+                name: request()->route()?->getName() ?? '',
                 route: request()->url(),
                 title: $title,
             )

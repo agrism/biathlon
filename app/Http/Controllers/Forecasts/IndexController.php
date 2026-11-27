@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Forecasts;
 
+use App\Enums\Forecast\AwardPointEnum;
 use App\Enums\Forecast\ForecastStatusEnum;
-use App\Helpers\Generic\GenericViewIndexHelper;
-use App\Helpers\LinkHelper;
 use App\Http\Controllers\Controller;
-use App\Models\Athlete;
 use App\Models\EventCompetition;
 use App\Models\Forecast;
 use App\Models\Season;
@@ -16,123 +14,118 @@ use Illuminate\View\View;
 
 class IndexController extends Controller
 {
-
-    protected LinkHelper $linkHelper;
-    public function __invoke(Request $request, LinkHelper $linkHelper): View
+    public function __invoke(Request $request): View
     {
-        $this->linkHelper = $linkHelper;
-
         $this->registerBread('Predictions');
 
-//        $c = Forecast::query()->with('competition')->first();
-//
-//        dump($c);
-//
-//        dd($c->competition);
+        $authUserId = auth()->id();
+        $authUser = auth()->user();
 
-        $showSeason2627 = now('Europe/Riga')->gte('2026-10-19 00:00:00');
+        // Active season selection (defaults to 2627)
+        $seasonParam = $request->query('season', '2627');
+        $season = Season::where('name', $seasonParam)->first() ?? Season::where('name', '2627')->first();
+        $seasonId = $season?->id;
 
-        $data = Forecast::query()
-            ->with('competition.event')
-            ->where(function ($query) use ($showSeason2627) {
-                $query->where(function ($q) use ($showSeason2627) {
-                    $q->whereHas('competition.event', function ($s) use ($showSeason2627) {
-                        $s->where('level', 1);
-                        if (!$showSeason2627) {
-                            $s->where('season_id', '!=', Season::where('name', '2627')->value('id'));
-                        }
-                    });
-                })
-                ->orWhere(function ($q) {
-                    $q->whereHas('competition.event', function ($s) {
-                        $s->where('events.event_remote_id', 'SB2627SIBUL1MU');
-                    })->whereHas('competition', function ($c) {
-                        $c->where('description', 'like', '%Final%')
-                          ->orWhere('short_description', 'like', '%Final%');
-                    });
+        // Fetch forecasts for this season (World Cup level 1 + Munich Loop One)
+        $forecasts = Forecast::query()
+            ->whereHas('competition.event', function ($q) use ($seasonId) {
+                $q->where('season_id', $seasonId)->where(function ($sub) {
+                    $sub->where('level', 1)->orWhere('events.event_remote_id', 'SB2627SIBUL1MU');
                 });
-            });
+            })
+            ->with(['competition.event', 'competition.results'])
+            ->get();
 
-        if($authUserId = auth()->id()){
-            $data = $data->with('submittedData');
-        }
+        $now = now();
 
-        $data = $data->orderBy('submit_deadline_at', 'desc')->paginate(perPage: 100);
-        $counter = 1;
+        // Attach auth user forecast stats & metadata to each forecast
+        $forecasts->transform(function (Forecast $forecast) use ($authUserId, $authUser) {
+            $userObj = null;
+            $submittedCount = 0;
+            $userPoints = null;
 
-        return GenericViewIndexHelper::instance()
-            ->setTitle('Predictions')
-            ->setData($data)
-            ->setHeaders(['no','competition','race start','status', 'my forecast'])
-            ->setDataKeys([
-                function (Forecast $forecast) use(&$counter): int {
-                    return $counter++;
-                },
-                function (Forecast $forecast): string {
-
-                    $name = [];
-                    $name[] = $forecast->competition->event->organizer;
-                    $name[] = $forecast->competition->start_time?->setTimeZone('Europe/RIga')->format('d F Y, H:i');
-                    $name[] = $forecast->competition->description;
-                    $name = array_filter($name);
-                    $name = array_map(function($s){
-                        return str_replace(' ', '&ensp;', $s);
-                    }, $name);
-
-                    $name = implode(', ', $name);
-                    return $this->getLink($forecast, $name);
-                },
-                function (Forecast $forecast): string {
-                    return $this->getLink($forecast, $forecast->competition?->start_time->setTimeZone('Europe/RIga')->format('d F Y, H:i'));
-                },
-                function (Forecast $forecast): string {
-
-                    if($forecast->submit_deadline_at->gt(now())){
-
-                    $name = '<span style="color: green">Starts in '. str_replace(' from now','',$forecast->submit_deadline_at->diffForHumans()) .'</span>';
-
-                        if($forecast->competition->results->count()){
-                            return $this->linkHelper->getLink(route: route('competitions.show', $forecast->competition->race_remote_id), name: $name. ' (start list)');
-                        }
-
-                        return $this->getLink($forecast, $name);
+            if ($authUserId && $forecast->final_data) {
+                $userObj = $forecast->final_data->getUserByUserModel($authUser);
+                if ($userObj) {
+                    $submittedCount = collect($userObj->athletes ?? [])->filter(fn($a) => !empty($a->id))->count();
+                    if ($forecast->status === ForecastStatusEnum::COMPLETED) {
+                        $reg = $userObj->getPointsByType(AwardPointEnum::REGULAR_POINT);
+                        $bon = $userObj->getPointsByType(AwardPointEnum::BONUS_POINT);
+                        $userPoints = [
+                            'regular' => $reg,
+                            'bonus' => $bon,
+                            'total' => $reg + $bon,
+                        ];
                     }
-
-                    if($forecast->status == ForecastStatusEnum::COMPLETED){
-                        return $this->getLink($forecast, '<span style="color: grey;">closed</span>');
-                    }
-
-                    return $this->getLink($forecast, '<span style="color: grey;">Waiting results</span>');
-                },
-                function(Forecast $forecast) use($authUserId){
-                    if(!$authUserId){
-                        return $this->linkHelper->getLink(route('login'), '<span style="color: grey;">Login</span>');
-                    }
-
-                    if($forecast->status == ForecastStatusEnum::COMPLETED){
-                        return $this->getLink($forecast, '<span style="color: grey;">Finished</span>');
-                    }
-
-                    $user = $forecast->final_data->getUserByUserModel(auth()->user());
-
-                    if($forecast->submit_deadline_at->gt(now())){
-
-                        $submittedAthleteCount = collect($user->athletes)->filter(fn(AthleteValueObject $athlete) => !empty($athlete->id))->count();
-
-                        if($submittedAthleteCount <6){
-                            return $this->getLink($forecast, '<span style="color: red;">Todo, add '.(6-$submittedAthleteCount).' athlete(s) to the list</span>');
-                        }
-                      return $this->getLink($forecast, '<span style="color: green;">Ready for race</span>');
-                    }
-
-                    return $this->getLink($forecast, '<span style="color: grey;">Waiting results</span>');
                 }
-            ])
-            ->render();
-    }
+            }
 
-    protected function getLink(Forecast $forecast, string $name, ?string $style = null): string
-    {
-        return $this->linkHelper->getLink(route: route('forecasts.show', $forecast->id),name:  $name, style: $style);
+            $forecast->auth_submitted_count = $submittedCount;
+            $forecast->auth_is_ready = ($submittedCount === 6);
+            $forecast->auth_points = $userPoints;
+
+            // Winner & scores for completed races
+            if ($forecast->status === ForecastStatusEnum::COMPLETED && $forecast->final_data) {
+                $forecast->winner = $forecast->final_data->results[0] ?? null;
+                $allScores = collect($forecast->final_data->users ?? [])->map(fn($u) => $u->getPointsByType(AwardPointEnum::REGULAR_POINT) + $u->getPointsByType(AwardPointEnum::BONUS_POINT));
+                $forecast->top_score = $allScores->max() ?? 0;
+                $forecast->player_count = $allScores->count();
+            }
+
+            // Determine gender / category for quick filtering
+            $desc = $forecast->competition?->description ?? '';
+            $cat = $forecast->competition?->cat_remote_id ?? '';
+            $forecast->category_type = match(true) {
+                str_ends_with($cat, 'M') || str_contains($desc, "Men's") || str_contains($desc, "Men ") => 'men',
+                str_ends_with($cat, 'W') || str_contains($desc, "Women's") || str_contains($desc, "Women ") => 'women',
+                default => 'relay',
+            };
+
+            return $forecast;
+        });
+
+        // 1. Upcoming forecasts: submit_deadline_at > now, sorted ASC (closest deadline first!)
+        $upcomingForecasts = $forecasts->filter(fn($f) => $f->submit_deadline_at && $f->submit_deadline_at->gt($now))
+            ->sortBy('submit_deadline_at')
+            ->values();
+
+        // Next race in focus (earliest upcoming deadline)
+        $nextForecast = $upcomingForecasts->first();
+
+        // 2. Live / In progress: deadline passed, but not marked COMPLETED yet
+        $liveForecasts = $forecasts->filter(fn($f) => $f->submit_deadline_at && $f->submit_deadline_at->lte($now) && $f->status !== ForecastStatusEnum::COMPLETED)
+            ->sortByDesc('submit_deadline_at')
+            ->values();
+
+        // 3. Completed: status == COMPLETED, sorted DESC (most recent first!)
+        $completedForecasts = $forecasts->filter(fn($f) => $f->status === ForecastStatusEnum::COMPLETED)
+            ->sortByDesc('submit_deadline_at')
+            ->values();
+
+        // 4. Group upcoming forecasts by Stage (event)
+        $upcomingByStage = $upcomingForecasts->groupBy('competition.event_id');
+
+        // 5. Total counts for tabs
+        $stats = [
+            'upcoming_count' => $upcomingForecasts->count(),
+            'live_count' => $liveForecasts->count(),
+            'completed_count' => $completedForecasts->count(),
+            'user_ready_count' => $upcomingForecasts->where('auth_is_ready', true)->count(),
+            'user_todo_count' => $upcomingForecasts->where('auth_is_ready', false)->count(),
+        ];
+
+        // 6. Available seasons for archive
+        $availableSeasons = Season::whereIn('name', ['2627', '2526', '2425'])->orderBy('name', 'desc')->get();
+
+        return view('forecasts.index', compact(
+            'nextForecast',
+            'upcomingForecasts',
+            'upcomingByStage',
+            'liveForecasts',
+            'completedForecasts',
+            'stats',
+            'availableSeasons',
+            'season'
+        ));
     }
 }
