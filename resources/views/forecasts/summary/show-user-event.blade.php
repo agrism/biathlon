@@ -70,12 +70,8 @@
 
                                             $userForecastObj = collect($competition->forecast->final_data?->users ?? [])->where('id', $user->id)->first();
                                             if ($userForecastObj) {
-                                                $isViewerOwner = auth()->check() && auth()->id() === $user->id;
-                                                $isPastDeadline = $competition->forecast->submit_deadline_at && $competition->forecast->submit_deadline_at->lte(now());
-
                                                 foreach ($userForecastObj->getAthletes() as $predAthlete) {
-                                                    $isAthleteHidden = $predAthlete->isHidden && !$isViewerOwner && !$isPastDeadline;
-                                                    if (!$isAthleteHidden && $predAthlete->name && !in_array((string)$predAthlete->tempId, $startTempIds)) {
+                                                    if ($predAthlete->name && !in_array((string)$predAthlete->tempId, $startTempIds)) {
                                                         $nonStartingCount++;
                                                     }
                                                 }

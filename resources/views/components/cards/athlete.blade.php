@@ -1,10 +1,10 @@
 @php
+    $hasStartList = !empty($startingUserTempIds);
+    $isNotInStartList = $hasStartList && $athlete->name && !in_array((string)$athlete->tempId, $startingUserTempIds ?? []);
+
     $isOwn = $isOwnPrediction ?? false;
     $isBeforeDeadline = $forecast->submit_deadline_at && $forecast->submit_deadline_at->gt(now());
-    $isHiddenFromViewer = $isBeforeDeadline && $athlete->isHidden && !$isOwn;
-
-    $hasStartList = !empty($startingUserTempIds);
-    $isNotInStartList = !$isHiddenFromViewer && $hasStartList && $athlete->name && !in_array((string)$athlete->tempId, $startingUserTempIds ?? []);
+    $isHiddenFromViewer = $isBeforeDeadline && $athlete->isHidden && !$isOwn && !$isNotInStartList;
 
     $isPlace1 = ($index === 0);
     $isPlace2 = ($index === 1);
