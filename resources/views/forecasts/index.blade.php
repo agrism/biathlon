@@ -92,7 +92,8 @@
             $athletesCount = $nextComp?->results?->count() ?? 0;
         @endphp
 
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-sky-950 text-white shadow-xl border border-slate-700/60 p-5 sm:p-7 mb-8">
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-sky-950 text-white shadow-xl border border-slate-700/60 p-5 sm:p-7 mb-8"
+             style="background-color: #0f172a; background-image: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #082f49 100%); color: #ffffff;">
             <!-- Background glow decoration -->
             <div class="absolute -top-24 -right-24 w-80 h-80 bg-sky-500/20 rounded-full blur-3xl pointer-events-none"></div>
             <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none"></div>
@@ -101,50 +102,53 @@
                 <!-- Left: Race Information -->
                 <div class="flex-1">
                     <div class="flex items-center gap-2.5 flex-wrap mb-3">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                            <span class="w-2 h-2 rounded-full bg-rose-400 animate-pulse"></span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                              style="background-color: rgba(244, 63, 94, 0.2); color: #fda4af; border: 1px solid rgba(244, 63, 94, 0.3);">
+                            <span class="w-2 h-2 rounded-full bg-rose-400 animate-pulse" style="background-color: #fb7185;"></span>
                             Next Race Up
                         </span>
 
                         @if($isToday)
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase bg-amber-400/20 text-amber-300 border border-amber-400/30"
+                                  style="background-color: rgba(251, 191, 36, 0.2); color: #fde68a; border: 1px solid rgba(251, 191, 36, 0.3);">
                                 Today!
                             </span>
                         @elseif($isTomorrow)
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase bg-sky-400/20 text-sky-300 border border-sky-400/30">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase bg-sky-400/20 text-sky-300 border border-sky-400/30"
+                                  style="background-color: rgba(56, 189, 248, 0.2); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.3);">
                                 Tomorrow
                             </span>
                         @endif
 
                         @if($nextEvent)
-                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-300">
+                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-300" style="color: #cbd5e1;">
                                 @if($flagUrl)
                                     <img src="{{ $flagUrl }}" alt="{{ $nextEvent->nat }}" class="w-4 h-3 object-cover rounded-2xs inline-block">
                                 @endif
                                 <span>{{ $nextEvent->short_description }}, {{ $nextEvent->nat_long }}</span>
-                                <span class="text-slate-500">•</span>
-                                <span class="text-slate-400">Stage {{ $nextEvent->event_series_no ?? '1' }}</span>
+                                <span class="text-slate-500" style="color: #64748b;">•</span>
+                                <span class="text-slate-400" style="color: #94a3b8;">Stage {{ $nextEvent->event_series_no ?? '1' }}</span>
                             </span>
                         @endif
                     </div>
 
-                    <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-white mb-2">
+                    <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-white mb-2" style="color: #ffffff;">
                         {{ $nextComp?->description ?? 'Biathlon Race' }}
                     </h2>
 
-                    <div class="flex items-center gap-4 text-xs text-slate-300 flex-wrap">
+                    <div class="flex items-center gap-4 text-xs text-slate-300 flex-wrap" style="color: #cbd5e1;">
                         <div class="flex items-center gap-1.5">
-                            <i class="fa-regular fa-clock text-sky-400"></i>
-                            <span>Deadline: <strong class="text-white font-bold">{{ $nextForecast->submit_deadline_at?->format('D, d M • H:i') }} CET</strong></span>
+                            <i class="fa-regular fa-clock text-sky-400" style="color: #38bdf8;"></i>
+                            <span>Deadline: <strong class="text-white font-bold" style="color: #ffffff;">{{ $nextForecast->submit_deadline_at?->format('D, d M • H:i') }} CET</strong></span>
                         </div>
                         @if($athletesCount > 0)
                             <div class="flex items-center gap-1.5">
-                                <i class="fa-solid fa-list-ol text-slate-400"></i>
+                                <i class="fa-solid fa-list-ol text-slate-400" style="color: #94a3b8;"></i>
                                 <span>{{ $athletesCount }} athletes in start list</span>
                             </div>
                         @endif
                         <div class="flex items-center gap-1.5">
-                            <i class="fa-solid fa-medal text-amber-400"></i>
+                            <i class="fa-solid fa-medal text-amber-400" style="color: #fbbf24;"></i>
                             <span>Dainis Matrix Scoring</span>
                         </div>
                     </div>
@@ -153,30 +157,32 @@
                 <!-- Right: Countdown Timer & CTA -->
                 <div class="flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end gap-4 shrink-0">
                     <!-- Alpine Countdown -->
-                    <div x-data="countdown('{{ $deadlineIso }}')" class="bg-black/40 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/10 text-center">
-                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Time Remaining</div>
-                        <div class="flex items-center gap-2 text-white font-mono font-bold text-lg" x-show="!isExpired">
+                    <div x-data="countdown('{{ $deadlineIso }}')" 
+                         class="bg-black/50 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/15 text-center shadow-inner"
+                         style="background-color: rgba(0, 0, 0, 0.55); border: 1px solid rgba(255, 255, 255, 0.15);">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1" style="color: #94a3b8;">Time Remaining</div>
+                        <div class="flex items-center gap-2 text-white font-mono font-bold text-lg" x-show="!isExpired" style="color: #ffffff;">
                             <div class="flex flex-col items-center">
-                                <span class="leading-none text-xl text-sky-300" x-text="days">0</span>
-                                <span class="text-[9px] text-slate-400 font-sans uppercase font-normal">days</span>
+                                <span class="leading-none text-xl text-sky-300" style="color: #7dd3fc;" x-text="days">0</span>
+                                <span class="text-[9px] text-slate-400 font-sans uppercase font-normal" style="color: #94a3b8;">days</span>
                             </div>
-                            <span class="text-slate-500 pb-2">:</span>
+                            <span class="text-slate-500 pb-2" style="color: #64748b;">:</span>
                             <div class="flex flex-col items-center">
-                                <span class="leading-none text-xl" x-text="pad(hours)">00</span>
-                                <span class="text-[9px] text-slate-400 font-sans uppercase font-normal">hrs</span>
+                                <span class="leading-none text-xl" style="color: #ffffff;" x-text="pad(hours)">00</span>
+                                <span class="text-[9px] text-slate-400 font-sans uppercase font-normal" style="color: #94a3b8;">hrs</span>
                             </div>
-                            <span class="text-slate-500 pb-2">:</span>
+                            <span class="text-slate-500 pb-2" style="color: #64748b;">:</span>
                             <div class="flex flex-col items-center">
-                                <span class="leading-none text-xl" x-text="pad(minutes)">00</span>
-                                <span class="text-[9px] text-slate-400 font-sans uppercase font-normal">min</span>
+                                <span class="leading-none text-xl" style="color: #ffffff;" x-text="pad(minutes)">00</span>
+                                <span class="text-[9px] text-slate-400 font-sans uppercase font-normal" style="color: #94a3b8;">min</span>
                             </div>
-                            <span class="text-slate-500 pb-2">:</span>
+                            <span class="text-slate-500 pb-2" style="color: #64748b;">:</span>
                             <div class="flex flex-col items-center">
-                                <span class="leading-none text-xl text-amber-400" x-text="pad(seconds)">00</span>
-                                <span class="text-[9px] text-slate-400 font-sans uppercase font-normal">sec</span>
+                                <span class="leading-none text-xl text-amber-400" style="color: #fbbf24;" x-text="pad(seconds)">00</span>
+                                <span class="text-[9px] text-slate-400 font-sans uppercase font-normal" style="color: #94a3b8;">sec</span>
                             </div>
                         </div>
-                        <div class="text-sm font-bold text-rose-400" x-show="isExpired" x-cloak>
+                        <div class="text-sm font-bold text-rose-400" x-show="isExpired" x-cloak style="color: #fb7185;">
                             Race Started
                         </div>
                     </div>
@@ -185,39 +191,46 @@
                     <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
                         @auth
                             @if($nextForecast->auth_is_ready)
-                                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold">
+                                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold"
+                                     style="background-color: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.35);">
                                     <i class="fa-solid fa-circle-check"></i>
                                     <span>Prediction Ready (6/6)</span>
                                 </div>
                                 <a href="{{ route('forecasts.show', $nextForecast->id) }}" 
-                                   class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-extrabold text-sm shadow-lg transition-all">
+                                   class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-extrabold text-sm shadow-lg transition-all"
+                                   style="background-color: #ffffff; color: #0f172a;">
                                     <span>Edit Top 6</span>
                                     <i class="fa-solid fa-arrow-right text-xs"></i>
                                 </a>
                             @elseif($nextForecast->auth_submitted_count > 0)
-                                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold">
+                                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold"
+                                     style="background-color: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.35);">
                                     <i class="fa-solid fa-triangle-exclamation"></i>
                                     <span>Incomplete ({{ $nextForecast->auth_submitted_count }}/6)</span>
                                 </div>
                                 <a href="{{ route('forecasts.show', $nextForecast->id) }}" 
-                                   class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition-all animate-pulse">
+                                   class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition-all animate-pulse"
+                                   style="background-color: #f59e0b; color: #020617;">
                                     <span>Complete Prediction</span>
                                     <i class="fa-solid fa-arrow-right text-xs"></i>
                                 </a>
                             @else
-                                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/30 text-xs font-bold">
+                                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/30 text-xs font-bold"
+                                     style="background-color: rgba(14, 165, 233, 0.2); color: #7dd3fc; border: 1px solid rgba(14, 165, 233, 0.35);">
                                     <i class="fa-regular fa-clock"></i>
                                     <span>Not Submitted Yet</span>
                                 </div>
                                 <a href="{{ route('forecasts.show', $nextForecast->id) }}" 
-                                   class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-black text-sm shadow-lg shadow-sky-500/25 transition-all">
+                                   class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-black text-sm shadow-lg shadow-sky-500/25 transition-all"
+                                   style="background-color: #0ea5e9; color: #ffffff;">
                                     <span>Predict Top 6 Now</span>
                                     <i class="fa-solid fa-arrow-right text-xs"></i>
                                 </a>
                             @endif
                         @else
                             <a href="{{ route('forecasts.show', $nextForecast->id) }}" 
-                               class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-black text-sm shadow-lg transition-all">
+                               class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-black text-sm shadow-lg transition-all"
+                               style="background-color: #0ea5e9; color: #ffffff;">
                                 <span>Predict Top 6</span>
                                 <i class="fa-solid fa-arrow-right text-xs"></i>
                             </a>
