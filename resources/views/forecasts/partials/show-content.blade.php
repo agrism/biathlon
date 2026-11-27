@@ -2,6 +2,24 @@
     $isTeamDiscipline = $isTeamDiscipline ?? ($forecast->competition ? \App\Enums\DisciplineEnum::tryFrom($forecast->competition->discipline_remote_id)?->isTeamDiscipline() : false);
 @endphp
 <div class="space-y-6">
+    <!-- Top Back Navigation Bar -->
+    <div class="flex items-center justify-between gap-3 mb-4">
+        <a href="{{ route('forecasts.index') }}" 
+           class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 text-xs font-bold border border-slate-200/90 shadow-2xs hover:shadow-xs transition-all">
+            <i class="fa-solid fa-arrow-left text-[11px] text-slate-400"></i>
+            <span>Back to Predictions</span>
+        </a>
+
+        <div class="flex items-center gap-2">
+            <a href="{{ route('forecasts.summary.index') }}" 
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100/80 text-amber-800 text-xs font-bold border border-amber-200/70 transition-all">
+                <i class="fa-solid fa-trophy text-amber-600 text-[11px]"></i>
+                <span class="hidden sm:inline">Leaderboard Standings</span>
+                <span class="sm:hidden">Standings</span>
+            </a>
+        </div>
+    </div>
+
     <div id="selected-athletes">
         <!-- Competition Header Card -->
         <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-sky-950 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden mb-6">
@@ -11,9 +29,12 @@
             
             <div class="relative z-10">
                 <div class="flex flex-wrap items-center gap-2 mb-2">
-                    <span class="px-2.5 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-400/30 text-xs font-bold uppercase tracking-wider">
-                        {{ $forecast->competition->event->short_description ?? 'World Cup' }}
-                    </span>
+                    <a href="{{ route('forecasts.index') }}" 
+                       class="px-2.5 py-1 rounded-full bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-400/30 text-xs font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-1.5"
+                       title="View all races in {{ $forecast->competition->event->short_description ?? 'World Cup' }}">
+                        <i class="fa-solid fa-arrow-left text-[10px]"></i>
+                        <span>{{ $forecast->competition->event->short_description ?? 'World Cup' }}</span>
+                    </a>
                     <span class="px-2.5 py-1 rounded-full bg-white/10 text-slate-200 text-xs font-medium">
                         {{ $forecast->competition->discipline_remote_id }} &bull; {{ $forecast->competition->km ?? '' }}
                     </span>

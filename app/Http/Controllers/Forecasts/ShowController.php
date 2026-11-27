@@ -32,6 +32,9 @@ class ShowController extends Controller
             return redirect()->to(route('forecasts.index'));
         }
 
+        $this->registerBread('Predictions', 'forecasts.index', route('forecasts.index'));
+        $this->registerBread($forecast->competition?->short_description ?? 'Race', 'forecasts.show', route('forecasts.show', $forecast->id));
+
         $isTeamDiscipline = DisciplineEnum::tryFrom($forecast->competition->discipline_remote_id)->isTeamDiscipline();
 
         $startingUserTempIds = $forecast->competition->results->map(function (EventCompetitionResult $result)use($isTeamDiscipline){

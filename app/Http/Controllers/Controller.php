@@ -19,12 +19,12 @@ abstract class Controller
 //        );
 //    }
 
-    protected function registerBread(string $title = 'x'): self
+    protected function registerBread(string $title = 'x', ?string $name = null, ?string $route = null): self
     {
         BreadCrumbHelper::instance()->register(
             new BreadCrumbValueObject(
-                name: request()->route()?->getName() ?? '',
-                route: request()->url(),
+                name: $name ?? request()->route()?->getName() ?? '',
+                route: $route ?? request()->url(),
                 title: $title,
             )
         );
