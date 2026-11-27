@@ -52,10 +52,10 @@
                         </div>
                         <div>
                             <div class="flex items-center gap-2">
-                                <h3 class="text-base font-extrabold text-slate-900 tracking-tight">Iepriekšējās sezonas</h3>
-                                <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">Arhīvs</span>
+                                <h3 class="text-base font-extrabold text-slate-900 tracking-tight">Previous Seasons</h3>
+                                <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">Archive</span>
                             </div>
-                            <p class="text-xs text-slate-500 mt-0.5">Skatīt iepriekšējo sezonu un turnīru kopvērtējumus</p>
+                            <p class="text-xs text-slate-500 mt-0.5">View previous season and tournament leaderboards</p>
                         </div>
                     </div>
 

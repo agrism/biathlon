@@ -40,10 +40,10 @@
                     type="button"
                     @click="openSeasons['{{ $sId }}'] = false"
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] text-xs font-bold transition-all border bg-white/15 text-white border-white/25 hover:bg-white/25 cursor-pointer"
-                    title="Aizvērt sezonas tabulu"
+                    title="Close season leaderboard"
                 >
                     <i class="fa-solid fa-xmark text-xs"></i>
-                    <span>Aizvērt</span>
+                    <span>Close</span>
                 </button>
             @endif
         </div>

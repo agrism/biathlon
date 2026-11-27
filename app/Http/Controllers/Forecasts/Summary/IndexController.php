@@ -30,7 +30,7 @@ class IndexController extends Controller
         $seasons[] = [
             'id' => 's2627',
             'title' => 'LaVita IBU World Cup Biathlon, season 26/27',
-            'button_title' => 'Sezona 26/27',
+            'button_title' => 'Season 26/27',
             'subtitle' => 'Official World Cup Season Matrix',
             'icon' => '🏆',
             'is_active' => true,
@@ -56,7 +56,7 @@ class IndexController extends Controller
         $seasons[] = [
             'id' => 's2526',
             'title' => 'BMW IBU World Cup Biathlon, season 25/26',
-            'button_title' => 'Sezona 25/26',
+            'button_title' => 'Season 25/26',
             'subtitle' => 'Official World Cup Season Matrix',
             'icon' => '🏆',
             'data' => $this->getSeasonData(season: '2526'),
@@ -65,7 +65,7 @@ class IndexController extends Controller
         $seasons[] = [
             'id' => 's2425',
             'title' => 'BMW IBU World Cup Biathlon, season 24/25',
-            'button_title' => 'Sezona 24/25',
+            'button_title' => 'Season 24/25',
             'subtitle' => 'Official World Cup Season Matrix',
             'icon' => '🏆',
             'data' => $this->getSeasonData(season: '2425'),
