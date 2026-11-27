@@ -101,7 +101,7 @@
                                     $isThisRowOwn = auth()->check() && ($user->id === auth()->id());
                                 @endphp
                                 <tr class="hover:bg-slate-50/80 transition-colors">
-                                    <td class="px-4 py-3 whitespace-nowrap font-bold text-slate-900">
+                                    <td class="px-4 py-3 whitespace-nowrap font-bold text-slate-900 align-top">
                                         <div class="flex items-center gap-2">
                                             <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center text-xs font-bold uppercase border border-slate-200">
                                                 {{ substr($user->name, 0, 1) }}
@@ -116,15 +116,15 @@
                                             $isNotInStartList = $hasStartList && $athlete->name && !in_array((string)$athlete->tempId, $startingUserTempIds ?? []);
                                             $isHiddenCell = $forecast->submit_deadline_at->gt(now()) && $athlete->isHidden && !$isThisRowOwn && !$isNotInStartList;
                                         @endphp
-                                        <td class="px-3 py-3 whitespace-nowrap transition-colors {{ $isNotInStartList ? 'bg-rose-50/90 border-l-2 border-r-2 border-rose-400' : '' }}">
+                                        <td class="px-3 py-3 whitespace-nowrap align-top transition-colors {{ $isNotInStartList ? 'bg-rose-50/90 border-l-2 border-r-2 border-rose-400' : '' }}">
                                             @if($isHiddenCell)
-                                                <div class="flex items-center gap-1.5 text-xs text-slate-400 italic">
+                                                <div class="flex items-center gap-1.5 text-xs text-slate-400 italic h-5">
                                                     <i class="fa fa-eye-slash text-slate-400 text-xs"></i>
                                                     <span>Hidden</span>
                                                 </div>
                                             @elseif($athlete->name)
                                                 <div class="flex flex-col">
-                                                    <div class="flex items-center gap-1.5 font-semibold {{ $isNotInStartList ? 'text-rose-950 font-bold' : 'text-slate-800' }}">
+                                                    <div class="flex items-center gap-1.5 font-semibold h-5 {{ $isNotInStartList ? 'text-rose-950 font-bold' : 'text-slate-800' }}">
                                                         @if($athlete->flagUrl)
                                                             <img src="{{ $athlete->flagUrl }}" class="h-3.5 rounded-xs shadow-2xs inline-block">
                                                         @endif
@@ -145,7 +145,7 @@
                                                     <x-cards.athlete-stat :athlete="$athlete" class="flex flex-wrap items-center gap-1 text-[11px] mt-1"></x-cards.athlete-stat>
                                                 </div>
                                             @else
-                                                <span class="text-slate-300 text-xs">-</span>
+                                                <span class="text-slate-300 text-xs h-5 flex items-center">-</span>
                                             @endif
                                         </td>
                                     @endforeach
@@ -187,31 +187,33 @@
                             <!-- Official IBU Results Row -->
                             @foreach([[0,6], [6,6]] as $slices)
                                 <tr class="bg-slate-900 text-white font-semibold {{ $slices[0] != 0 ? 'opacity-40 text-xs' : '' }}">
-                                    <td class="px-4 py-3 whitespace-nowrap">
+                                    <td class="px-4 py-3 whitespace-nowrap align-top">
                                         <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 text-xs font-bold uppercase">
                                             IBU {{ $slices[0] == 0 ? '(1–6)' : '(7–12)' }}
                                         </span>
                                     </td>
 
                                     @foreach(collect($forecast->final_data->results)->slice($slices[0], $slices[1])->toArray() as $index => $athlete)
-                                        <td class="px-3 py-3 whitespace-nowrap">
-                                            <div class="flex items-center gap-1.5">
-                                                @if($athlete->flagUrl)
-                                                    <img src="{{ $athlete->flagUrl }}" class="h-3 rounded-xs inline-block">
-                                                @endif
-                                                <span class="font-bold text-white truncate max-w-[120px]">{{ $athlete->getShortName() }}</span>
+                                        <td class="px-3 py-3 whitespace-nowrap align-top">
+                                            <div class="flex flex-col">
+                                                <div class="flex items-center gap-1.5 font-bold h-5">
+                                                    @if($athlete->flagUrl)
+                                                        <img src="{{ $athlete->flagUrl }}" class="h-3 rounded-xs inline-block">
+                                                    @endif
+                                                    <span class="font-bold text-white truncate max-w-[120px]">{{ $athlete->getShortName() }}</span>
+                                                </div>
+                                                <x-cards.athlete-result-data :eventCompetionResult="$isTeamDiscipline ? null : $forecast->competition->results->where('athlete_id', $athlete->id)->first()"></x-cards.athlete-result-data>
                                             </div>
-                                            <x-cards.athlete-result-data :eventCompetionResult="$isTeamDiscipline ? null : $forecast->competition->results->where('athlete_id', $athlete->id)->first()"></x-cards.athlete-result-data>
                                         </td>
                                     @endforeach
-                                    <td colspan="3" class="px-3 py-3 text-center text-slate-400 text-xs italic">Official Ranks</td>
+                                    <td colspan="3" class="px-3 py-3 text-center align-top text-slate-400 text-xs italic">Official Ranks</td>
                                 </tr>
                             @endforeach
 
                             <!-- User Forecast Rows -->
                             @foreach($forecast->final_data->users as $user)
                                 <tr class="hover:bg-slate-50/80 transition-colors">
-                                    <td class="px-4 py-3 whitespace-nowrap font-bold text-slate-900">
+                                    <td class="px-4 py-3 whitespace-nowrap font-bold text-slate-900 align-top">
                                         <div class="flex items-center gap-2">
                                             <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center text-xs font-bold uppercase border border-slate-200">
                                                 {{ substr($user->name, 0, 1) }}
@@ -230,11 +232,11 @@
                                             $tot = (int)$pts['total'] == $pts['total'] ? (int)$pts['total'] : $pts['total'];
                                             $tooltipText = "{$reg} regular + {$bon} bonus = {$tot} points";
                                         @endphp
-                                        <td class="px-3 py-3 whitespace-nowrap {{ $isNotInStartList ? 'bg-rose-50/80 border-l-2 border-r-2 border-rose-300' : '' }}">
+                                        <td class="px-3 py-3 whitespace-nowrap align-top {{ $isNotInStartList ? 'bg-rose-50/80 border-l-2 border-r-2 border-rose-300' : '' }}">
                                             @if($athlete->name)
                                                 <div class="relative group/cell cursor-default rounded-lg p-1 -m-1 hover:bg-slate-100/70 transition-colors" title="{{ $tooltipText }}">
                                                     <div class="flex flex-col">
-                                                        <div class="flex items-center gap-1.5 font-semibold {{ $isNotInStartList ? 'text-rose-950 font-bold' : 'text-slate-800' }}">
+                                                        <div class="flex items-center gap-1.5 font-semibold h-5 {{ $isNotInStartList ? 'text-rose-950 font-bold' : 'text-slate-800' }}">
                                                             @if($athlete->flagUrl)
                                                                 <img src="{{ $athlete->flagUrl }}" class="h-3.5 rounded-xs shadow-2xs inline-block">
                                                             @endif
@@ -268,18 +270,18 @@
                                                     </div>
                                                 </div>
                                             @else
-                                                <span class="text-slate-300 text-xs">-</span>
+                                                <span class="text-slate-300 text-xs h-5 flex items-center">-</span>
                                             @endif
                                         </td>
                                     @endforeach
 
-                                    <td class="px-3 py-3 whitespace-nowrap text-center font-bold text-slate-700">
+                                    <td class="px-3 py-3 whitespace-nowrap align-top text-center font-bold text-slate-700">
                                         {{ $regularPoints = $user->getPointsByType(type: \App\Enums\Forecast\AwardPointEnum::REGULAR_POINT) }}
                                     </td>
-                                    <td class="px-3 py-3 whitespace-nowrap text-center font-bold text-amber-600">
+                                    <td class="px-3 py-3 whitespace-nowrap align-top text-center font-bold text-amber-600">
                                         +{{ $bonusPoints = $user->getPointsByType(type: \App\Enums\Forecast\AwardPointEnum::BONUS_POINT) }}
                                     </td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-center font-black text-base text-sky-600 bg-sky-50/40">
+                                    <td class="px-4 py-3 whitespace-nowrap align-top text-center font-black text-base text-sky-600 bg-sky-50/40">
                                         {{ $regularPoints + $bonusPoints }}
                                     </td>
                                 </tr>
