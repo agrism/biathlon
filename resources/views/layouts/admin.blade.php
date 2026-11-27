@@ -38,20 +38,20 @@
         $breadcrumbHtml = \App\Helpers\BreadCrumbHelper::instance()->render();
     @endphp
     @if(!empty(trim($breadcrumbHtml)))
-        <div class="px-4 sm:px-6 lg:px-8 mb-5">
+        <div class="px-[5px] mb-5">
             {!! $breadcrumbHtml !!}
         </div>
     @endif
 
     @isset($heading)
         @if($heading)
-            <div class="px-4 sm:px-6 lg:px-8 mb-6 text-center">
+            <div class="px-[5px] mb-6 text-center">
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">{!! $heading !!}</h1>
             </div>
         @endif
     @endif
 
-    <div class="cont w-full" style="opacity: 1;">
+    <div class="cont w-full px-[5px]" style="opacity: 1; padding-left: 5px; padding-right: 5px;">
         @yield('content')
     </div>
 </main>

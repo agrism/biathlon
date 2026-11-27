@@ -34,7 +34,7 @@
         @endforeach
     </div>
 @else
-    <div class="p-8 rounded-3xl bg-slate-50 border border-slate-200/80 text-center" id="selected-athletes">
+    <div class="p-8 rounded-none bg-slate-50 border border-slate-200/80 text-center" id="selected-athletes">
         <p class="text-xs text-slate-500 font-medium">
             <a href="{{ route('login') }}" class="font-bold text-sky-600 hover:text-sky-700 hover:underline">Sign in</a> to view and manage your prediction podium.
         </p>

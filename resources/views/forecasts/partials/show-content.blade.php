@@ -26,7 +26,7 @@
 
     <div id="selected-athletes">
         <!-- Competition Header Card -->
-        <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-sky-950 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden mb-6">
+        <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-sky-950 text-white rounded-none p-6 shadow-xl relative overflow-hidden mb-6">
             <div class="absolute -right-8 -bottom-8 opacity-10 text-9xl">
                 <i class="fa-solid fa-person-skiing"></i>
             </div>
@@ -94,7 +94,7 @@
         <!-- Bid Summary / Results Section -->
         @if(!$forecast->final_data->results)
             <!-- Bid Summary (Pre-Race) -->
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mt-8">
+            <div class="bg-white rounded-none border border-slate-200 shadow-sm overflow-hidden mt-8">
                 <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
                     <div>
                         <h3 class="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
@@ -179,7 +179,7 @@
             </div>
         @else
             <!-- Bid Results (Post-Race) -->
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mt-8">
+            <div class="bg-white rounded-none border border-slate-200 shadow-sm overflow-hidden mt-8">
                 <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-white">
                     <div>
                         <h3 class="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-2">

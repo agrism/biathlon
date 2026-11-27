@@ -35,7 +35,7 @@
     ];
 @endphp
 
-<div class="relative flex flex-col h-full rounded-2xl border p-4 transition-all duration-200 card-hover {{ $podiumClass }}">
+<div class="relative flex flex-col h-full rounded-none border p-4 transition-all duration-200 card-hover {{ $podiumClass }}">
     <!-- Top Header: Place Badge & Privacy Toggle -->
     <div class="flex justify-between items-center h-7 mb-3">
         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-extrabold tracking-wide uppercase {{ $badgeClass }}">
@@ -221,7 +221,7 @@
             @if($isOwn && $isBeforeDeadline)
                 <button
                     type="button"
-                    class="w-full flex flex-col items-center justify-center p-6 rounded-xl border-2 border-dashed border-sky-300 hover:border-sky-500 bg-sky-50/40 hover:bg-sky-50 text-sky-600 transition-all group cursor-pointer"
+                    class="w-full flex flex-col items-center justify-center p-6 rounded-none border-2 border-dashed border-sky-300 hover:border-sky-500 bg-sky-50/40 hover:bg-sky-50 text-sky-600 transition-all group cursor-pointer"
                     hx-get="{{ route('forecasts.select-athlete', ['id' => $forecast->id, 'place' => $index]) }}"
                     hx-target="#selected-athletes"
                 >
