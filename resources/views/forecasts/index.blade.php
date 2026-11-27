@@ -85,8 +85,8 @@
             $nextComp = $nextForecast->competition;
             $nextEvent = $nextComp?->event;
             $flagUrl = $nextEvent?->nat ? 'https://info.blob.core.windows.net/resources/bt/flags/' . strtolower($nextEvent->nat) . '.png' : null;
-            $isToday = $nextForecast->submit_deadline_at?->isToday();
-            $isTomorrow = $nextForecast->submit_deadline_at?->isTomorrow();
+            $isToday = $nextForecast->submit_deadline_at?->tz('Europe/Riga')->isToday();
+            $isTomorrow = $nextForecast->submit_deadline_at?->tz('Europe/Riga')->isTomorrow();
             $diffHours = now()->diffInHours($nextForecast->submit_deadline_at, false);
             $deadlineIso = $nextForecast->submit_deadline_at?->toIso8601String();
             $athletesCount = $nextComp?->results?->count() ?? 0;
@@ -139,7 +139,7 @@
                     <div class="flex items-center gap-4 text-xs text-slate-300 flex-wrap" style="color: #cbd5e1;">
                         <div class="flex items-center gap-1.5">
                             <i class="fa-regular fa-clock text-sky-400" style="color: #38bdf8;"></i>
-                            <span>Deadline: <strong class="text-white font-bold" style="color: #ffffff;">{{ $nextForecast->submit_deadline_at?->format('D, d M • H:i') }} CET</strong></span>
+                            <span>Deadline: <strong class="text-white font-bold" style="color: #ffffff;">{{ $nextForecast->submit_deadline_at?->toLatviaTime() }}</strong></span>
                         </div>
                         @if($athletesCount > 0)
                             <div class="flex items-center gap-1.5">
@@ -415,8 +415,8 @@
                                 $comp = $forecast->competition;
                                 $categoryType = $forecast->category_type;
                                 $isNext = ($nextForecast && $nextForecast->id === $forecast->id);
-                                $isRaceToday = $forecast->submit_deadline_at?->isToday();
-                                $isRaceTomorrow = $forecast->submit_deadline_at?->isTomorrow();
+                                $isRaceToday = $forecast->submit_deadline_at?->tz('Europe/Riga')->isToday();
+                                $isRaceTomorrow = $forecast->submit_deadline_at?->tz('Europe/Riga')->isTomorrow();
                             @endphp
 
                             <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors hover:bg-slate-50/80 {{ $isNext ? 'bg-sky-50/40' : '' }}"
@@ -464,7 +464,7 @@
                                         <div class="flex items-center gap-3 text-xs text-slate-500 mt-1 flex-wrap">
                                             <div class="flex items-center gap-1 font-semibold text-slate-700">
                                                 <i class="fa-regular fa-clock text-slate-400 text-[11px]"></i>
-                                                <span>{{ $forecast->submit_deadline_at?->format('D, d M • H:i') }} CET</span>
+                                                <span>{{ $forecast->submit_deadline_at?->toLatviaTime() }}</span>
                                             </div>
                                             <span>•</span>
                                             <span class="text-slate-400">
@@ -601,7 +601,7 @@
                                 <span>•</span>
                                 <span>Stage {{ $event?->event_series_no ?? '1' }}</span>
                                 <span>•</span>
-                                <span>{{ $forecast->submit_deadline_at?->format('d M Y') }}</span>
+                                <span>{{ $forecast->submit_deadline_at?->tz('Europe/Riga')->format('d M Y') }}</span>
                             </div>
 
                             <h4 class="text-base sm:text-lg font-extrabold text-slate-900">

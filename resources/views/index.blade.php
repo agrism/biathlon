@@ -206,7 +206,7 @@
                         <span>{{ $event->description }}</span>
                     </h2>
                     <p class="text-xs {{ $isLoopOne ? 'text-violet-100 font-medium' : 'text-slate-300' }} mt-1">
-                        {{ $event->short_description }} • {{ $event->first_competition_date->tz('Europe/Riga')->format('d F Y, H:i') }}
+                        {{ $event->short_description }} • {{ $event->first_competition_date->toLatviaTime('d F Y, H:i') }}
                     </p>
                 </a>
 

@@ -65,7 +65,7 @@ class ShowController extends Controller
                     return $this->getLink($competition, $competition->location);
                 },
                 function (EventCompetition $competition): string {
-                    return $this->getLink($competition, $competition->start_time?->format('d.m.Y H:i') ?? '-');
+                    return $this->getLink($competition, $competition->start_time?->toLatviaTime('d.m.Y H:i') ?? '-');
                 },
                 function (EventCompetition $competition): string {
                     return $this->getLink($competition, (string)$competition->nr_shootings);

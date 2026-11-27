@@ -41,7 +41,7 @@
                     @if($forecast->submit_deadline_at)
                         <span class="px-2.5 py-1 rounded-full {{ $forecast->submit_deadline_at->gt(now()) ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30' : 'bg-rose-500/20 text-rose-300 border border-rose-400/30' }} text-xs font-semibold">
                             <i class="fa-regular fa-clock mr-1"></i>
-                            {{ $forecast->submit_deadline_at->gt(now()) ? 'Deadline: '.$forecast->submit_deadline_at->format('d M H:i') : 'Closed' }}
+                            {{ $forecast->submit_deadline_at->gt(now()) ? 'Deadline: '.$forecast->submit_deadline_at->toLatviaTime('d M H:i') : 'Closed' }}
                         </span>
                     @endif
                 </div>
