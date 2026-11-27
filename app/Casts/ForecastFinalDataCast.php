@@ -35,7 +35,7 @@ class ForecastFinalDataCast implements CastsAttributes
         };
 
 
-        $finalData = json_decode(data_get($attributes, 'final_data'), true);
+        $finalData = json_decode(data_get($attributes, 'final_data') ?? '', true);
 
         return new FinalDataValueObject(
             results: collect(data_get($finalData, 'results', []))->map(fn($athlete) => $athleteFactory($athlete))->toArray(),
