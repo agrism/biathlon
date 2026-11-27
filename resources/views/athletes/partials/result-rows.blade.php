@@ -64,11 +64,11 @@
                 $hasMisses = is_numeric($result->shooting_total) && (int)$result->shooting_total > 0;
             @endphp
             @if(is_numeric($shootingsVal))
-                <span class="w-[20px] h-[20px] min-w-[20px] rounded-full {{ $hasMisses ? 'bg-slate-900 text-white shadow-2xs' : 'bg-slate-100 text-slate-500 border border-slate-300/80' }} font-bold text-[11px] inline-flex items-center justify-center leading-none" title="Penalties / Shooting Misses">
+                <span class="w-[20px] h-[20px] min-w-[20px] rounded-full bg-slate-900 text-white border border-white shadow-2xs font-bold text-[11px] inline-flex items-center justify-center leading-none" title="Penalties / Shooting Misses">
                     {{ $shootingsVal }}
                 </span>
             @else
-                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md {{ $hasMisses ? 'bg-slate-900 text-white shadow-2xs' : 'bg-slate-100 text-slate-700' }} font-medium text-xs" title="Penalties / Shooting Misses">
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-900 text-white border border-white shadow-2xs font-medium text-xs" title="Penalties / Shooting Misses">
                     <span class="w-1.5 h-1.5 rounded-full {{ $hasMisses ? 'bg-rose-400' : 'bg-slate-400' }}"></span>
                     <span>{{ $shootingsVal }}</span>
                 </span>
