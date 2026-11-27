@@ -21,6 +21,12 @@
             active: 0,
             slides: [
                 {
+                    src: 'https://assets.biathlonworld.com/image/upload/c_limit,f_auto,q_auto,w_1920/Photo%20Database/2026-2027/World%20Cup/WC1%20Kontiolahti/Men%20Individual/Group_DY6242',
+                    tag: 'Kontiolahti Stage',
+                    title: 'BMW IBU World Cup Kontiolahti',
+                    subtitle: 'Opening stage battles and thrilling individual races in Kontiolahti, Finland.'
+                },
+                {
                     src: '{{ asset('images/carousel/slide-1.jpg') }}',
                     tag: 'Holmenkollen Stage',
                     title: 'BMW IBU World Cup Holmenkollen',
