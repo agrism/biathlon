@@ -48,6 +48,17 @@
                 <i class="fa-solid fa-triangle-exclamation text-[9px]"></i>
                 <span>Not in Start List</span>
             </span>
+        @elseif(isset($points) && is_array($points) && $forecast->isCompleted() && $athlete->name)
+            @php
+                $cardReg = (int)$points['regular'] == $points['regular'] ? (int)$points['regular'] : $points['regular'];
+                $cardBon = (int)$points['bonus'] == $points['bonus'] ? (int)$points['bonus'] : $points['bonus'];
+                $cardTot = (int)$points['total'] == $points['total'] ? (int)$points['total'] : $points['total'];
+                $cardTooltip = "{$cardReg} regular + {$cardBon} bonus = {$cardTot} total points";
+            @endphp
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-sky-50 text-sky-800 border border-sky-200/80 text-[11px] font-black shadow-2xs cursor-default" title="{{ $cardTooltip }}">
+                <i class="fa-solid fa-star text-[10px] text-amber-500"></i>
+                <span>{{ $cardTot }} pts</span>
+            </span>
         @elseif($isOwn && $isBeforeDeadline && $athlete->name)
             <x-tooltip :text="$athlete->isHidden ? 'Hidden from other players' : 'Publicly visible'">
                 <button

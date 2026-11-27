@@ -15,6 +15,8 @@
     $isOwn = isset($isOwnPrediction)
         ? (bool)$isOwnPrediction
         : (auth()->check() && $selectedUserObj && auth()->id() === $selectedUserObj->id);
+
+    $isTeam = $isTeamDiscipline ?? ($forecast->competition ? \App\Enums\DisciplineEnum::tryFrom($forecast->competition->discipline_remote_id)?->isTeamDiscipline() : false);
 @endphp
 
 @if($selectedUserObj)
@@ -27,6 +29,7 @@
                 :favoriteAthleteIds="$favoriteAthleteIds"
                 :isOwnPrediction="$isOwn"
                 :startingUserTempIds="$startingUserTempIds ?? []"
+                :points="$forecast->isCompleted() ? $selectedUserObj->getPointsForAthlete($index, $forecast->final_data->results ?? [], (bool)$isTeam) : null"
             ></x-cards.athlete>
         @endforeach
     </div>

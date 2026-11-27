@@ -221,26 +221,48 @@
                                         @php
                                             $hasStartList = !empty($startingUserTempIds);
                                             $isNotInStartList = $hasStartList && $athlete->name && !in_array((string)$athlete->tempId, $startingUserTempIds ?? []);
+                                            $pts = $user->getPointsForAthlete($index, $forecast->final_data->results ?? [], $isTeamDiscipline ?? false);
+                                            $reg = (int)$pts['regular'] == $pts['regular'] ? (int)$pts['regular'] : $pts['regular'];
+                                            $bon = (int)$pts['bonus'] == $pts['bonus'] ? (int)$pts['bonus'] : $pts['bonus'];
+                                            $tot = (int)$pts['total'] == $pts['total'] ? (int)$pts['total'] : $pts['total'];
+                                            $tooltipText = "{$reg} regular + {$bon} bonus = {$tot} points";
                                         @endphp
                                         <td class="px-3 py-3 whitespace-nowrap {{ $isNotInStartList ? 'bg-rose-50/80 border-l-2 border-r-2 border-rose-300' : '' }}">
                                             @if($athlete->name)
-                                                <div class="flex flex-col">
-                                                    <div class="flex items-center gap-1.5 font-semibold {{ $isNotInStartList ? 'text-rose-950 font-bold' : 'text-slate-800' }}">
-                                                        @if($athlete->flagUrl)
-                                                            <img src="{{ $athlete->flagUrl }}" class="h-3.5 rounded-xs shadow-2xs inline-block">
+                                                <div class="relative group/cell cursor-default rounded-lg p-1 -m-1 hover:bg-slate-100/70 transition-colors" title="{{ $tooltipText }}">
+                                                    <div class="flex flex-col">
+                                                        <div class="flex items-center gap-1.5 font-semibold {{ $isNotInStartList ? 'text-rose-950 font-bold' : 'text-slate-800' }}">
+                                                            @if($athlete->flagUrl)
+                                                                <img src="{{ $athlete->flagUrl }}" class="h-3.5 rounded-xs shadow-2xs inline-block">
+                                                            @endif
+                                                            <span class="truncate max-w-[120px]">{{ $athlete->getShortName() }}</span>
+                                                        </div>
+
+                                                        @if($isNotInStartList)
+                                                            <div class="mt-1">
+                                                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px] font-black uppercase tracking-wider shadow-2xs">
+                                                                    <i class="fa-solid fa-triangle-exclamation text-[9px]"></i> DNS
+                                                                </span>
+                                                            </div>
                                                         @endif
-                                                        <span class="truncate max-w-[120px]">{{ $athlete->getShortName() }}</span>
+
+                                                        <x-cards.athlete-result-data
+                                                            :eventCompetionResult="$isTeamDiscipline ? null : $forecast->competition->results->where('athlete_id', $athlete->id)->first()"
+                                                            :showBadgeTitles="false"
+                                                        ></x-cards.athlete-result-data>
                                                     </div>
 
-                                                    @if($isNotInStartList)
-                                                        <div class="mt-1">
-                                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px] font-black uppercase tracking-wider shadow-2xs">
-                                                                <i class="fa-solid fa-triangle-exclamation text-[9px]"></i> DNS
-                                                            </span>
+                                                    <!-- Points Tooltip on hover -->
+                                                    <div class="absolute invisible group-hover/cell:visible opacity-0 group-hover/cell:opacity-100 transition-all duration-150 bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-slate-900 text-white text-xs rounded-lg shadow-xl whitespace-nowrap z-30 pointer-events-none">
+                                                        <div class="flex items-center gap-1.5 font-bold tracking-tight text-[11px]">
+                                                            <span class="text-slate-200 font-semibold">{{ $reg }} regular</span>
+                                                            <span class="text-slate-400 font-normal">+</span>
+                                                            <span class="text-amber-400 font-semibold">{{ $bon }} bonus</span>
+                                                            <span class="text-slate-400 font-normal">=</span>
+                                                            <span class="text-sky-300 font-black">{{ $tot }} pts</span>
                                                         </div>
-                                                    @endif
-
-                                                    <x-cards.athlete-result-data :eventCompetionResult="$isTeamDiscipline ? null : $forecast->competition->results->where('athlete_id', $athlete->id)->first()"></x-cards.athlete-result-data>
+                                                        <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900"></div>
+                                                    </div>
                                                 </div>
                                             @else
                                                 <span class="text-slate-300 text-xs">-</span>
