@@ -63,10 +63,16 @@
                 $shootingsVal = $result->shootings ?: ($result->shooting_total ?? '-');
                 $hasMisses = is_numeric($result->shooting_total) && (int)$result->shooting_total > 0;
             @endphp
-            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md {{ $hasMisses ? 'bg-rose-50 text-rose-800 border border-rose-200/70' : 'bg-slate-100 text-slate-700' }} font-medium text-xs" title="Penalties / Shooting Misses">
-                <i class="fa-solid fa-circle-xmark {{ $hasMisses ? 'text-rose-500' : 'text-slate-400' }} text-[11px]"></i>
-                <span>{{ $shootingsVal }}</span>
-            </span>
+            @if(is_numeric($shootingsVal))
+                <span class="w-[20px] h-[20px] min-w-[20px] rounded-full {{ $hasMisses ? 'bg-slate-900 text-white shadow-2xs' : 'bg-slate-100 text-slate-500 border border-slate-300/80' }} font-bold text-[11px] inline-flex items-center justify-center leading-none" title="Penalties / Shooting Misses">
+                    {{ $shootingsVal }}
+                </span>
+            @else
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md {{ $hasMisses ? 'bg-slate-900 text-white shadow-2xs' : 'bg-slate-100 text-slate-700' }} font-medium text-xs" title="Penalties / Shooting Misses">
+                    <span class="w-1.5 h-1.5 rounded-full {{ $hasMisses ? 'bg-rose-400' : 'bg-slate-400' }}"></span>
+                    <span>{{ $shootingsVal }}</span>
+                </span>
+            @endif
         </td>
         <td class="px-4 py-2.5 whitespace-nowrap text-slate-500 font-medium text-xs">
             {{ $result->behind ? (str_starts_with($result->behind, '+') ? $result->behind : '+'.$result->behind) : '-' }}
