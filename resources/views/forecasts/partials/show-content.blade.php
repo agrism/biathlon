@@ -139,7 +139,7 @@
                                                         </div>
                                                     @endif
 
-                                                    <x-cards.athlete-stat :athlete="$athlete"></x-cards.athlete-stat>
+                                                    <x-cards.athlete-stat :athlete="$athlete" class="flex flex-wrap items-center gap-1 text-[11px] mt-1"></x-cards.athlete-stat>
                                                 </div>
                                             @else
                                                 <span class="text-slate-300 text-xs">-</span>

@@ -151,10 +151,10 @@
         </div>
 
         <!-- Bottom Section: Stats & Action Controls -->
-        <div class="mt-auto pt-3 w-full flex flex-col items-center">
-            <!-- Athlete Stats Chips -->
-            <div class="w-full">
-                <x-cards.athlete-stat :athlete="$athlete"></x-cards.athlete-stat>
+        <div class="mt-auto pt-2 w-full flex flex-col items-center justify-end">
+            <!-- Athlete Stats Chips (Atpalicība at the bottom) -->
+            <div class="w-full flex flex-col items-center justify-end min-h-[48px]">
+                <x-cards.athlete-stat :athlete="$athlete" class="flex flex-col items-center justify-end gap-1 text-[11px]"></x-cards.athlete-stat>
             </div>
 
             @if($isOwn && $isBeforeDeadline)
