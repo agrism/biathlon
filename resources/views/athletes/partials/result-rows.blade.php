@@ -59,8 +59,13 @@
             @endif
         </td>
         <td class="px-4 py-2.5 whitespace-nowrap">
-            <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-medium text-xs">
-                🎯 {{ $result->shootings ?: ($result->shooting_total ?? '-') }}
+            @php
+                $shootingsVal = $result->shootings ?: ($result->shooting_total ?? '-');
+                $hasMisses = is_numeric($result->shooting_total) && (int)$result->shooting_total > 0;
+            @endphp
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md {{ $hasMisses ? 'bg-rose-50 text-rose-800 border border-rose-200/70' : 'bg-slate-100 text-slate-700' }} font-medium text-xs" title="Penalties / Shooting Misses">
+                <i class="fa-solid fa-circle-xmark {{ $hasMisses ? 'text-rose-500' : 'text-slate-400' }} text-[11px]"></i>
+                <span>{{ $shootingsVal }}</span>
             </span>
         </td>
         <td class="px-4 py-2.5 whitespace-nowrap text-slate-500 font-medium text-xs">
