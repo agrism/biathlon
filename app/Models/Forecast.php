@@ -54,4 +54,9 @@ class Forecast extends Model
     {
         return $this->hasMany(ForecastAward::class);
     }
+
+    public function isCompleted(): bool
+    {
+        return $this->status === ForecastStatusEnum::COMPLETED || !empty($this->final_data?->results);
+    }
 }
