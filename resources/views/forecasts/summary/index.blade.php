@@ -1,5 +1,9 @@
 @extends('layouts.admin', ['heading' => ''])
 
+@section('style')
+<style>[x-cloak] { display: none !important; }</style>
+@endsection
+
 @section('content')
     <div class="mb-8 text-center">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100/80 text-sky-800 text-xs font-bold uppercase tracking-wider mb-2">
@@ -13,161 +17,94 @@
         </p>
     </div>
 
-    @foreach($seasons as $index => $season)
-        <div class="mb-12" x-data="{ showDetails: false }">
-            <!-- Season Header & Controls -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 bg-gradient-to-r {{ data_get($season, 'gradient', 'from-slate-900 via-slate-800 to-sky-950') }} text-white p-5 rounded-[5px] {{ data_get($season, 'is_active') ? 'shadow-lg ring-2 ring-indigo-400/50 border border-white/25' : 'shadow-sm' }}">
-                <div class="flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-[6px] {{ data_get($season, 'icon_bg', 'bg-amber-500/20 border-amber-400/30 text-amber-400') }} border flex items-center justify-center font-black text-xl shadow-inner backdrop-blur-xs">
-                        {{ data_get($season, 'icon', '🏆') }}
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <h2 class="text-lg sm:text-xl font-black tracking-tight text-white">
-                                {{ data_get($season, 'title') }}
-                            </h2>
-                            @if(data_get($season, 'is_active'))
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-400 text-emerald-950 text-[10px] font-black uppercase tracking-wider shadow-sm">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-950 animate-pulse"></span>
-                                    {{ data_get($season, 'badge', 'ACTIVE') }}
-                                </span>
-                            @elseif(data_get($season, 'badge'))
-                                <span class="px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[10px] font-black uppercase tracking-wider">
-                                    {{ data_get($season, 'badge') }}
-                                </span>
-                            @endif
-                        </div>
-                        <span class="text-xs {{ data_get($season, 'is_active') ? 'text-violet-100 font-semibold' : 'text-sky-300 font-medium' }}">{{ data_get($season, 'subtitle', 'Official World Cup Season Matrix') }}</span>
-                    </div>
-                </div>
+    @php
+        $currentSeason = $seasons[0] ?? null;
+        $pastSeasons = array_slice($seasons, 1);
+    @endphp
 
-                <div class="flex items-center gap-2">
-                    <button
-                        type="button"
-                        @click="showDetails = !showDetails"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] text-xs font-bold transition-all border"
-                        :class="showDetails ? 'bg-white text-slate-900 border-white shadow-xs' : 'bg-white/15 text-white border-white/20 hover:bg-white/25'"
-                    >
-                        <i class="fa-solid fa-list-ol text-xs"></i>
-                        <span x-text="showDetails ? 'Hide Split Points' : 'Show Split Points (Reg+Bon)'"></span>
-                    </button>
-                </div>
-            </div>
+    @if($currentSeason)
+        <!-- Current / Active Season Leaderboard -->
+        @include('forecasts.summary.partials.season-table', [
+            'season' => $currentSeason,
+            'sId' => data_get($currentSeason, 'id', 's_current'),
+            'canClose' => false,
+        ])
 
-            <!-- Leaderboard Table Card -->
-            <div class="bg-white rounded-[5px] border {{ data_get($season, 'is_active') ? 'border-indigo-300/80 shadow-md ring-1 ring-indigo-200/50' : 'border-slate-200 shadow-xs' }} overflow-hidden">
-                <div id="totals" class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
-                        <thead class="bg-slate-50 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                            <tr>
-                                <th scope="col" class="sticky left-0 bg-slate-50 z-20 px-4 py-3 min-w-[140px] shadow-sm">
-                                    Player
-                                </th>
-                                @foreach(array_slice($season['data']['events'] ?? [], 1, -4) as $eventTitle)
-                                    <th scope="col" class="px-2.5 py-3 min-w-[90px] text-center font-bold">
-                                        {{ $eventTitle }}
-                                    </th>
-                                @endforeach
-                                <th scope="col" class="px-3 py-3 text-center bg-slate-100/80 font-extrabold text-slate-700">Reg.</th>
-                                <th scope="col" class="px-3 py-3 text-center bg-amber-50/80 font-extrabold text-amber-800">Bonus</th>
-                                <th scope="col" class="px-4 py-3 text-center bg-sky-100/80 font-black text-sky-900">Total</th>
-                                <th scope="col" class="px-3 py-3 text-right bg-slate-100/80 font-bold text-slate-600">Diff</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 bg-white">
-                            @php $seasonStarted = $season['data']['season_started'] ?? false; @endphp
-                            @foreach($season['data']['users'] ?? [] as $i => $user)
-                                @php
-                                    $isLeader = $user['is_leader'] ?? false;
-                                    $userRank = $user['rank'] ?? ($i + 1);
-                                    $diff = $user['total']['diff'] ?? 0;
-                                @endphp
-                                <tr class="hover:bg-slate-50/80 transition-colors {{ $isLeader ? 'bg-amber-50/20' : '' }}">
-                                    <!-- Sticky Player Name & Rank -->
-                                    <td class="sticky left-0 bg-white z-10 px-4 py-3 whitespace-nowrap font-bold text-slate-900 shadow-sm">
-                                        <div class="flex items-center gap-2">
-                                            @if($isLeader)
-                                                <span class="w-6 h-6 rounded-full bg-amber-400 text-amber-950 flex items-center justify-center text-xs font-black shadow-xs">1</span>
-                                            @elseif($seasonStarted && $userRank === 2)
-                                                <span class="w-6 h-6 rounded-full bg-slate-300 text-slate-800 flex items-center justify-center text-xs font-bold shadow-xs">2</span>
-                                            @elseif($seasonStarted && $userRank === 3)
-                                                <span class="w-6 h-6 rounded-full bg-amber-700 text-amber-100 flex items-center justify-center text-xs font-bold shadow-xs">3</span>
-                                            @elseif($seasonStarted)
-                                                <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-xs font-medium">{{ $userRank }}</span>
-                                            @else
-                                                <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-xs font-medium">{{ $i + 1 }}</span>
-                                            @endif
-                                            <span>{{ $user['name'] ?? '-' }}</span>
-                                        </div>
-                                    </td>
-
-                                    <!-- Event Columns -->
-                                    @foreach($user['events'] as $userEvent)
-                                        <td class="px-2 py-2 whitespace-nowrap text-center">
-                                            <div
-                                                hx-get="{{ route('forecasts.summary.user-event', ['userId' => $user['id'] ?? 'y', 'eventId' => $userEvent['eventId'] ?? 'x']) }}"
-                                                hx-target="#user-event"
-                                                class="cursor-pointer inline-flex flex-col items-center justify-center py-1 px-2 rounded-lg hover:bg-sky-50 transition-colors group"
-                                            >
-                                                @php $isWinner = ($userEvent['winner'] ?? false) == true; @endphp
-                                                <span class="font-bold text-xs {{ $isWinner ? 'px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 shadow-xs' : 'text-slate-700 group-hover:text-sky-600' }}">
-                                                    @if($isWinner)<i class="fa-solid fa-crown text-[10px] text-amber-500 mr-0.5"></i>@endif
-                                                    {{ ($userEvent['regular'] ?? 0) + ($userEvent['bonus'] ?? 0) }}
-                                                </span>
-                                                <span x-show="showDetails" class="text-[10px] text-slate-400 font-medium mt-0.5 block">
-                                                    {{ $userEvent['regular'] ?? 0 }}+{{ $userEvent['bonus'] ?? 0 }}
-                                                </span>
-                                            </div>
-                                        </td>
-                                    @endforeach
-
-                                    <!-- Regular Points -->
-                                    <td class="px-3 py-3 whitespace-nowrap text-center font-bold text-slate-700 bg-slate-50/50">
-                                        {{ $user['total']['regular'] ?? 0 }}
-                                    </td>
-
-                                    <!-- Bonus Points -->
-                                    <td class="px-3 py-3 whitespace-nowrap text-center font-bold text-amber-600 bg-amber-50/30">
-                                        +{{ $user['total']['bonus'] ?? 0 }}
-                                    </td>
-
-                                    <!-- Total Points -->
-                                    <td class="px-4 py-3 whitespace-nowrap text-center font-black text-base text-sky-600 bg-sky-50/60">
-                                        {{ $user['total']['total'] ?? 0 }}
-                                    </td>
-
-                                    <!-- Diff Column -->
-                                    <td class="px-3 py-3 whitespace-nowrap text-right bg-slate-50/50">
-                                        @if($isLeader)
-                                            <span class="inline-block px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-xs font-bold">Leader</span>
-                                        @elseif($diff > 0)
-                                            <span class="inline-block px-2 py-0.5 rounded-md bg-rose-50 text-rose-600 text-xs font-semibold">
-                                                -{{ $diff }}
-                                            </span>
-                                        @else
-                                            <span class="inline-block px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 text-xs font-semibold">
-                                                0
-                                            </span>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Detail Event Inspection Container -->
-            @if($index === 0)
-                <div
-                    id="user-event"
-                    class="mt-6"
-                    @if(isset($autoOpenUrl) && $autoOpenUrl)
-                        hx-get="{{ $autoOpenUrl }}"
-                        hx-trigger="load"
-                    @endif
-                ></div>
+        <!-- Detail Event Inspection Container -->
+        <div
+            id="user-event"
+            class="mt-6 mb-12"
+            @if(isset($autoOpenUrl) && $autoOpenUrl)
+                hx-get="{{ $autoOpenUrl }}"
+                hx-trigger="load"
             @endif
+        ></div>
+    @endif
+
+    @if(!empty($pastSeasons))
+        <!-- Previous Seasons Section (Collapsed by Default with Buttons for Each Season) -->
+        <div class="mt-14 pt-8 border-t border-slate-200" x-data="{ openSeasons: {} }">
+            <div class="bg-gradient-to-r from-slate-100 via-white to-slate-100 rounded-2xl border border-slate-200/90 p-5 mb-8 shadow-xs">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-xl bg-slate-900 text-white flex items-center justify-center text-lg shadow-sm">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-base font-extrabold text-slate-900 tracking-tight">Iepriekšējās sezonas</h3>
+                                <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">Arhīvs</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-0.5">Skatīt iepriekšējo sezonu un turnīru kopvērtējumus</p>
+                        </div>
+                    </div>
+
+                    <!-- Season Buttons -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        @foreach($pastSeasons as $season)
+                            @php
+                                $sId = data_get($season, 'id', 's_'.$loop->index);
+                                $btnTitle = data_get($season, 'button_title') ?? data_get($season, 'title');
+                            @endphp
+                            <button
+                                type="button"
+                                @click="openSeasons['{{ $sId }}'] = !openSeasons['{{ $sId }}']; if (openSeasons['{{ $sId }}']) { $nextTick(() => document.getElementById('season-block-{{ $sId }}')?.scrollIntoView({ behavior: 'smooth', block: 'start' })) }"
+                                class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all border cursor-pointer select-none"
+                                :class="openSeasons['{{ $sId }}'] 
+                                    ? 'bg-slate-900 text-white border-slate-900 shadow-md ring-2 ring-slate-900/10' 
+                                    : 'bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-300/80 shadow-2xs'"
+                            >
+                                <span>{{ data_get($season, 'icon', '🏆') }}</span>
+                                <span>{{ $btnTitle }}</span>
+                                <i class="fa-solid text-[10px] transition-transform duration-200" :class="openSeasons['{{ $sId }}'] ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            <!-- Past Seasons Content Cards (shown when opened) -->
+            @foreach($pastSeasons as $season)
+                @php
+                    $sId = data_get($season, 'id', 's_'.$loop->index);
+                @endphp
+                <div
+                    x-show="openSeasons['{{ $sId }}']"
+                    x-cloak
+                    x-transition:enter="transition ease-out duration-250"
+                    x-transition:enter-start="opacity-0 -translate-y-2 scale-[0.99]"
+                    x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                    x-transition:leave-end="opacity-0 -translate-y-2 scale-[0.99]"
+                >
+                    @include('forecasts.summary.partials.season-table', [
+                        'season' => $season,
+                        'sId' => $sId,
+                        'canClose' => true,
+                    ])
+                </div>
+            @endforeach
         </div>
-    @endforeach
+    @endif
 @endsection

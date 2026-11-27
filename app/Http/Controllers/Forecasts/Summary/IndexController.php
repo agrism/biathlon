@@ -30,8 +30,11 @@ class IndexController extends Controller
         $seasons[] = [
             'id' => 's2627',
             'title' => 'LaVita IBU World Cup Biathlon, season 26/27',
+            'button_title' => 'Sezona 26/27',
             'subtitle' => 'Official World Cup Season Matrix',
             'icon' => '🏆',
+            'is_active' => true,
+            'badge' => 'ACTIVE',
             'data' => $this->getSeasonData(season: '2627'),
         ];
 
@@ -40,6 +43,7 @@ class IndexController extends Controller
             $seasons[] = [
                 'id' => 's_loop_one',
                 'title' => 'Loop One Festival Munich 2026 — Pre-Season Special',
+                'button_title' => 'Loop One Festival',
                 'subtitle' => 'Super Sprint Exhibition Tournament • Olympiapark Munich (17–18 Oct 2026)',
                 'icon' => '⚡',
                 'badge' => 'Pre-Season Special',
@@ -52,14 +56,16 @@ class IndexController extends Controller
         $seasons[] = [
             'id' => 's2526',
             'title' => 'BMW IBU World Cup Biathlon, season 25/26',
+            'button_title' => 'Sezona 25/26',
             'subtitle' => 'Official World Cup Season Matrix',
             'icon' => '🏆',
             'data' => $this->getSeasonData(season: '2526'),
         ];
 
         $seasons[] = [
-            'id' => 'id2425',
+            'id' => 's2425',
             'title' => 'BMW IBU World Cup Biathlon, season 24/25',
+            'button_title' => 'Sezona 24/25',
             'subtitle' => 'Official World Cup Season Matrix',
             'icon' => '🏆',
             'data' => $this->getSeasonData(season: '2425'),
