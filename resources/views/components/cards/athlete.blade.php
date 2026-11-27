@@ -3,14 +3,18 @@
     $isBeforeDeadline = $forecast->submit_deadline_at && $forecast->submit_deadline_at->gt(now());
     $isHiddenFromViewer = $isBeforeDeadline && $athlete->isHidden && !$isOwn;
 
+    $hasStartList = !empty($startingUserTempIds);
+    $isNotInStartList = $hasStartList && $athlete->name && !in_array((string)$athlete->tempId, $startingUserTempIds ?? []);
+
     $isPlace1 = ($index === 0);
     $isPlace2 = ($index === 1);
     $isPlace3 = ($index === 2);
     
-    $podiumClass = match($index) {
-        0 => 'border-amber-300 ring-1 ring-amber-400/30 bg-gradient-to-b from-amber-50/40 via-white to-white shadow-podium-gold',
-        1 => 'border-slate-300 ring-1 ring-slate-300/40 bg-gradient-to-b from-slate-50/40 via-white to-white shadow-podium-silver',
-        2 => 'border-amber-600/30 ring-1 ring-amber-600/20 bg-gradient-to-b from-amber-50/30 via-white to-white shadow-podium-bronze',
+    $podiumClass = match(true) {
+        $isNotInStartList => 'border-rose-400 ring-2 ring-rose-500/50 bg-gradient-to-b from-rose-50/70 via-white to-white shadow-md',
+        $index === 0 => 'border-amber-300 ring-1 ring-amber-400/30 bg-gradient-to-b from-amber-50/40 via-white to-white shadow-podium-gold',
+        $index === 1 => 'border-slate-300 ring-1 ring-slate-300/40 bg-gradient-to-b from-slate-50/40 via-white to-white shadow-podium-silver',
+        $index === 2 => 'border-amber-600/30 ring-1 ring-amber-600/20 bg-gradient-to-b from-amber-50/30 via-white to-white shadow-podium-bronze',
         default => 'border-slate-200 bg-white hover:border-slate-300 shadow-sm',
     };
 
@@ -39,7 +43,12 @@
             <span>{{ $placeTitles[$index] ?? ($index+1).'th Place' }}</span>
         </span>
 
-        @if($isOwn && $isBeforeDeadline && $athlete->name)
+        @if($isNotInStartList)
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-black uppercase tracking-wider shadow-xs animate-pulse">
+                <i class="fa-solid fa-triangle-exclamation text-[9px]"></i>
+                <span>Not in Start List</span>
+            </span>
+        @elseif($isOwn && $isBeforeDeadline && $athlete->name)
             <x-tooltip :text="$athlete->isHidden ? 'Hidden from other players' : 'Publicly visible'">
                 <button
                     type="button"
@@ -131,6 +140,13 @@
                 </div>
             </div>
 
+            @if($isNotInStartList)
+                <div class="w-full mt-2 px-2 py-1.5 rounded-xl bg-rose-100/90 border border-rose-300 text-rose-800 text-[11px] font-extrabold flex items-center justify-center gap-1.5 shadow-2xs">
+                    <i class="fa-solid fa-circle-exclamation text-rose-600 text-xs"></i>
+                    <span>Not in Start List (DNS)</span>
+                </div>
+            @endif
+
             <!-- Athlete Stats Chips -->
             <div class="w-full mt-2">
                 <x-cards.athlete-stat :athlete="$athlete"></x-cards.athlete-stat>
@@ -159,11 +175,11 @@
                 <!-- Edit Button -->
                 <button
                     type="button"
-                    class="flex-1 py-1.5 px-3 rounded-xl bg-slate-100 hover:bg-sky-50 text-slate-700 hover:text-sky-600 font-semibold text-xs border border-slate-200/80 hover:border-sky-200 transition-all text-center"
+                    class="flex-1 py-1.5 px-3 rounded-xl {{ $isNotInStartList ? 'bg-rose-600 hover:bg-rose-700 text-white font-black shadow-xs' : 'bg-slate-100 hover:bg-sky-50 text-slate-700 hover:text-sky-600 border border-slate-200/80 hover:border-sky-200 font-semibold' }} text-xs transition-all text-center"
                     hx-get="{{ route('forecasts.select-athlete', ['id' => $forecast->id, 'place' => $index]) }}"
                     hx-target="#selected-athletes"
                 >
-                    <i class="fa-solid fa-pen text-[10px] mr-1"></i> Edit
+                    <i class="fa-solid fa-pen text-[10px] mr-1"></i> {{ $isNotInStartList ? 'Change Athlete' : 'Edit' }}
                 </button>
 
                 <!-- Move Down Button -->

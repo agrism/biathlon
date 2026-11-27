@@ -30,7 +30,7 @@ class ShowUserEventController extends Controller
             ->with(['competitions.forecast.awards.user'=> function($q): void{
                 $q->where('id', $this->userId);
             }])
-            ->with('competitions.results')
+            ->with(['competitions.results.athlete', 'competitions.forecast'])
             ->where('id', $eventId)->first();
 
         if(!$user || !$event){

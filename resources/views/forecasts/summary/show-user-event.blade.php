@@ -47,17 +47,45 @@
 
                         <td class="px-4 py-3 whitespace-nowrap font-medium text-slate-800">
                             <div class="flex items-center justify-between gap-3">
-                                @if($competition->forecast)
-                                    <a
-                                        hx-get="{{ route('forecasts.show', ['id' => $competition->forecast->id, 'showContentOnly' => 1]) }}?user_id={{ $user->id }}"
-                                        hx-target="#forecast"
-                                        class="hover:text-sky-600 hover:underline font-bold transition-colors cursor-pointer"
-                                    >
-                                        {!! $competition->getTitle() !!}
-                                    </a>
-                                @else
-                                    <span class="font-bold text-slate-700">{!! $competition->getTitle() !!}</span>
-                                @endif
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    @if($competition->forecast)
+                                        <a
+                                            hx-get="{{ route('forecasts.show', ['id' => $competition->forecast->id, 'showContentOnly' => 1]) }}?user_id={{ $user->id }}"
+                                            hx-target="#forecast"
+                                            class="hover:text-sky-600 hover:underline font-bold transition-colors cursor-pointer"
+                                        >
+                                            {!! $competition->getTitle() !!}
+                                        </a>
+                                    @else
+                                        <span class="font-bold text-slate-700">{!! $competition->getTitle() !!}</span>
+                                    @endif
+
+                                    @php
+                                        $nonStartingCount = 0;
+                                        if ($competition->results->count() > 0 && $competition->forecast) {
+                                            $isTeam = \App\Enums\DisciplineEnum::tryFrom($competition->discipline_remote_id)?->isTeamDiscipline();
+                                            $startTempIds = $competition->results->map(function ($r) use ($isTeam) {
+                                                return (string)$r->athlete?->attachTempId($isTeam)?->temp_id;
+                                            })->filter()->toArray();
+
+                                            $userForecastObj = collect($competition->forecast->final_data?->users ?? [])->where('id', $user->id)->first();
+                                            if ($userForecastObj) {
+                                                foreach ($userForecastObj->getAthletes() as $predAthlete) {
+                                                    if ($predAthlete->name && !in_array((string)$predAthlete->tempId, $startTempIds)) {
+                                                        $nonStartingCount++;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    @endphp
+
+                                    @if($nonStartingCount > 0)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[11px] font-black border border-rose-300 shadow-2xs">
+                                            <i class="fa-solid fa-triangle-exclamation text-rose-600"></i>
+                                            <span>{{ $nonStartingCount }} {{ $nonStartingCount === 1 ? 'athlete' : 'athletes' }} not in start list</span>
+                                        </span>
+                                    @endif
+                                </div>
 
                                 @if($competition->results->count())
                                     <a

@@ -35,8 +35,8 @@ class ShowController extends Controller
         $isTeamDiscipline = DisciplineEnum::tryFrom($forecast->competition->discipline_remote_id)->isTeamDiscipline();
 
         $startingUserTempIds = $forecast->competition->results->map(function (EventCompetitionResult $result)use($isTeamDiscipline){
-            return $result->athlete->attachTempId(isTeamDiscipline: $isTeamDiscipline)->temp_id;
-        })->toArray();
+            return (string)$result->athlete->attachTempId(isTeamDiscipline: $isTeamDiscipline)->temp_id;
+        })->filter()->toArray();
 
         $favoriteAthleteIds = [];
 

@@ -58,7 +58,12 @@
                 </div>
             </div>
 
-            @include('forecasts.partials.user-selected-athletes', ['displayUser' => $displayUser, 'displayName' => $displayName, 'isOwnPrediction' => $isOwnPrediction])
+            @include('forecasts.partials.user-selected-athletes', [
+                'displayUser' => $displayUser,
+                'displayName' => $displayName,
+                'isOwnPrediction' => $isOwnPrediction,
+                'startingUserTempIds' => $startingUserTempIds ?? [],
+            ])
         </div>
 
         <!-- Bid Summary / Results Section -->
@@ -103,7 +108,11 @@
                                     </td>
 
                                     @foreach($user->getAthletes() as $athlete)
-                                        <td class="px-3 py-3 whitespace-nowrap @if(!in_array($athlete->tempId, $startingUserTempIds ?? [])) bg-rose-50/30 @endif">
+                                        @php
+                                            $hasStartList = !empty($startingUserTempIds);
+                                            $isNotInStartList = $hasStartList && $athlete->name && !in_array((string)$athlete->tempId, $startingUserTempIds ?? []);
+                                        @endphp
+                                        <td class="px-3 py-3 whitespace-nowrap transition-colors {{ $isNotInStartList ? 'bg-rose-50/90 border-l-2 border-r-2 border-rose-400' : '' }}">
                                             @if($forecast->submit_deadline_at->gt(now()) && $athlete->isHidden && !$isThisRowOwn)
                                                 <div class="flex items-center gap-1.5 text-xs text-slate-400 italic">
                                                     <i class="fa fa-eye-slash text-slate-400 text-xs"></i>
@@ -111,15 +120,24 @@
                                                 </div>
                                             @elseif($athlete->name)
                                                 <div class="flex flex-col">
-                                                    <div class="flex items-center gap-1.5 font-semibold text-slate-800">
+                                                    <div class="flex items-center gap-1.5 font-semibold {{ $isNotInStartList ? 'text-rose-950 font-bold' : 'text-slate-800' }}">
                                                         @if($athlete->flagUrl)
                                                             <img src="{{ $athlete->flagUrl }}" class="h-3.5 rounded-xs shadow-2xs inline-block">
                                                         @endif
-                                                        <span class="truncate max-w-[120px]">{{ $athlete->getShortName() }}</span>
+                                                        <span class="truncate max-w-[120px]" title="{{ $athlete->name }}">{{ $athlete->getShortName() }}</span>
                                                         @if($forecast->submit_deadline_at->gt(now()) && $athlete->isHidden && $isThisRowOwn)
                                                             <span title="Hidden from other players"><i class="fa fa-eye-slash text-rose-500 text-[10px]"></i></span>
                                                         @endif
                                                     </div>
+
+                                                    @if($isNotInStartList)
+                                                        <div class="mt-1">
+                                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px] font-black uppercase tracking-wider shadow-2xs">
+                                                                <i class="fa-solid fa-triangle-exclamation text-[9px]"></i> Not in start list
+                                                            </span>
+                                                        </div>
+                                                    @endif
+
                                                     <x-cards.athlete-stat :athlete="$athlete"></x-cards.athlete-stat>
                                                 </div>
                                             @else
@@ -199,15 +217,28 @@
                                     </td>
 
                                     @foreach($user->getAthletes() as $index => $athlete)
-                                        <td class="px-3 py-3 whitespace-nowrap @if(!in_array($athlete->tempId, $startingUserTempIds ?? [])) bg-rose-50/30 @endif">
+                                        @php
+                                            $hasStartList = !empty($startingUserTempIds);
+                                            $isNotInStartList = $hasStartList && $athlete->name && !in_array((string)$athlete->tempId, $startingUserTempIds ?? []);
+                                        @endphp
+                                        <td class="px-3 py-3 whitespace-nowrap {{ $isNotInStartList ? 'bg-rose-50/80 border-l-2 border-r-2 border-rose-300' : '' }}">
                                             @if($athlete->name)
                                                 <div class="flex flex-col">
-                                                    <div class="flex items-center gap-1.5 font-semibold text-slate-800">
+                                                    <div class="flex items-center gap-1.5 font-semibold {{ $isNotInStartList ? 'text-rose-950 font-bold' : 'text-slate-800' }}">
                                                         @if($athlete->flagUrl)
                                                             <img src="{{ $athlete->flagUrl }}" class="h-3.5 rounded-xs shadow-2xs inline-block">
                                                         @endif
                                                         <span class="truncate max-w-[120px]">{{ $athlete->getShortName() }}</span>
                                                     </div>
+
+                                                    @if($isNotInStartList)
+                                                        <div class="mt-1">
+                                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px] font-black uppercase tracking-wider shadow-2xs">
+                                                                <i class="fa-solid fa-triangle-exclamation text-[9px]"></i> DNS
+                                                            </span>
+                                                        </div>
+                                                    @endif
+
                                                     <x-cards.athlete-result-data :eventCompetionResult="$isTeamDiscipline ? null : $forecast->competition->results->where('athlete_id', $athlete->id)->first()"></x-cards.athlete-result-data>
                                                 </div>
                                             @else

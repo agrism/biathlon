@@ -26,6 +26,7 @@
                 :forecast="$forecast"
                 :favoriteAthleteIds="$favoriteAthleteIds"
                 :isOwnPrediction="$isOwn"
+                :startingUserTempIds="$startingUserTempIds ?? []"
             ></x-cards.athlete>
         @endforeach
     </div>
