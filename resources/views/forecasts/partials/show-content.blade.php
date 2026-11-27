@@ -1,3 +1,6 @@
+@php
+    $isTeamDiscipline = $isTeamDiscipline ?? ($forecast->competition ? \App\Enums\DisciplineEnum::tryFrom($forecast->competition->discipline_remote_id)?->isTeamDiscipline() : false);
+@endphp
 <div class="space-y-6">
     <div id="selected-athletes">
         <!-- Competition Header Card -->
