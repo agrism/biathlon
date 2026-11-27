@@ -110,10 +110,11 @@
                                     @foreach($user->getAthletes() as $athlete)
                                         @php
                                             $hasStartList = !empty($startingUserTempIds);
-                                            $isNotInStartList = $hasStartList && $athlete->name && !in_array((string)$athlete->tempId, $startingUserTempIds ?? []);
+                                            $isHiddenCell = $forecast->submit_deadline_at->gt(now()) && $athlete->isHidden && !$isThisRowOwn;
+                                            $isNotInStartList = !$isHiddenCell && $hasStartList && $athlete->name && !in_array((string)$athlete->tempId, $startingUserTempIds ?? []);
                                         @endphp
                                         <td class="px-3 py-3 whitespace-nowrap transition-colors {{ $isNotInStartList ? 'bg-rose-50/90 border-l-2 border-r-2 border-rose-400' : '' }}">
-                                            @if($forecast->submit_deadline_at->gt(now()) && $athlete->isHidden && !$isThisRowOwn)
+                                            @if($isHiddenCell)
                                                 <div class="flex items-center gap-1.5 text-xs text-slate-400 italic">
                                                     <i class="fa fa-eye-slash text-slate-400 text-xs"></i>
                                                     <span>Hidden</span>
